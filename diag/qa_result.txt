@@ -1,25 +1,3 @@
-has usage section: True
-이 문장에서의 쓰임 |  | 이 문장에서는 타동사로 쓰여 'drain it'이 '씻은 쌀의 물기를 빼다'라는 뜻입니다. Wash, drain, let처럼 동사원형이 이어지는 요리 레시피의 명령문 구조입니다. |  | 예문 | Drain the pasta and add the sauce. | 파스타의 물을 빼고 소스를 넣으세요. | Please drain the water from the tank before you move it. | 옮기기 전에 탱크의 물을 빼 주세요. | Long meetings really drain my energy. | 긴 회의는 정말 내 기
-seconds: 8
-prompt v2: True
-Q: drain과 empty는 어떻게 달라요?
- 흘려보내 비우는 상태를 뜻합니다.
-지문 문장 속 덩어리인 drain it을 소리 내어 세 번만 읽어보세요.
-자주 함께 쓰는 짝꿍 표현으로 파스타 면의 물기를 빼는 drain the pasta가 있습니다.
-또 다른 짝꿍 표현으로 캔에 든 참치 기름을 버리는 drain the tuna가 있습니다.
-방금 배운 표현을 활용해 '야채의 물기를 빼세요'를 영어로 쓰면 무엇일까요?
-Q. drain과 empty는 어떻게 달라요?
-drain은 내용물은 남기고 액체만 걸러 뺄 때 쓰고, empty는 안에 든 것을 전부 쏟아 비울 때 씁니다.
-요리할 때 쌀이나 면은 그대로 두고 겉에 묻은 물기만 빼낼 때는 항상 drain을 사용합니다.
-반면에 empty는 그릇이나 용기 자체를 텅 빈 상태로 깨끗이 비워내는 동작을 뜻합니다.
-Drain the pot. (냄비에서 물기만 따라내세요.)
-Empty the pot. (냄비 속 내용물을 다 쏟아서 비우세요.)
-이번 지문에서도 쌀은 남겨두고 물기만 쏙 빼야 하므로 drain it이라고 쓴 것입니다.
-Q. drain과 empty는 어떻게 달라요?
-drain은 쌀이나 면처럼 건더기는 남기고 액체만 따라내어 물기를 빼는 것이고 empty는 컵이나 상자 안의 모든 것을 싹 비워내는 것입니다.
-주방 싱크대 배수구인 드레인을 떠올리면 액체만 쏙 빠져나가는 그 느낌을 쉽게 기억할 수 있습니다.
-이번 지문에서는 쌀은 냄비에 그대로 두고 물만 빼야 하므로 drain it이라고 표현했습니다.
-자주 함께 쓰는 짝꿍 표현으로 파스타 면의 물기를 빼는 drain the pasta가 있습니다.
-또 다른 짝꿍 표현으로 캔에 든 참치 기름을 버리는 drain the tuna가 있습니다.
-그렇다면 냄비에 든 물을 완전히 쏟아 비울 때는 drain과 empty 중 어떤 단어를 써야 할까요?
-질문
+example in page: True
+target: [0, 1, "pot", "Rice in a Pot"]
+EXC: TimeoutError('Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator("#c0").locator("details.voc summary").first\n')
