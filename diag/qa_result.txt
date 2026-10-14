@@ -2,7 +2,49 @@ example in page: True
 target: [1, 1, "post", "One day, I happened to see a post on social media about cooking rice in a pot."]
 detail seconds: 1
 DETAIL:
-크
+핵심 의미
+
+단어 'post'는 온라인 공간에 글이나 사진, 동영상 등을 올리는 행위 또는 그 결과물인 게시물을 뜻합니다. 주로 블로그, SNS, 커뮤니티 사이트 등에서 정보나 생각을 공유할 때 널리 쓰입니다.
+
+이 문장에서의 쓰임
+
+이 지문 문장에서는 'see a post on social media'라는 구조로 쓰여 'SNS에서 게시물을 보다'라는 의미를 나타냅니다. 전치사 'on'과 함께 쓰여 온라인 플랫폼 공간에 올라와 있음을 명확히 보여 줍니다.
+
+예문
+I left a comment on her latest post.
+나는 그녀의 최신 게시물에 댓글을 남겼다.
+She shared an interesting job post on LinkedIn.
+그녀는 링크드인에 흥미로운 구인 공고를 공유했다.
+Make sure to delete the post if it contains private info.
+개인 정보가 포함되어 있다면 그 게시물은 반드시 삭제하세요.
+비슷한 표현
+article · '기사'나 '논문'을 뜻하며, 뉴스나 전문적인 매체에 실린 긴 글에 어울립니다. SNS의 가벼운 게시물보다는 격식 있는 글을 말할 때 씁니다.
+message · '메시지'나 '문자'를 뜻하며, 불특정 다수에게 공개하는 post와 달리 특정 상대에게 직접 보내는 소통에 주로 쓰입니다.
+upload · 명사도 되지만 주로 '업로드하다'라는 동사로 많이 쓰입니다. 글 자체를 뜻하는 post와 달리 파일을 인터넷 서버로 전송하는 행위에 초점을 맞춥니다.
+외우는 팁 · 주의할 점
+
+'post'를 외울 때 우체국(post office)이나 우편물을 떠올리면 온라인에 '우편물처럼 부쳐서 올리는 글'이라는 개념으로 쉽게 연상할 수 있습니다. 동사로도 '게시하다'라는 뜻으로 자주 쓰이므로 명사와 동사 형태를 함께 기억해 두세요.
+
+궁금한 점 바로 묻기
+Q. 이 표현 비슷한 말이랑 뭐가 달라요?
+post는 온라인에 올리는 게시물 자체를 뜻하고, article은 신문이나 잡지에 실린 기사, message는 주고받는 메시지를 뜻합니다.
+그래서 SNS나 블로그에 글이나 사진을 올릴 때는 post를 쓰고, 언론 매체의 정식 글에는 article을 씁니다.
+She shared a great recipe post on her blog. (그녀는 블로그에 훌륭한 레시피 게시물을 공유했다.)
+The newspaper published an article about traditional food. (신문은 전통 음식에 관한 기사를 발행했다.)
+지문의 'a post on social media'도 SNS에 올라온 가벼운 개인 게시물을 의미합니다.
+확인 퀴즈: '내가 올린 요리 게시물에 댓글을 달아 주세요'를 영어로 말해 보세요.
+질문
+🔊
+social media
+소셜 미디어, SNS 자세히 ▾
+🔊
+one day
+어느 날 자세히 ▾
+▶ 듣기
+느리게
+영어 가리기
+✍ 써보기
+암기 체크
 qa seconds: 4
 QA:
 궁금한 점 바로 묻기
@@ -13,4 +55,12 @@ She shared a great recipe post on her blog. (그녀는 블로그에 훌륭한 �
 The newspaper published an article about traditional food. (신문은 전통 음식에 관한 기사를 발행했다.)
 지문의 'a post on social media'도 SNS에 올라온 가벼운 개인 게시물을 의미합니다.
 확인 퀴즈: '내가 올린 요리 게시물에 댓글을 달아 주세요'를 영어로 말해 보세요.
+Q. post 외우는 요령 있을까요?
+'post'라는 단어가 눈에 잘 안 익고 입에 안 붙을 때는 우편이나 우체국을 뜻하는 명사에서 '우편물을 보내듯 인터넷에 띄워 올린다'는 이미지를 떠올리면 쉽게 외워집니다.
+지문 문장 속에서 덩어리로 통째로 외울 때는 "a post on social media"라는 소리 덩어리를 입으로 여러 번 소리 내어 뱉는 것이 가장 효과적입니다.
+평소에 자주 함께 쓰는 짝꿍 표현으로는 블로그나 SNS에 글을 올릴 때 쓰는 "create a post"와 마음에 드는 글을 내 공간에 가져올 때 쓰는 "share a post"가 있습니다.
+I want to create a helpful cooking post on my blog. (나는 블로그에 유용한 요리 게시물을 올리고 싶다.)
+Please check out the recipe post I shared yesterday. (내가 어제 공유한 레시피 게시물을 확인해 주세요.)
+지문의 'a post on social media'도 결국 SNS에 띄워 둔 게시물 하나를 뜻하므로 이 덩어리 자체를 통으로 기억해 두세요.
+확인 퀴즈: '내가 인스타그램에 올린 요리 게시물을 봐 주세요'를 영어로 말해 보세요.
 질문
