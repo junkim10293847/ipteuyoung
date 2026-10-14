@@ -1,36 +1,31 @@
-import json, os, time
+import json, time
 from playwright.sync_api import sync_playwright
 out = []
 try:
   with sync_playwright() as p:
-      b = p.chromium.launch()
-      pg = b.new_page(viewport={'width': 820, 'height': 1180})
-      pg.on('pageerror', lambda e: out.append('pageerror: ' + str(e)[:300]))
-      pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=11', wait_until='networkidle')
-      out.append('example in page: ' + str(pg.evaluate("typeof DETAIL_EXAMPLE!=='undefined'")))
-      pg.fill('#nickInput', '점검봇'); pg.click('#gateForm button[type=submit]'); pg.wait_for_timeout(6000)
-      if pg.locator('[data-view="all"]').count():
-          pg.locator('[data-view="all"]').first.click(); pg.wait_for_timeout(1500)
-      tgt = pg.evaluate("""()=>{const w=weeks.find(x=>x.id===curId);for(let i=0;i<w.sentences.length;i++){if(w.sentences[i].isTitle)continue;const vs=w.sentences[i].vocab||[];for(let j=0;j<vs.length;j++){if(vs[j].t==='post'||!vs[j].detail)return [i,j,vs[j].t,w.sentences[i].en]}}return null}""")
-      out.append('target: ' + json.dumps(tgt, ensure_ascii=False))
-      if tgt:
-          i, j = tgt[0], tgt[1]
-          card = pg.locator('#c%d' % i)
-          card.locator('details.voc summary').first.click(); pg.wait_for_timeout(800)
-          card.locator('.vmore[data-k="%d-%d"]' % (i, j)).click()
-          t0 = time.time()
-          while time.time() - t0 < 120 and ('핵심 의미' not in card.inner_text() or '만드는 중' in card.inner_text()): pg.wait_for_timeout(2000)
-          pg.wait_for_timeout(1500)
-          out.append('detail seconds: %d' % (time.time() - t0))
-          txt = card.inner_text(); k = txt.find('핵심 의미')
-          out.append('DETAIL:\n' + txt[k:k+1800])
-          form = card.locator('.qa-form').first
-          form.locator('input').fill('post 외우는 요령 있을까요?'); form.locator('.primary').click()
-          t0 = time.time()
-          while time.time() - t0 < 120 and '생각하는 중' in card.locator('.qa').first.inner_text(): pg.wait_for_timeout(2000)
-          out.append('qa seconds: %d' % (time.time() - t0))
-          out.append('QA:\n' + card.locator('.qa').first.inner_text()[-1200:])
-      b.close()
+    b = p.chromium.launch()
+    for vw in [(390, 844), (820, 1180)]:
+      pg = b.new_page(viewport={'width': vw[0], 'height': vw[1]})
+      errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:200]))
+      bad = []; pg.on('response', lambda r: bad.append(f'{r.status} {r.url[-60:]}') if r.status >= 400 else None)
+      t0 = time.time(); pg.goto('https://junkim10293847.github.io/ipteuyoung/?final=1', wait_until='networkidle')
+      pg.fill('#nickInput', '점검봇'); pg.click('#gateForm button[type=submit]')
+      pg.wait_for_selector('#list .card', timeout=30000); out.append(f'[{vw[0]}px] load+data {time.time()-t0:.1f}s, cards {pg.locator("#list .card").count()}')
+      out.append('  add panel hidden: ' + str(not pg.is_visible('#addPanel')))
+      la = pg.evaluate("(document.getElementById('longAudio')||{}).src||''")
+      st = pg.evaluate("async u=>u?(await fetch(u,{method:'HEAD'})).status:0", la); out.append(f'  long audio {la[-30:]} -> {st}')
+      first = pg.evaluate("(()=>{const w=weeks.find(x=>x.id===curId);return w.sentences.filter(s=>!s.isTitle).map(s=>[s.audio,(s.alt||{}).am,(s.alt||{}).bf])})()")
+      miss = 0
+      for trio in first:
+        for u in trio:
+          if not u or pg.evaluate("async u=>(await fetch(u,{method:'HEAD'})).status", u) != 200: miss += 1
+      out.append(f'  sentence audio files missing: {miss} of {len(first)*3}')
+      c = pg.locator('#list .card').first; c.locator('button.write').click(); pg.wait_for_timeout(300)
+      c.locator('textarea').fill('test'); c.locator('.wr-check').click(); pg.wait_for_timeout(400)
+      out.append('  grading shown: ' + str(pg.locator('#list .card').first.locator('.wr-res').count() == 1))
+      out.append('  page errors: ' + json.dumps(errs[:3])); out.append('  http errors: ' + json.dumps(bad[:5]))
+      pg.close()
+    b.close()
 except Exception as e:
-  out.append('EXC: '+repr(e)[:500])
+  out.append('EXC: ' + repr(e)[:400])
 open('diag/qa_result.txt', 'w').write('\n'.join(out))
