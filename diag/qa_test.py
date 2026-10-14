@@ -12,12 +12,15 @@ with sync_playwright() as p:
     out.append('title: ' + pg.inner_text('h1'))
     card = pg.locator('#list .card').first
     card.locator('details.voc summary').first.click(); pg.wait_for_timeout(800)
+    card.locator('.vmore').first.click(); pg.wait_for_timeout(20000)
+    out.append('detail: ' + card.inner_text()[:600].replace('\n',' | '))
     qa = card.locator('.qa').first
     out.append('qa before: ' + (qa.inner_text()[:300] if qa.count() else 'NO QA BLOCK'))
     if card.locator('.qa-form input').count():
         card.locator('.qa-form input').first.fill('이 표현 예문 하나만 알려 줘')
         card.locator('.qa-form .primary').first.click()
         pg.wait_for_timeout(25000)
+        out.append('placeholder: ' + str(pg.locator('#list .card').first.locator('.qa-form input').first.get_attribute('placeholder')) if pg.locator('#list .card').first.locator('.qa-form input').count() else 'no input')
         out.append('qa after: ' + pg.locator('#list .card').first.locator('.qa').first.inner_text()[:500])
         errs = pg.locator('#list .card').first.locator('.err, .status.err').all_inner_texts()
         out.append('err texts: ' + json.dumps(errs, ensure_ascii=False))
