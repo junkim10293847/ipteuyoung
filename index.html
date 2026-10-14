@@ -306,7 +306,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     <label for="fTitle">지문 제목<input id="fTitle" placeholder="예: Rice in a Pot"></label>
     <label for="fDate">테스트하는 토요일 (배정받은 다음 주 토요일)<input id="fDate" type="date"></label>
     <label for="fText">영어 지문 (그대로 붙여넣기)<textarea id="fText" placeholder="첫 줄이 제목이면 자동으로 제목으로 인식합니다.&#10;문장은 마침표·물음표·느낌표 기준으로 자동 분리됩니다."></textarea></label>
-    <p class="hint">저장하면 문장을 나누고 한국어 해석과 단어·숙어를 정리한 뒤(30초~1분), 음성 파일이 붙기 전까지는 기기 음성으로 재생됩니다.</p>
+    <p class="hint">저장하면 문장을 나누고 한국어 해석과 단어·숙어를 정리합니다(30초~1분). 원어민 음성(미국 여·남, 영국 여)은 15~20분 안에 자동으로 만들어져 붙고, 그 전까지는 기기 음성으로 재생됩니다.</p>
     <p class="status" id="fStatus"></p>
     <div class="btns">
       <button class="primary" id="fSave">저장하고 자동 정리</button>
@@ -663,7 +663,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[노랑 표시]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
    <p class="note">암기 체크와 하루 분량은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
-   <p class="note">${(()=>{const vm=w.sentences.reduce((n,x)=>n+(x.vocab||[]).filter(v=>!v.audio).length,0),sOk=!!w.longAudio&&w.sentences.every(x=>x.audio&&x.alt);return sOk&&vm?`문장 음성은 준비돼 있습니다. 새로 정리된 단어·숙어 ${vm}개는 기기 음성으로 재생됩니다.`:''})()||(hasAudio(w)?'원어민 스타일 음성 파일로 재생됩니다. 소리가 작으면 미디어 볼륨을 올려 주세요.':w.audioRequested?`음성 만드는 중입니다 (${new Date(w.audioRequested).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} 요청). 10~15분 뒤 휴대폰 알림이 오면 다시 열어 주세요.`:'이 주차는 기기 음성으로 재생됩니다. 음성 파일이 연결되면 원어민 음성으로 바뀝니다.')}</p>
+   <p class="note">${(()=>{const vm=w.sentences.reduce((n,x)=>n+(x.vocab||[]).filter(v=>!v.audio).length,0),sOk=!!w.longAudio&&w.sentences.every(x=>x.audio&&x.alt);return sOk&&vm?`문장 음성은 준비돼 있습니다. 새로 정리된 단어·숙어 ${vm}개의 원어민 음성은 15~20분 안에 자동으로 만들어지고, 그동안은 기기 음성으로 재생됩니다.`:''})()||(hasAudio(w)?'원어민 스타일 음성 파일로 재생됩니다. 소리가 작으면 미디어 볼륨을 올려 주세요.':w.audioRequested?'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다.':'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다. 다 만들어지면 새로고침 시 자동으로 바뀝니다.')}</p>
    <p class="status" id="wStatus"></p>
    ${(isOwner||(me&&w.addedBy===me&&missing))?`<details class="admin"><summary>⚙ 관리</summary><div class="tools">
      ${missing?`<button id="regen">해석·단어 자동 정리</button>`:`<button id="regen">해석·단어 다시 정리</button>`}
