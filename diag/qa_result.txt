@@ -1,3 +1,16 @@
 example in page: True
-target: [0, 1, "pot", "Rice in a Pot"]
-EXC: TimeoutError('Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator("#c0").locator("details.voc summary").first\n')
+target: [1, 1, "post", "One day, I happened to see a post on social media about cooking rice in a pot."]
+detail seconds: 1
+DETAIL:
+크
+qa seconds: 4
+QA:
+궁금한 점 바로 묻기
+Q. 이 표현 비슷한 말이랑 뭐가 달라요?
+post는 온라인에 올리는 게시물 자체를 뜻하고, article은 신문이나 잡지에 실린 기사, message는 주고받는 메시지를 뜻합니다.
+그래서 SNS나 블로그에 글이나 사진을 올릴 때는 post를 쓰고, 언론 매체의 정식 글에는 article을 씁니다.
+She shared a great recipe post on her blog. (그녀는 블로그에 훌륭한 레시피 게시물을 공유했다.)
+The newspaper published an article about traditional food. (신문은 전통 음식에 관한 기사를 발행했다.)
+지문의 'a post on social media'도 SNS에 올라온 가벼운 개인 게시물을 의미합니다.
+확인 퀴즈: '내가 올린 요리 게시물에 댓글을 달아 주세요'를 영어로 말해 보세요.
+질문
