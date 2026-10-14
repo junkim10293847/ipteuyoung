@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -130,6 +131,7 @@ h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;
 .wk-words i{font-style:normal;font-size:.72rem;color:var(--muted);margin-left:4px}
 .weak .ghost{justify-self:start;padding:5px 12px;font-size:.78rem}
 .adminfoot{text-align:center;margin:28px 0 0}
+.copyright-note{text-align:center;font-size:.72rem;line-height:1.6;color:var(--muted);margin:10px 0 0;opacity:.85}
 .adminfoot button{font:inherit;font-size:.76rem;color:var(--muted);background:none;border:0;cursor:pointer;opacity:.7}
 .howto{margin-top:12px;font-size:.82rem;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;display:grid;gap:3px}
 .howto>b{color:var(--fg);font-size:.88rem}
@@ -289,7 +291,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <form class="gate-card" id="gateForm">
     <div class="eyebrow">입트영 스터디</div>
     <h2>닉네임을 입력하세요</h2>
-    <p>암기 체크와 하루 분량이 이 이름으로 따로 저장됩니다. 비밀번호는 필요 없습니다.</p>
+    <p>암기 체크와 하루 분량이 이 이름으로 따로 저장됩니다. 다른 멤버와 겹치지 않는 이름을 써 주세요.</p>
     <label for="nickInput" class="sr">닉네임</label>
     <input id="nickInput" maxlength="20" autocomplete="nickname" placeholder="예: 배라">
     <div id="nickList" class="nick-list"></div>
@@ -316,6 +318,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크·입장 코드·내용의 외부 공유를 삼가 주세요.</p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -337,16 +340,44 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 (function(){
   const API=(window.APP_CONFIG||{}).api||'';
   const errCode=m=>/not_granted/.test(m)?'not_granted':/rate_limited/.test(m)?'rate_limited':/invalid_json/.test(m)?'invalid_json':/not_admin/.test(m)?'invalid_argument':'upstream_error';
-  async function run(fn,...args){
-    if(!API||/여기에/.test(API))throw{code:'upstream_error',message:'no_api'};
+  /* 스터디 입장 코드: 서버가 코드를 요구하면 입력창을 띄우고, 맞으면 이 기기에 기억 */
+  const getCode=()=>{try{return localStorage.getItem('studyCode')||''}catch(e){return ''}};
+  async function raw(fn,args,code){
     let r;
     for(let t=0;;t++){
-      try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args}),redirect:'follow'});break}
+      try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args,code}),redirect:'follow'});break}
       catch(e){if(t>=1)throw{code:'network',message:String(e)};await new Promise(z=>setTimeout(z,1200))}
     }
     let j;try{j=await r.json()}catch(e){throw{code:'upstream_error',message:'bad_response '+r.status}}
-    if(j&&j.err)throw{code:errCode(j.err),message:j.err};
-    return j?j.res:null;
+    return j||{};
+  }
+  let codeP=null;
+  function askCode(wrong){
+    if(codeP)return codeP;
+    codeP=new Promise(done=>{
+      const box=document.createElement('div');box.className='gate';box.id='codeGate';box.style.zIndex='60';
+      box.innerHTML=`<form class="gate-card" id="codeForm"><div class="eyebrow">입트영 스터디</div><h2>스터디 입장 코드</h2>
+        <p>스터디 멤버에게 공유된 입장 코드를 입력하세요. 한 번 입력하면 이 기기에서 기억합니다.</p>
+        <input id="codeInput" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="입장 코드">
+        <button class="primary" type="submit">확인</button><p class="status${wrong?' err':''}" id="codeMsg">${wrong?'저장된 코드가 바뀌었습니다. 새 코드를 입력해 주세요.':''}</p>
+        <p class="hint" style="font-size:.78rem;color:var(--muted)">본 지문·음성의 저작권은 EBS 「입이 트이는 영어」에 있으며, 스터디 구성원의 내부 학습용으로만 사용합니다.</p></form>`;
+      document.body.appendChild(box);setTimeout(()=>{const i=document.getElementById('codeInput');if(i)i.focus()},50);
+      box.querySelector('form').addEventListener('submit',async e=>{
+        e.preventDefault();const v=document.getElementById('codeInput').value.trim(),m=document.getElementById('codeMsg');
+        if(!v){m.textContent='코드를 입력해 주세요.';m.className='status err';return}
+        m.textContent='확인하는 중…';m.className='status';
+        try{const j=await raw('checkCode',[v],'');if(j.res===true){try{localStorage.setItem('studyCode',v)}catch(_){};box.remove();codeP=null;done(v)}else{m.textContent='코드가 맞지 않습니다. 스터디 단톡방의 코드를 확인해 주세요.';m.className='status err'}}
+        catch(_){m.textContent='연결이 불안정합니다. 다시 눌러 주세요.';m.className='status err'}
+      });
+    });
+    return codeP;
+  }
+  async function run(fn,...args){
+    if(!API||/여기에/.test(API))throw{code:'upstream_error',message:'no_api'};
+    let j=await raw(fn,args,getCode());
+    if(j.err==='need_code'){const had=!!getCode();try{localStorage.removeItem('studyCode')}catch(_){};const c=await askCode(had);j=await raw(fn,args,c)}
+    if(j.err)throw{code:errCode(j.err),message:j.err};
+    return j.res;
   }
   window.__run=run;
   window.__features={ai:false,tts:true};

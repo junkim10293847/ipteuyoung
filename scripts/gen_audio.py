@@ -7,7 +7,7 @@
   python scripts/gen_audio.py --plan   # 만들 개수만 계산 (모델 설치 전 빠른 확인)
   python scripts/gen_audio.py          # 실제 생성
 """
-import json, os, re, subprocess, sys, urllib.request
+import json, os, re, subprocess, sys, urllib.parse, urllib.request
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 AUDIO = os.path.join(ROOT, 'audio')
@@ -27,9 +27,13 @@ def api_url():
 def get_weeks(url):
     if os.environ.get('WEEKS_JSON'):
         return json.load(open(os.environ['WEEKS_JSON'], encoding='utf-8'))
-    req = urllib.request.Request(url + ('&' if '?' in url else '?') + 'fn=getWeeks', headers={'User-Agent': 'ipteuyoung-audio'})
+    code = os.environ.get('STUDY_CODE', '').strip()
+    q = 'fn=getWeeks' + ('&code=' + urllib.parse.quote(code) if code else '')
+    req = urllib.request.Request(url + ('&' if '?' in url else '?') + q, headers={'User-Agent': 'ipteuyoung-audio'})
     with urllib.request.urlopen(req, timeout=60) as r:
         j = json.loads(r.read().decode('utf-8'))
+    if j.get('err') == 'need_code':
+        raise SystemExit('스터디 입장 코드가 필요합니다. 저장소 Settings → Secrets and variables → Actions 에 STUDY_CODE 를 넣어 주세요.')
     if j.get('err'):
         raise SystemExit('Apps Script 오류: ' + j['err'])
     return j.get('res') or {}

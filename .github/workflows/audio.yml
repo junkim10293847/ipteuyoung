@@ -20,6 +20,8 @@ concurrency:
 jobs:
   audio:
     runs-on: ubuntu-latest
+    env:
+      STUDY_CODE: ${{ secrets.STUDY_CODE }}
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
