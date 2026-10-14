@@ -13,7 +13,7 @@
  *   ADMIN_PASSWORD   관리자 비밀번호 (setup이 자동으로 만들고 실행 로그에 보여 줌)
  *   GITHUB_TOKEN     (선택) 넣으면 새 주차 저장 즉시 음성 생성 시작 (없으면 15분 안에 자동 시작)
  *   GITHUB_REPO      (선택) GITHUB_TOKEN과 함께: 아이디/저장소 (예: hong/ipteuyoung)
- *   GEMINI_MODEL     (선택) 비우면 무료 Flash 계열을 자동 선택
+ *   GEMINI_MODEL     (선택) 먼저 쓸 모델 (예: gemini-2.5-flash). 혼잡하면 자동으로 다른 무료 모델로 넘어감
  *   AI_DAILY_LIMIT   (선택) 하루 AI 호출 상한, 기본 300
  */
 
@@ -145,26 +145,33 @@ function callAI_(prompt, json) {
   throw new Error('not_granted');
 }
 
-/* Gemini 무료: 모델 이름이 바뀌어도 동작하도록 후보를 차례로 시도하고, 되는 모델을 기억 */
-const GEMINI_CANDIDATES = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+/* Gemini 무료: GEMINI_MODEL(쉼표로 여러 개 가능)을 먼저 쓰고, 그 모델이 혼잡·한도 초과·이름 오류면 다음 후보로 자동 전환 */
+const GEMINI_CANDIDATES = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-2.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
 function gemini_(prompt, json) {
   const key = PROPS.getProperty('GEMINI_API_KEY');
-  const fixed = PROPS.getProperty('GEMINI_MODEL'), known = PROPS.getProperty('GEMINI_OK_MODEL');
-  const list = fixed ? [fixed] : [known].concat(GEMINI_CANDIDATES).filter((x, i, a) => x && a.indexOf(x) === i);
+  const fixed = String(PROPS.getProperty('GEMINI_MODEL') || '').split(',').map(x => x.trim()).filter(Boolean);
+  const known = PROPS.getProperty('GEMINI_OK_MODEL');
+  const list = fixed.concat([known], GEMINI_CANDIDATES).filter((x, i, a) => x && a.indexOf(x) === i);
   let lastErr = 'upstream_error';
   for (const model of list) {
-    const res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
-      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-      payload: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: json ? { responseMimeType: 'application/json' } : {} })
-    });
-    const code = res.getResponseCode(), body = JSON.parse(res.getContentText() || '{}');
-    if (code === 404 || (code === 400 && /model/i.test(JSON.stringify(body.error || '')))) { lastErr = 'model_not_found ' + model; continue; }
-    if (code === 429) throw new Error('rate_limited');
+    let res;
+    try {
+      res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
+        method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+        payload: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: json ? { responseMimeType: 'application/json' } : {} })
+      });
+    } catch (e) { lastErr = 'upstream_error: ' + e; continue; }
+    const code = res.getResponseCode();
+    let body = {}; try { body = JSON.parse(res.getContentText() || '{}'); } catch (e) {}
+    const msg = JSON.stringify(body.error || '');
+    if (code === 404 || (code === 400 && /model/i.test(msg))) { lastErr = 'model_not_found ' + model; continue; }
+    if (code === 429) { lastErr = 'rate_limited'; continue; }                         // 이 모델 한도 초과 → 다른 모델
+    if (code >= 500 || /high demand|overloaded|UNAVAILABLE/i.test(msg)) { lastErr = 'upstream_error: busy'; continue; } // 혼잡 → 다른 모델
     if (code >= 400) throw new Error('upstream_error: ' + ((body.error && body.error.message) || code));
-    if (model !== known && !fixed) PROPS.setProperty('GEMINI_OK_MODEL', model);
     const c = (body.candidates || [])[0];
     const text = c && c.content && (c.content.parts || []).map(p => p.text || '').join('');
-    if (!text) throw new Error('upstream_error: empty');
+    if (!text) { lastErr = 'upstream_error: empty'; continue; }
+    if (!fixed.length && model !== known) PROPS.setProperty('GEMINI_OK_MODEL', model);
     return text;
   }
   throw new Error(lastErr);
