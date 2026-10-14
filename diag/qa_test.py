@@ -7,7 +7,7 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={'width': 820, 'height': 1180})
     pg.on('pageerror', lambda e: out.append('pageerror: ' + str(e)[:300]))
-    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=2', wait_until='networkidle')
+    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=3', wait_until='networkidle')
     pg.fill('#nickInput', '점검봇'); pg.click('#gateForm button[type=submit]'); pg.wait_for_timeout(6000)
     if pg.locator('[data-view="all"]').count():
         pg.locator('[data-view="all"]').first.click(); pg.wait_for_timeout(1500)
@@ -22,6 +22,7 @@ with sync_playwright() as p:
     form = card.locator('.qa-form').first
     form.locator('input').fill(Q); form.locator('.primary').click()
     pg.wait_for_timeout(30000)
+    out.append('prompt v2: ' + str(pg.evaluate("document.documentElement.innerHTML.includes('20년 넘게')")))
     out.append('Q: ' + Q)
     out.append(card.locator('.qa').first.inner_text()[-1500:])
     b.close()
