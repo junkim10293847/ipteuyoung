@@ -93,6 +93,7 @@ def out(key, val):
 
 
 def main():
+    sys.stdout.reconfigure(line_buffering=True)  # GitHub 화면에 진행 상황이 실시간으로 보이게
     os.makedirs(AUDIO, exist_ok=True)
     url = api_url()
     if not url and not os.environ.get('WEEKS_JSON'):
