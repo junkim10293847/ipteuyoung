@@ -378,12 +378,17 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   let cache={},listeners=[],pollT=null;
   const snap=()=>({docs:Object.keys(cache).sort().reverse().map(id=>({id,exists:true,data:()=>cache[id]}))});
   const emit=()=>{listeners.forEach(l=>{try{l.next(snap())}catch(e){}})};
-  async function refresh(){try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);cache=attach(wk||{});emit()}catch(e){listeners.forEach(l=>l.err&&l.err(e))}}
+  /* 바뀐 게 없으면 화면을 다시 그리지 않고, 글을 쓰는 중이면 다 쓴 뒤에 반영 (아이패드에서 화면이 튀는 것 방지) */
+  let lastSig='',pendingEmit=false;
+  const typing=()=>{const a=document.activeElement;return !!(a&&(a.tagName==='TEXTAREA'||a.tagName==='INPUT'||a.isContentEditable))};
+  function emitSafe(){if(typing()){pendingEmit=true;return}pendingEmit=false;emit()}
+  document.addEventListener('focusout',()=>{if(pendingEmit)setTimeout(()=>{if(pendingEmit&&!typing())emitSafe()},400)});
+  async function refresh(force){try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);const next=attach(wk||{}),sig=JSON.stringify(next);if(!force&&sig===lastSig)return;lastSig=sig;cache=next;emitSafe()}catch(e){listeners.forEach(l=>l.err&&l.err(e))}}
   function poll(){if(pollT)return;pollT=setInterval(()=>{if(document.visibilityState==='visible')refresh()},60000)}
   function docRef(path){
     const p=path.split('/');
     if(p[0]==='weeks'){const id=p[1];return{
-      get:async()=>{await refresh();return{exists:!!cache[id],data:()=>cache[id]}},
+      get:async()=>{await refresh(true);return{exists:!!cache[id],data:()=>cache[id]}},
       set:async d=>{await run('saveWeek',id,d,false);cache[id]=attach({[id]:d})[id];emit()},
       update:async d=>{await run('saveWeek',id,d,true);cache[id]=attach({[id]:{...cache[id],...d}})[id];emit()},
       delete:async()=>{await run('deleteWeek',id,adminPw);delete cache[id];emit()}}}
@@ -392,7 +397,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
       set:d=>run('saveProgress',key,d),update:d=>run('saveProgress',key,d),delete:async()=>{}};
   }
   const db={doc:docRef,collection:path=>({doc:id=>docRef(path+'/'+id),orderBy(){return this},
-    onSnapshot(next,err){listeners.push({next,err});refresh();poll();return()=>{}}})};
+    onSnapshot(next,err){listeners.push({next,err});refresh(true);poll();return()=>{}}})};
 
   /* AI: Apps Script에 넣어 둔 Gemini 무료 키로 답함 */
   const flat=i=>typeof i==='string'?i:i.map(m=>(m.role==='assistant'?'[이전 답변] ':'')+m.content).join('\n\n');
