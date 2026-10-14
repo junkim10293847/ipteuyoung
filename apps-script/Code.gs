@@ -11,8 +11,6 @@
  * 스크립트 속성(프로젝트 설정 → 스크립트 속성)
  *   GEMINI_API_KEY   (필수, 무료) Google AI Studio 키 → 해석 자동 정리·자세히·바로 질문
  *   ADMIN_PASSWORD   관리자 비밀번호 (setup이 자동으로 만들고 실행 로그에 보여 줌)
- *   STUDY_CODE       (권장) 스터디 입장 코드. 넣으면 코드를 아는 멤버만 지문을 볼 수 있음
- *                    → GitHub 저장소 Settings → Secrets → Actions 에도 같은 값(STUDY_CODE)을 넣어야 음성 자동 생성이 됨
  *   GITHUB_TOKEN     (선택) 넣으면 새 주차 저장 즉시 음성 생성 시작 (없으면 15분 안에 자동 시작)
  *   GITHUB_REPO      (선택) GITHUB_TOKEN과 함께: 아이디/저장소 (예: hong/ipteuyoung)
  *   GEMINI_MODEL     (선택) 먼저 쓸 모델 (예: gemini-2.5-flash). 혼잡하면 자동으로 다른 무료 모델로 넘어감
@@ -25,13 +23,8 @@ const API_FNS = ['getWeeks', 'saveWeek', 'deleteWeek', 'checkAdmin', 'getProgres
 
 /* ---------- API ---------- */
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
-/* 스터디 입장 코드: 스크립트 속성 STUDY_CODE를 넣으면 코드가 맞아야만 지문·진도·AI를 쓸 수 있음 (비우면 누구나) */
-const OPEN_FNS = ['features', 'checkCode'];
-function codeOk_(code) { const c = PROPS.getProperty('STUDY_CODE'); return !c || String(code || '').trim() === String(c).trim(); }
-function checkCode(code) { return codeOk_(code); }
-function call_(fn, args, code) {
-  if (API_FNS.indexOf(fn) < 0 && OPEN_FNS.indexOf(fn) < 0) return { err: 'unknown_fn' };
-  if (OPEN_FNS.indexOf(fn) < 0 && !codeOk_(code)) return { err: 'need_code' };
+function call_(fn, args) {
+  if (API_FNS.indexOf(fn) < 0) return { err: 'unknown_fn' };
   try { return { res: this[fn].apply(null, args || []) }; }
   catch (e) { return { err: String(e && e.message || e) }; }
 }
@@ -39,13 +32,13 @@ function call_(fn, args, code) {
 function doPost(e) {
   let b = {};
   try { b = JSON.parse(e.postData.contents || '{}'); } catch (x) { return json_({ err: 'bad_request' }); }
-  return json_(call_(b.fn, b.args, b.code));
+  return json_(call_(b.fn, b.args));
 }
 /* GitHub Actions·확인용: GET …/exec?fn=getWeeks */
 function doGet(e) {
   const fn = e && e.parameter && e.parameter.fn;
-  if (fn === 'getWeeks' || fn === 'features') return json_(call_(fn, [], e.parameter.code));
-  return json_({ ok: true, app: '입트영 주간 암기 API' });
+  if (fn === 'getWeeks' || fn === 'features') return json_(call_(fn, []));
+  return json_({ ok: true, app: '입트영 주간 암기 API', ai: aiEnabled() });
 }
 
 /* ---------- 최초 설정 ---------- */
@@ -139,7 +132,7 @@ function aiJson(prompt) {
   throw new Error('invalid_json');
 }
 function aiEnabled() { return !!(PROPS.getProperty('GEMINI_API_KEY') || PROPS.getProperty('ANTHROPIC_API_KEY')); }
-function features() { return { ai: aiEnabled(), tts: true, needCode: !!PROPS.getProperty('STUDY_CODE') }; }
+function features() { return { ai: aiEnabled(), tts: true }; }
 
 function callAI_(prompt, json) {
   const cache = CacheService.getScriptCache(), dk = 'ai:' + Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyyMMdd');
