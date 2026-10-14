@@ -1,0 +1,17 @@
+name: 서버 점검
+on:
+  push:
+    paths: [.github/workflows/diag.yml]
+  workflow_dispatch: {}
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apps Script API 점검
+        run: |
+          API=$(grep -o 'https://script.google.com[^"]*' config.js)
+          echo "== GET features"; curl -sSL "$API?fn=features"; echo
+          echo "== POST aiEnabled"; curl -sSL -H 'Content-Type: text/plain;charset=utf-8' -d '{"fn":"aiEnabled","args":[]}' "$API"; echo
+          echo "== POST aiText"; curl -sSL -H 'Content-Type: text/plain;charset=utf-8' -d '{"fn":"aiText","args":["Say hi in 3 words."]}' "$API"; echo
+          echo "== CORS headers (POST)"; curl -sSL -D - -o /dev/null -H 'Origin: https://junkim10293847.github.io' -H 'Content-Type: text/plain;charset=utf-8' -d '{"fn":"features","args":[]}' "$API" | grep -i -E 'HTTP/|access-control|location' 
