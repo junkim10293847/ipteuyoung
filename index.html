@@ -849,7 +849,7 @@ async function speak(text,rate,url){
   await ttsSpeak(text,rate);
 }
 const wait=s=>new Promise(r=>setTimeout(r,s*1000));
-function hl(i){document.querySelectorAll('.card').forEach(c=>c.classList.remove('playing'));if(i!=null){const c=$('c'+i);if(c){c.classList.add('playing');const r=c.getBoundingClientRect();if(r.top<70||r.bottom>innerHeight-110)c.scrollIntoView({block:'center',behavior:'smooth'})}}}
+function hl(i,noScroll){document.querySelectorAll('.card').forEach(c=>c.classList.remove('playing'));if(i!=null){const c=$('c'+i);if(c){c.classList.add('playing');const r=c.getBoundingClientRect();if(!noScroll&&(r.top<70||r.bottom>innerHeight-110))c.scrollIntoView({block:'center',behavior:'smooth'})}}}
 /* 듣기 버튼 3초 누르기 → 그 문장 무한 반복 (다시 누르거나 정지하면 멈춤) */
 let loopIdx=null, pressTimer=null, suppressClick=false;
 function setLoopUI(i,on){const b=document.querySelector(`#c${i} .play`);if(!b)return;b.classList.toggle('looping',on);b.textContent=on?'🔁 반복 중 · 탭하면 멈춤':'▶ 듣기'}
@@ -874,8 +874,8 @@ document.addEventListener('pointerdown',e=>{
 },true));
 document.addEventListener('contextmenu',e=>{if(e.target.closest('.play'))e.preventDefault()});
 function stop(){if(loopIdx!=null){const li=loopIdx;loopIdx=null;setLoopUI(li,false)}token++;try{player.pause()}catch(e){}if('speechSynthesis' in window)speechSynthesis.cancel();hl(null)}
-async function playOne(s,i,rate,my){
-  const rep=+$('rep').value,gap=+$('gap').value; hl(i);
+async function playOne(s,i,rate,my,noScroll){
+  const rep=+$('rep').value,gap=+$('gap').value; hl(i,noScroll);
   const la=$('longAudio');if(la&&!la.paused)la.pause();
   const vs=$('voiceSel').value, url=(vs!=='af'&&s.alt&&s.alt[vs])||s.audio;
   for(let r=0;r<rep;r++){if(my!==token)return;await speak(s.en,rate,url);if(my!==token)return;await wait(gap)}
@@ -885,7 +885,7 @@ const cleanTerm=t=>t.replace(/\(.*?\)/g,'').replace(/[가-힣~]+/g,'').replace(/
 /* ---------- events ---------- */
 document.addEventListener('click',async e=>{
   const ps=e.target.closest&&e.target.closest('.ps');
-  if(ps){const w0=weeks.find(x=>x.id===curId);if(!w0)return;const sl=window.getSelection();if(sl&&!sl.isCollapsed)return;const j=+ps.dataset.ps;stop();const my=token;document.querySelectorAll('.ps.on').forEach(x=>x.classList.remove('on'));ps.classList.add('on');await playOne(w0.sentences[j],j,+$('rate').value,my);ps.classList.remove('on');if(my===token)hl(null);return}
+  if(ps){const w0=weeks.find(x=>x.id===curId);if(!w0)return;const sl=window.getSelection();if(sl&&!sl.isCollapsed)return;const j=+ps.dataset.ps;stop();const my=token;document.querySelectorAll('.ps.on').forEach(x=>x.classList.remove('on'));ps.classList.add('on');await playOne(w0.sentences[j],j,+$('rate').value,my,true);ps.classList.remove('on');if(my===token)hl(null);return}
   const t=e.target.closest('button,.en'); if(!t)return;
   const w=weeks.find(x=>x.id===curId);
   if(t.dataset.week){stop();revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
