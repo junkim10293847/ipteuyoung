@@ -1,0 +1,12 @@
+== GET features
+{"res":{"ai":true,"tts":true}}
+== POST aiEnabled
+{"res":true}
+== POST aiText
+{"res":"Hello there, friend!"}
+== CORS headers (POST)
+HTTP/2 302 
+access-control-allow-origin: *
+location: https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnRpPrfQ_PcKruLPVXKHXikEzNVOzdeNI7vytSJ37jUsX5ZqNphztS2U7Mv287DMrVvV-Evrch7Wf_0gK4amc0re1whqwjvN8CUALzIIJaGRU-uylpe8W3Bnf5R8Cc46R21Q8iN6VoPxNDpNwdQsExclMJRB3hqDtoJt_2Ahe-WCotj_m2ctXAMnbXnrVGOmu8zc3rCQYeXluYcAOfkMmx2o1TySiCELUL3j-3sGsAKE2eVjCqwrPtbib4lAgwT7XM6QYCnHaYIg_sBw5jyI80Y5No6GpQ&lib=MeM0vADeQHk903DjjIgdjvpOFtAwfnh8F
+HTTP/2 200 
+access-control-allow-origin: *
