@@ -340,8 +340,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   async function run(fn,...args){
     if(!API||/여기에/.test(API))throw{code:'upstream_error',message:'no_api'};
     let r;
-    try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args}),redirect:'follow'})}
-    catch(e){throw{code:'upstream_error',message:String(e)}}
+    for(let t=0;;t++){
+      try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args}),redirect:'follow'});break}
+      catch(e){if(t>=1)throw{code:'network',message:String(e)};await new Promise(z=>setTimeout(z,1200))}
+    }
     let j;try{j=await r.json()}catch(e){throw{code:'upstream_error',message:'bad_response '+r.status}}
     if(j&&j.err)throw{code:errCode(j.err),message:j.err};
     return j?j.res:null;
@@ -398,7 +400,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   sample.json=async input=>run('aiJson',flat(input));
 
   const user={isOwner:async()=>adminPw?!!(await run('checkAdmin',adminPw).catch(()=>false)):false,id:async()=>'m',can:async()=>true,profiles:async()=>({})};
-  window.claude={use:async n=>n==='db'?db:n==='user'?user:n==='sample'?((await aiP)?sample:null):null};
+  window.claude={use:async n=>n==='db'?db:n==='user'?user:n==='sample'?sample:null};
   window.__resolveAudio=async p=>p||'';
 
   /* 관리자 로그인 (주차 삭제·다시 정리용) */
@@ -678,6 +680,7 @@ const qaKey=k=>curId+'|'+k;
 function qaHtml(k){
   const key=qaKey(k), list=(prog.qa&&prog.qa[key])||[], live=qaLive[key];
   const items=list.map(x=>`<div class="qa-item"><div class="qa-q">Q. ${esc(x.q)}</div><div class="qa-a">${esc(x.a)}</div></div>`).join('')
+    +(detErr['qa'+key]?`<p class="load" style="color:var(--bad,#b3261e)">${esc(detErr['qa'+key])}</p>`:'')
     +(live?`<div class="qa-item"><div class="qa-q">Q. ${esc(live.q)}</div><div class="qa-a" id="qaLive-${esc(k)}">${esc(live.a||'생각하는 중…')}</div></div>`:'');
   const off=!sample||readOnly;
   return `<div class="qa"><h4>궁금한 점 바로 묻기</h4>${items}
@@ -699,16 +702,15 @@ ${d.core?'핵심 의미: '+d.core:''}
 ${prev.length?'이전 질문과 답:\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):''}
 새 질문: ${q}
 한국어로 핵심부터 간결하게 답해 줘(3~6문장). 필요하면 짧은 영어 예문 1~2개를 넣고, 마크다운 기호(#, *, -) 없이 일반 문장으로 써 줘.`;
-  qaLive[key]={q,a:''};qaDraft[key]='';render();
+  delete detErr['qa'+key];qaLive[key]={q,a:''};qaDraft[key]='';render();
   try{
     const {text}=await sample(prompt,{cache:false,onText:({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text}});
     prog.qa=prog.qa||{};const arr=(prog.qa[key]||[]).concat([{q,a:text}]).slice(-8);prog.qa[key]=arr;saveProg();
   }catch(err){
-    const msg=err&&err.code==='not_granted'?'AI 기능이 꺼져 있어 답할 수 없습니다.':err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요.';
+    const msg=err&&err.code==='not_granted'?'AI 키가 설정되지 않아 답할 수 없습니다. 관리자에게 알려 주세요.':err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'인터넷 연결이 불안정해 서버에 닿지 못했습니다. 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요. ('+String(err&&err.message||'').slice(0,60)+')';
     qaDraft[key]=q;detErr['qa'+key]=msg;
   }
   delete qaLive[key];render();
-  const ni=$('qaIn-'+k);if(ni&&detErr['qa'+key]){ni.placeholder=detErr['qa'+key];delete detErr['qa'+key]}
 });
 function detHtml(d,k){
   if(!d){
