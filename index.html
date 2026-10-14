@@ -383,7 +383,19 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   const typing=()=>{const a=document.activeElement;return !!(a&&(a.tagName==='TEXTAREA'||a.tagName==='INPUT'||a.isContentEditable))};
   function emitSafe(){if(typing()){pendingEmit=true;return}pendingEmit=false;emit()}
   document.addEventListener('focusout',()=>{if(pendingEmit)setTimeout(()=>{if(pendingEmit&&!typing())emitSafe()},400)});
-  async function refresh(force){try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);const next=attach(wk||{}),sig=JSON.stringify(next);if(!force&&sig===lastSig)return;lastSig=sig;cache=next;emitSafe()}catch(e){listeners.forEach(l=>l.err&&l.err(e))}}
+  /* 연결이 잠깐 끊겨도(화면 꺼짐·절전·와이파이 전환) 이미 받은 주차는 그대로 두고 다음 확인 때 다시 시도 */
+  let loadedOnce=false;
+  async function refresh(force){
+    for(let t=0;;t++){
+      try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);loadedOnce=true;const next=attach(wk||{}),sig=JSON.stringify(next);if(!force&&sig===lastSig)return;lastSig=sig;cache=next;emitSafe();return}
+      catch(e){
+        if(loadedOnce)return;                                   // 이미 화면에 주차가 있으면 조용히 넘어감
+        if(t<3){await new Promise(z=>setTimeout(z,2000*(t+1)));continue}   // 처음 열 때는 세 번 더 시도
+        listeners.forEach(l=>l.err&&l.err(e));return;
+      }
+    }
+  }
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loadedOnce)refresh()});
   function poll(){if(pollT)return;pollT=setInterval(()=>{if(document.visibilityState==='visible')refresh()},60000)}
   function docRef(path){
     const p=path.split('/');
