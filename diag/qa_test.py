@@ -1,13 +1,13 @@
 import json, os
 from playwright.sync_api import sync_playwright
-Q = os.environ.get('Q', 'drain과 empty는 어떻게 달라?')
+Q = os.environ.get('Q', 'drain과 empty는 어떻게 달라요?')
 WORD = os.environ.get('WORD', 'drain')
 out = []
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={'width': 820, 'height': 1180})
     pg.on('pageerror', lambda e: out.append('pageerror: ' + str(e)[:300]))
-    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=5', wait_until='networkidle')
+    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=6', wait_until='networkidle')
     pg.fill('#nickInput', '점검봇'); pg.click('#gateForm button[type=submit]'); pg.wait_for_timeout(6000)
     if pg.locator('[data-view="all"]').count():
         pg.locator('[data-view="all"]').first.click(); pg.wait_for_timeout(1500)
