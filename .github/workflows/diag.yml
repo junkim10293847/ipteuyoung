@@ -1,7 +1,7 @@
 name: 서버 점검
 on:
   push:
-    paths: [.github/workflows/diag.yml]
+    paths: [.github/workflows/diag.yml, diag/qa_test.py]
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -10,17 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apps Script API 점검
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: 실제 사이트에서 질문 기능 점검
         run: |
-          exec > >(tee diag-result.txt) 2>&1
-          API=$(grep -o 'https://script.google.com[^"]*' config.js)
-          echo "== GET features"; curl -sSL "$API?fn=features"; echo
-          echo "== POST aiEnabled"; curl -sSL -H 'Content-Type: text/plain;charset=utf-8' -d '{"fn":"aiEnabled","args":[]}' "$API"; echo
-          echo "== POST aiText"; curl -sSL -H 'Content-Type: text/plain;charset=utf-8' -d '{"fn":"aiText","args":["Say hi in 3 words."]}' "$API"; echo
-          echo "== CORS headers (POST)"; curl -sSL -D - -o /dev/null -H 'Origin: https://junkim10293847.github.io' -H 'Content-Type: text/plain;charset=utf-8' -d '{"fn":"features","args":[]}' "$API" | grep -i -E 'HTTP/|access-control|location' 
+          pip install -q playwright && python -m playwright install --with-deps chromium > /dev/null
+          python diag/qa_test.py || true
       - name: 결과 저장
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add diag-result.txt && git commit -q -m "서버 점검 결과" && git push -q
-# rerun 1791968373
+          git add diag && git commit -q -m "질문 기능 점검 결과" && git pull -q --rebase && git push -q
