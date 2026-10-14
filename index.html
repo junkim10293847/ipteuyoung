@@ -710,10 +710,22 @@ ${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):
 3. 암기가 어렵다는 질문이면: 단어의 이미지나 어원으로 연상 고리를 하나 주고, 지문 문장 속 덩어리(예: "drain the water")를 그대로 보여 주며, 자주 함께 쓰는 짝꿍 표현 2개와 마지막 줄에 스스로 확인할 짧은 퀴즈 1개를 준다.
 4. 영어 예문과 표현은 반드시 영어 알파벳으로 쓰고, 바로 뒤에 괄호로 자연스러운 한국어 해석을 붙인다. 영어를 한글 발음으로 옮겨 적지 않는다(발음을 물었을 때만 발음 표기).
 5. 예문은 일상에서 실제로 쓰는 자연스러운 문장 1~2개로, 지문 상황(요리 등)과 연결되면 더 좋다.
-6. 전체 5~8줄, 한 줄에 한 가지 내용. 마크다운 기호(#, *, -, **)와 번호 목록 없이 줄바꿈만 사용한다. 군더더기 인사말은 쓰지 않는다.`;
+6. 전체 5~8줄, 한 줄에 한 가지 내용. 마크다운 기호(#, *, -, **)와 번호 목록 없이 줄바꿈만 사용한다. 군더더기 인사말은 쓰지 않는다. 존댓말로 쓴다.
+
+[좋은 답의 예시] 표현 "measure out — 계량하다", 질문 "measure랑 measure out은 뭐가 달라요?"
+measure는 '재다' 자체이고, measure out은 필요한 양만큼 재어서 덜어 두는 동작까지 포함합니다.
+그래서 길이나 키를 잴 때는 measure만 쓰고, 요리 재료를 정량만큼 덜 때는 measure out을 씁니다.
+Measure the table before you buy a tablecloth. (식탁보를 사기 전에 테이블을 재 보세요.)
+Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.)
+지문의 'first measure out 240 grams of rice'도 쌀을 정량만큼 덜어 놓는 장면이라 out이 붙었습니다.
+확인 퀴즈: '설탕 한 스푼을 계량해 덜어 두세요'를 영어로 말해 보세요.
+
+위 예시처럼 질문에 정확히 답하되, 예시의 내용을 그대로 베끼지 않는다.`;
   delete detErr['qa'+key];qaLive[key]={q,a:''};qaDraft[key]='';render();
   try{
-    const {text}=await sample(prompt,{cache:false,onText:({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text}});
+    const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
+    let {text}=await sample(prompt,{cache:false,onText});
+    if(!/[A-Za-z]{3,}/.test(text)||text.length<60){const r2=await sample(prompt+'\n\n[주의] 직전 답에 영어 예문이 없거나 너무 짧았다. 규칙대로 다시 답한다.',{cache:false,onText}).catch(()=>null);if(r2&&r2.text)text=r2.text}
     prog.qa=prog.qa||{};const arr=(prog.qa[key]||[]).concat([{q,a:text}]).slice(-8);prog.qa[key]=arr;saveProg();
   }catch(err){
     const msg=err&&err.code==='not_granted'?'AI 키가 설정되지 않아 답할 수 없습니다. 관리자에게 알려 주세요.':err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'인터넷 연결이 불안정해 서버에 닿지 못했습니다. 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요. ('+String(err&&err.message||'').slice(0,60)+')';
@@ -734,27 +746,51 @@ function detHtml(d,k){
    ${d.tip?`<div><h4>외우는 팁 · 주의할 점</h4><p>${esc(d.tip)}</p></div>`:''}
    ${qaHtml(k)}`;
 }
+const DETAIL_EXAMPLE="{\"core\": \"문장 맨 앞의 'To + 동사원형'은 '~하기 위해서, ~하려면'이라는 목적을 나타내며, 뒤에 이어지는 주절이 그 목적을 이루기 위한 방법이나 단계임을 알려 줍니다. 요리법, 사용 설명서, 업무 절차처럼 '어떻게 하는지'를 설명하는 글에서 자주 쓰입니다.\", \"usage\": \"이 문장에서는 'To make rice in a pot'이 문장 앞에서 목적 부사구로 쓰여 '솥밥을 지으려면'이라는 뜻이고, 뒤의 명령문 'first measure out...'이 그 목적을 달성하는 첫 단계입니다. 목적 부사구가 문장 앞에 오면 쉼표(,)로 주절과 구분합니다.\", \"examples\": [{\"en\": \"To log in, click the button at the top right.\", \"ko\": \"로그인하려면 오른쪽 위의 버튼을 클릭하세요.\"}, {\"en\": \"To save time, I usually prepare my lunch the night before.\", \"ko\": \"시간을 아끼려고 저는 보통 점심을 전날 밤에 준비해 둡니다.\"}, {\"en\": \"To join the meeting, you need to use this link.\", \"ko\": \"회의에 참여하려면 이 링크를 사용해야 합니다.\"}], \"similar\": [{\"t\": \"In order to + 동사원형\", \"m\": \"'~하기 위해서'라는 뜻으로 To보다 목적이 더 분명하고 격식 있는 느낌입니다. 보고서나 공식 문서에서 자주 씁니다.\"}, {\"t\": \"So as to + 동사원형\", \"m\": \"In order to와 비슷하지만 주로 글에서 쓰며, 일상 회화에서는 드뭅니다.\"}, {\"t\": \"If you want to + 동사원형, ...\", \"m\": \"'~하고 싶다면'이라는 뜻으로 상대방에게 말하듯 더 구어적이고 부드럽습니다.\"}], \"tip\": \"'To + 동사원형'이 문장 맨 앞에 오면 '~하려면'으로 해석하고, 쉼표 뒤에 그 목적을 이루는 방법이 나온다고 생각하면 쉽게 외워집니다. 이때 to 뒤에는 항상 동사원형이 오며, 'To making'처럼 -ing 형태를 쓰지 않도록 주의하세요.\"}";
 async function loadDetail(w,i,j,k){
   const s=w.sentences[i],v=s.vocab[j];
   if(!sample||readOnly){detErr[k]='아직 만들어진 설명이 없습니다. 관리자가 AI 기능을 켜면 자세한 설명을 만들 수 있습니다.';render();return}
   detBusy[k]=true;delete detErr[k];render();
-  const prompt=`한국인 성인 영어 학습자(중급)가 아래 지문 문장을 암기하고 있다. 문장 속 표현 하나를 더 깊이 이해하도록 설명해 줘.
-문장: ${s.en}
-해석: ${s.ko||''}
-표현: ${v.t}
-현재 간단한 뜻: ${v.m}
-모든 항목을 빠짐없이 채운다. 특히 usage에는 이 지문 문장 안에서 이 표현이 무엇과 연결되어 어떤 뜻으로 쓰였는지 문장 일부를 인용해 설명한다. 영어 예문은 영어 알파벳으로 쓴다.
-Reply with only JSON in this shape:
-{"core":"핵심 의미와 뉘앙스를 한국어 1~2문장","usage":"이 문장에서 어떤 구조·의미로 쓰였는지 한국어 1~2문장","examples":[{"en":"짧고 자연스러운 영어 예문","ko":"해석"}],"similar":[{"t":"비슷한 영어 표현","m":"한국어 뜻·차이"}],"tip":"헷갈리기 쉬운 점이나 외우는 요령 한국어 1문장"}
-examples는 일상·업무 상황으로 3개, similar는 최대 3개.`;
-  try{
-    let d=await sample.json(prompt,{modelTier:'default'});
+  const basePrompt=`너는 한국 성인 학습자(중급)의 영어 암기를 돕는 노련한 강사다. 학습자가 아래 지문 문장을 통째로 외우고 있다. 문장 속 표현 하나를 깊이 이해하도록 설명한다.
+
+[지문 문장] ${s.en}
+[해석] ${s.ko||''}
+[설명할 표현] ${v.t}
+[간단한 뜻] ${v.m}
+
+작성 규칙
+- 모든 항목(core, usage, examples, similar, tip)을 빠짐없이 채운다.
+- core: 핵심 의미와 뉘앙스, 주로 쓰이는 상황을 한국어 2문장으로.
+- usage: 이 지문 문장 안에서 어떤 구조로, 무엇과 연결되어, 어떤 뜻으로 쓰였는지 문장 일부를 작은따옴표로 인용해 한국어 2문장으로.
+- examples: 일상·업무 상황의 짧고 자연스러운 영어 예문 3개. en은 영어 알파벳으로, ko는 자연스러운 한국어 해석.
+- similar: 비슷한 영어 표현 최대 3개. m에는 뜻과 함께 이 표현과의 차이(뉘앙스·격식·쓰임)를 한국어 1~2문장으로.
+- tip: 외우는 요령과 학습자가 자주 하는 실수를 한국어 2문장으로.
+- 영어를 한글 발음으로 적지 않는다. 존댓말(~입니다, ~합니다)로 쓴다.
+
+[좋은 답의 예시] 지문 문장 "To make rice in a pot, first measure out 240 grams of rice for a family of four."의 표현 "To + 동사원형, ..."에 대한 답:
+${DETAIL_EXAMPLE}
+
+위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태로만 답한다.`;
+  const normDet=d=>{
     if(Array.isArray(d))d=d[0]||{};
     if(d&&typeof d==='object'&&!d.core&&Object.keys(d).length===1&&typeof d[Object.keys(d)[0]]==='object')d=d[Object.keys(d)[0]];
-    const pick=(...ks)=>{for(const k of ks){if(d&&d[k])return typeof d[k]==='string'?d[k]:JSON.stringify(d[k])}return ''};
-    const det={core:pick('core','meaning','핵심 의미'),usage:pick('usage','in_sentence','sentence_usage','usage_in_sentence','이 문장에서의 쓰임'),tip:pick('tip','tips','memory_tip','외우는 팁'),
-      examples:(Array.isArray(d.examples)?d.examples:[]).slice(0,3).map(x=>({en:String(x.en||''),ko:String(x.ko||'')})),
-      similar:(Array.isArray(d.similar)?d.similar:[]).slice(0,3).map(x=>({t:String(x.t||''),m:String(x.m||'')}))};
+    d=d||{};
+    const pick=(...ks)=>{for(const k of ks){if(d[k])return typeof d[k]==='string'?d[k]:JSON.stringify(d[k])}return ''};
+    return {core:pick('core','meaning','핵심 의미'),usage:pick('usage','in_sentence','sentence_usage','usage_in_sentence','이 문장에서의 쓰임'),tip:pick('tip','tips','memory_tip','외우는 팁'),
+      examples:(Array.isArray(d.examples)?d.examples:[]).slice(0,3).map(x=>({en:String(x.en||x.english||''),ko:String(x.ko||x.korean||'')})),
+      similar:(Array.isArray(d.similar)?d.similar:[]).slice(0,3).map(x=>({t:String(x.t||x.expression||''),m:String(x.m||x.meaning||'')}))};
+  };
+  const probs=det=>{const p=[];
+    if(det.core.length<20)p.push('core가 비었거나 너무 짧음');
+    if(det.usage.length<20)p.push('usage가 비었거나 너무 짧음');
+    else if(!/[A-Za-z]{2,}/.test(det.usage))p.push('usage에 지문 문장 일부를 영어로 인용하지 않음');
+    if(det.examples.filter(x=>/[A-Za-z]{3,}/.test(x.en)&&x.ko).length<2)p.push('영어 예문(영어 알파벳)과 해석이 부족함');
+    if(!det.tip)p.push('tip이 비었음');
+    return p};
+  try{
+    let det=normDet(await sample.json(basePrompt,{modelTier:'default'}));
+    let pr=probs(det);
+    if(pr.length){const d2=normDet(await sample.json(basePrompt+`\n\n[주의] 직전 답에서 다음이 부족했다: ${pr.join(', ')}. 이 점을 고쳐 모든 항목을 채워 다시 답한다.`,{modelTier:'default'}).catch(()=>({})));if(probs(d2).length<pr.length)det=d2}
     const cur=weeks.find(x=>x.id===w.id)||w;
     const sents=JSON.parse(JSON.stringify(cur.sentences));
     if(sents[i]&&sents[i].vocab[j]&&sents[i].vocab[j].t===v.t){sents[i].vocab[j].detail=det;w.sentences[i].vocab[j].detail=det}
