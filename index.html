@@ -583,7 +583,7 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
 document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))setTimeout(()=>{const a=document.activeElement;if(!(a&&a.matches&&a.matches('textarea,.qa-form input')))document.body.classList.remove('typing')},150)});
 document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWith('wr-'))writeDraft[curId+'|'+el.dataset.i]=el.value});
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
-let revSeed='', seqPos=0, seqShow=false, seqHint=false, mock=null;
+let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null;
 const toolOpen={};
 document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox')toolOpen[id]=e.target.open},true);
 let psKo=false, psOpen=false;
@@ -615,6 +615,8 @@ function render(){
   const dn=view&&view[0]==='d'?+view.slice(1):-1, rev=dn>0?(days[dn-1]||[]):[];
   {const dn=doneOf(curId);Object.keys(dn).forEach(k=>{if(dn[k]&&!doneSeen.has(+k)){doneSeen.add(+k);hiddenEn.add(+k)}})}
   if(revSeed!==curId+'|'+view+'|'+pace){rev.forEach(j=>hiddenEn.add(j));revSeed=curId+'|'+view+'|'+pace}
+  /* 화면에 처음 나오는 문장은 영어를 가린 상태로 시작 (보기를 누른 문장은 그대로 유지) */
+  (idx||[]).concat(rev||[]).forEach(j=>{const hk=curId+'|'+j;if(!hideSeed[hk]){hideSeed[hk]=1;hiddenEn.add(j)}});
   const listIdx=rev.length?['__R',...rev,'__T',...idx]:idx;
   const total=bodyIdx.length, nDone=bodyIdx.filter(i=>done[i]).length;
   const dTo=Math.round((sat-today())/864e5);
@@ -886,7 +888,7 @@ document.addEventListener('click',async e=>{
   if(ps){const w0=weeks.find(x=>x.id===curId);if(!w0)return;const sl=window.getSelection();if(sl&&!sl.isCollapsed)return;const j=+ps.dataset.ps;stop();const my=token;document.querySelectorAll('.ps.on').forEach(x=>x.classList.remove('on'));ps.classList.add('on');await playOne(w0.sentences[j],j,+$('rate').value,my);ps.classList.remove('on');if(my===token)hl(null);return}
   const t=e.target.closest('button,.en'); if(!t)return;
   const w=weeks.find(x=>x.id===curId);
-  if(t.dataset.week){stop();revealed.clear();hiddenEn.clear();doneSeen.clear();curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
+  if(t.dataset.week){stop();revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
   if(t.id==='addBtn'){openAdd();return}
   if(t.dataset.view){stop();view=view===t.dataset.view&&t.dataset.view==='all'?todayView(w):t.dataset.view;render();return}
   if(t.dataset.pace){stop();prog.pace[w.id]=t.dataset.pace;saveProg();view=todayView(w);render();return}
@@ -1045,7 +1047,7 @@ function showGate(){
 }
 function setNick(n){
   nick=n;try{localStorage.setItem('nick',n);const l=nicks().filter(x=>x!==n);l.unshift(n);localStorage.setItem('nicks',JSON.stringify(l.slice(0,8)))}catch(e){}
-  $('gate').hidden=true;hiddenEn.clear();doneSeen.clear();$('who').hidden=false;$('whoName').textContent=n;
+  $('gate').hidden=true;hiddenEn.clear();doneSeen.clear();hideSeed={};$('who').hidden=false;$('whoName').textContent=n;
   loadLocalProg();attachProgRef();full();
 }
 $('gateForm').addEventListener('submit',e=>{e.preventDefault();const v=$('nickInput').value.trim();if(!v){$('gateMsg').textContent='닉네임을 입력해 주세요.';$('gateMsg').className='status err';return}setNick(v)});
