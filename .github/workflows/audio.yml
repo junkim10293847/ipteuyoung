@@ -1,0 +1,80 @@
+name: 음성 자동 생성
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'      # 15분마다 새 주차 확인 (새 주차가 없으면 몇 초 만에 끝남)
+  workflow_dispatch: {}         # Actions 탭에서 'Run workflow'로 바로 실행
+  repository_dispatch:
+    types: [audio]              # (선택) Apps Script가 새 주차 저장 직후 호출
+  push:
+    branches: [main]
+    paths: [config.js, audio.zip]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: audio
+  cancel-in-progress: false
+
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 처음 올린 음성 묶음(audio.zip) 풀기
+        id: unzip
+        run: |
+          if [ -f audio.zip ]; then
+            mkdir -p audio && unzip -o -q audio.zip -d audio && git rm -q audio.zip
+            echo "done=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "done=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 새로 만들 음성 확인
+        id: plan
+        run: python scripts/gen_audio.py --plan
+
+      - name: 음성 엔진 설치
+        if: steps.plan.outputs.todo != '0'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak-ng ffmpeg
+          pip install -q onnxruntime numpy
+
+      - name: 음성 모델 캐시
+        if: steps.plan.outputs.todo != '0'
+        uses: actions/cache@v4
+        with:
+          path: .kokoro
+          key: kokoro-v1.0-int8
+
+      - name: 음성 모델 내려받기 (처음 한 번)
+        if: steps.plan.outputs.todo != '0'
+        run: |
+          mkdir -p .kokoro
+          [ -f .kokoro/kokoro.onnx ] || curl -sSL -o .kokoro/kokoro.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          [ -f .kokoro/voices.bin ] || curl -sSL -o .kokoro/voices.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+          ls -la .kokoro
+
+      - name: 음성 만들기
+        if: steps.plan.outputs.todo != '0'
+        run: python scripts/gen_audio.py
+
+      - name: 저장소에 올리기
+        if: steps.plan.outputs.todo != '0' || steps.unzip.outputs.done == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A audio audio.zip 2>/dev/null || git add -A audio
+          if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
+          git commit -m "새 주차 음성 자동 생성"
+          git pull --rebase -q origin main
+          git push
