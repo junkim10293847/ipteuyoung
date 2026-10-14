@@ -1,13 +1,13 @@
 import json, os
 from playwright.sync_api import sync_playwright
-Q = os.environ.get('Q', 'drain 외우는 요령 알려줘')
+Q = os.environ.get('Q', 'drain과 empty는 어떻게 달라?')
 WORD = os.environ.get('WORD', 'drain')
 out = []
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={'width': 820, 'height': 1180})
     pg.on('pageerror', lambda e: out.append('pageerror: ' + str(e)[:300]))
-    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=4', wait_until='networkidle')
+    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=5', wait_until='networkidle')
     pg.fill('#nickInput', '점검봇'); pg.click('#gateForm button[type=submit]'); pg.wait_for_timeout(6000)
     if pg.locator('[data-view="all"]').count():
         pg.locator('[data-view="all"]').first.click(); pg.wait_for_timeout(1500)
@@ -21,10 +21,12 @@ with sync_playwright() as p:
     btns.nth(idx).click(); pg.wait_for_timeout(20000)
     form = card.locator('.qa-form').first
     form.locator('input').fill(Q); form.locator('.primary').click()
-    pg.wait_for_timeout(30000)
+    import time; t0=time.time()
+    while time.time()-t0<120 and '생각하는 중' in card.locator('.qa').first.inner_text(): pg.wait_for_timeout(2000)
+    out.append('seconds: %d' % (time.time()-t0))
     out.append('prompt v2: ' + str(pg.evaluate("document.documentElement.innerHTML.includes('20년 넘게')")))
     out.append('Q: ' + Q)
-    out.append(card.locator('.qa').first.inner_text()[-1500:])
+    out.append(card.locator('.qa').first.inner_text()[-900:])
     b.close()
 open('diag/qa_result.txt', 'w').write('\n'.join(out))
 print('\n'.join(out))
