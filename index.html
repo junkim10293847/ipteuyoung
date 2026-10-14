@@ -727,7 +727,7 @@ function detHtml(d,k){
     if(detErr[k])return `<p class="load">${esc(detErr[k])}</p>`;
     return `<p class="load">불러오는 중…</p>`;
   }
-  return `${d.core?`<div><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
+  return `${detBusy[k]?`<p class="load">이 문장에서의 쓰임까지 보완하는 중… (10~30초)</p>`:''}${d.core?`<div><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
    ${d.usage?`<div><h4>이 문장에서의 쓰임</h4><p>${esc(d.usage)}</p></div>`:''}
    ${(d.examples||[]).length?`<div><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
    ${(d.similar||[]).length?`<div><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span>${esc(x.t)} · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
@@ -743,12 +743,16 @@ async function loadDetail(w,i,j,k){
 해석: ${s.ko||''}
 표현: ${v.t}
 현재 간단한 뜻: ${v.m}
+모든 항목을 빠짐없이 채운다. 특히 usage에는 이 지문 문장 안에서 이 표현이 무엇과 연결되어 어떤 뜻으로 쓰였는지 문장 일부를 인용해 설명한다. 영어 예문은 영어 알파벳으로 쓴다.
 Reply with only JSON in this shape:
 {"core":"핵심 의미와 뉘앙스를 한국어 1~2문장","usage":"이 문장에서 어떤 구조·의미로 쓰였는지 한국어 1~2문장","examples":[{"en":"짧고 자연스러운 영어 예문","ko":"해석"}],"similar":[{"t":"비슷한 영어 표현","m":"한국어 뜻·차이"}],"tip":"헷갈리기 쉬운 점이나 외우는 요령 한국어 1문장"}
 examples는 일상·업무 상황으로 3개, similar는 최대 3개.`;
   try{
-    const d=await sample.json(prompt,{modelTier:'default'});
-    const det={core:String(d.core||''),usage:String(d.usage||''),tip:String(d.tip||''),
+    let d=await sample.json(prompt,{modelTier:'default'});
+    if(Array.isArray(d))d=d[0]||{};
+    if(d&&typeof d==='object'&&!d.core&&Object.keys(d).length===1&&typeof d[Object.keys(d)[0]]==='object')d=d[Object.keys(d)[0]];
+    const pick=(...ks)=>{for(const k of ks){if(d&&d[k])return typeof d[k]==='string'?d[k]:JSON.stringify(d[k])}return ''};
+    const det={core:pick('core','meaning','핵심 의미'),usage:pick('usage','in_sentence','sentence_usage','usage_in_sentence','이 문장에서의 쓰임'),tip:pick('tip','tips','memory_tip','외우는 팁'),
       examples:(Array.isArray(d.examples)?d.examples:[]).slice(0,3).map(x=>({en:String(x.en||''),ko:String(x.ko||'')})),
       similar:(Array.isArray(d.similar)?d.similar:[]).slice(0,3).map(x=>({t:String(x.t||''),m:String(x.m||'')}))};
     const cur=weeks.find(x=>x.id===w.id)||w;
@@ -840,7 +844,7 @@ document.addEventListener('click',async e=>{
     if(openDet.has(k)){openDet.delete(k);render();return}
     openDet.add(k);openVoc.add(i);
     const v=w.sentences[i].vocab[j];
-    if(!v.detail&&!detBusy[k])loadDetail(w,i,j,k);else render();
+    if((!v.detail||!v.detail.usage||!v.detail.core)&&!detBusy[k])loadDetail(w,i,j,k);else render();
     return}
   if(t.classList.contains('vplay')){stop();speak(cleanTerm(t.dataset.t)||t.dataset.t,0.9,t.dataset.a||'');return}
   if(t.id==='psKo'){psKo=!psKo;render();return}

@@ -7,7 +7,7 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={'width': 820, 'height': 1180})
     pg.on('pageerror', lambda e: out.append('pageerror: ' + str(e)[:300]))
-    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=6', wait_until='networkidle')
+    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=7', wait_until='networkidle')
     pg.fill('#nickInput', '점검봇'); pg.click('#gateForm button[type=submit]'); pg.wait_for_timeout(6000)
     if pg.locator('[data-view="all"]').count():
         pg.locator('[data-view="all"]').first.click(); pg.wait_for_timeout(1500)
@@ -18,7 +18,10 @@ with sync_playwright() as p:
     for i in range(btns.count()):
         if WORD in btns.nth(i).evaluate("e=>e.closest('li,div').innerText"):
             idx = i; break
-    btns.nth(idx).click(); pg.wait_for_timeout(20000)
+    btns.nth(idx).click(); pg.wait_for_timeout(35000)
+    det = card.inner_text()
+    out.append('has usage section: ' + str('이 문장에서의 쓰임' in det))
+    k = det.find('이 문장에서의 쓰임'); out.append(det[k:k+300].replace('\n',' | ') if k>=0 else '')
     form = card.locator('.qa-form').first
     form.locator('input').fill(Q); form.locator('.primary').click()
     import time; t0=time.time()
