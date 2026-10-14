@@ -694,14 +694,23 @@ document.addEventListener('submit',async e=>{
   const w=weeks.find(x=>x.id===curId);if(!w)return;
   const [i,j]=k.split('-').map(Number),s=w.sentences[i],v=s.vocab[j],d=v.detail||{};
   const prev=((prog.qa&&prog.qa[key])||[]).slice(-4);
-  const prompt=`너는 한국인 성인 영어 학습자를 돕는 친절한 영어 선생님이다. 학습자가 외우는 지문 문장 속 표현에 대해 질문했다.
-문장: ${s.en}
-해석: ${s.ko||''}
-표현: ${v.t} (${v.m})
-${d.core?'핵심 의미: '+d.core:''}
-${prev.length?'이전 질문과 답:\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):''}
-새 질문: ${q}
-한국어로 핵심부터 간결하게 답해 줘(3~6문장). 필요하면 짧은 영어 예문 1~2개를 넣고, 마크다운 기호(#, *, -) 없이 일반 문장으로 써 줘.`;
+  const prompt=`너는 한국 성인 학습자의 영어 암기를 20년 넘게 도와 온 노련한 영어 강사다. 학습자는 아래 지문 문장을 토요일 테스트 전까지 통째로 외워야 한다.
+
+[지문 문장] ${s.en}
+[해석] ${s.ko||''}
+[질문한 표현] ${v.t} — ${v.m}
+${d.core?'[핵심 의미] '+d.core:''}
+${(d.similar||[]).length?'[비슷한 표현] '+d.similar.map(x=>x.t).join(', '):''}
+${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):''}
+[새 질문] ${q}
+
+답하는 방법:
+1. 먼저 질문의 진짜 의도를 파악한다. 뜻·뉘앙스 차이, 쓰임, 문법, 발음, "잘 안 외워진다"(암기 도움) 중 무엇인지에 맞춰 답한다.
+2. 첫 줄에 질문에 대한 핵심 답을 한 문장으로 말한다.
+3. 암기가 어렵다는 질문이면: 단어의 이미지나 어원으로 연상 고리를 하나 주고, 지문 문장 속 덩어리(예: "drain the water")를 그대로 보여 주며, 자주 함께 쓰는 짝꿍 표현 2개와 마지막 줄에 스스로 확인할 짧은 퀴즈 1개를 준다.
+4. 영어 예문과 표현은 반드시 영어 알파벳으로 쓰고, 바로 뒤에 괄호로 자연스러운 한국어 해석을 붙인다. 영어를 한글 발음으로 옮겨 적지 않는다(발음을 물었을 때만 발음 표기).
+5. 예문은 일상에서 실제로 쓰는 자연스러운 문장 1~2개로, 지문 상황(요리 등)과 연결되면 더 좋다.
+6. 전체 5~8줄, 한 줄에 한 가지 내용. 마크다운 기호(#, *, -, **)와 번호 목록 없이 줄바꿈만 사용한다. 군더더기 인사말은 쓰지 않는다.`;
   delete detErr['qa'+key];qaLive[key]={q,a:''};qaDraft[key]='';render();
   try{
     const {text}=await sample(prompt,{cache:false,onText:({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text}});

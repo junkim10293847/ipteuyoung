@@ -1,30 +1,29 @@
-import json, sys
+import json, os
 from playwright.sync_api import sync_playwright
+Q = os.environ.get('Q', 'drain이 잘 머리속에 안들어오네')
+WORD = os.environ.get('WORD', 'drain')
 out = []
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={'width': 820, 'height': 1180})
-    pg.on('console', lambda m: out.append('console ' + m.type + ': ' + m.text[:300]))
     pg.on('pageerror', lambda e: out.append('pageerror: ' + str(e)[:300]))
-    pg.on('requestfailed', lambda r: out.append('reqfail: ' + r.url[:120] + ' ' + str(r.failure)))
-    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=1', wait_until='networkidle')
+    pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=2', wait_until='networkidle')
     pg.fill('#nickInput', '점검봇'); pg.click('#gateForm button[type=submit]'); pg.wait_for_timeout(6000)
-    out.append('title: ' + pg.inner_text('h1'))
-    card = pg.locator('#list .card').first
+    if pg.locator('[data-view="all"]').count():
+        pg.locator('[data-view="all"]').first.click(); pg.wait_for_timeout(1500)
+    card = pg.locator('#list .card', has_text=WORD).first
     card.locator('details.voc summary').first.click(); pg.wait_for_timeout(800)
-    card.locator('.vmore').first.click(); pg.wait_for_timeout(20000)
-    out.append('detail: ' + card.inner_text()[:600].replace('\n',' | '))
-    qa = card.locator('.qa').first
-    out.append('qa before: ' + (qa.inner_text()[:300] if qa.count() else 'NO QA BLOCK'))
-    if card.locator('.qa-form input').count():
-        card.locator('.qa-form input').first.fill('이 표현 예문 하나만 알려 줘')
-        card.locator('.qa-form .primary').first.click()
-        pg.wait_for_timeout(25000)
-        out.append('placeholder: ' + str(pg.locator('#list .card').first.locator('.qa-form input').first.get_attribute('placeholder')) if pg.locator('#list .card').first.locator('.qa-form input').count() else 'no input')
-        out.append('qa after: ' + pg.locator('#list .card').first.locator('.qa').first.inner_text()[:500])
-        errs = pg.locator('#list .card').first.locator('.err, .status.err').all_inner_texts()
-        out.append('err texts: ' + json.dumps(errs, ensure_ascii=False))
-    pg.screenshot(path='diag/qa.png', full_page=False)
+    btns = card.locator('.vmore')
+    idx = 0
+    for i in range(btns.count()):
+        if WORD in btns.nth(i).evaluate("e=>e.closest('li,div').innerText"):
+            idx = i; break
+    btns.nth(idx).click(); pg.wait_for_timeout(20000)
+    form = card.locator('.qa-form').first
+    form.locator('input').fill(Q); form.locator('.primary').click()
+    pg.wait_for_timeout(30000)
+    out.append('Q: ' + Q)
+    out.append(card.locator('.qa').first.inner_text()[-1500:])
     b.close()
 open('diag/qa_result.txt', 'w').write('\n'.join(out))
 print('\n'.join(out))
