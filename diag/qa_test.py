@@ -6,12 +6,12 @@ try:
       b = p.chromium.launch()
       pg = b.new_page(viewport={'width': 820, 'height': 1180})
       pg.on('pageerror', lambda e: out.append('pageerror: ' + str(e)[:300]))
-      pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=9', wait_until='networkidle')
+      pg.goto('https://junkim10293847.github.io/ipteuyoung/?t=10', wait_until='networkidle')
       out.append('example in page: ' + str(pg.evaluate("typeof DETAIL_EXAMPLE!=='undefined'")))
       pg.fill('#nickInput', '점검봇'); pg.click('#gateForm button[type=submit]'); pg.wait_for_timeout(6000)
       if pg.locator('[data-view="all"]').count():
           pg.locator('[data-view="all"]').first.click(); pg.wait_for_timeout(1500)
-      tgt = pg.evaluate("""()=>{const w=weeks.find(x=>x.id===curId);for(let i=0;i<w.sentences.length;i++){const vs=w.sentences[i].vocab||[];for(let j=0;j<vs.length;j++){if(!vs[j].detail)return [i,j,vs[j].t,w.sentences[i].en]}}return null}""")
+      tgt = pg.evaluate("""()=>{const w=weeks.find(x=>x.id===curId);for(let i=0;i<w.sentences.length;i++){if(w.sentences[i].isTitle)continue;const vs=w.sentences[i].vocab||[];for(let j=0;j<vs.length;j++){if(!vs[j].detail)return [i,j,vs[j].t,w.sentences[i].en]}}return null}""")
       out.append('target: ' + json.dumps(tgt, ensure_ascii=False))
       if tgt:
           i, j = tgt[0], tgt[1]
