@@ -140,6 +140,8 @@ h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .howto+*{}
 .ps-ko{display:block;font-size:.84rem;color:var(--muted);line-height:1.5;margin:0 0 8px}
+.skipnote{list-style:none;font-size:.82rem;color:var(--muted);margin:-4px 0 10px;padding:0 4px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+.skipnote .alllink{font-size:.8rem}
 .sumrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:.85rem;color:var(--muted);margin:10px 0 12px}
 .sumrow b{color:var(--fg);font-size:.9rem}
 .sumrow .pc{font-variant-numeric:tabular-nums}
@@ -699,7 +701,11 @@ function render(){
   if(revSeed!==curId+'|'+view+'|'+pace){rev.forEach(j=>hiddenEn.add(j));revSeed=curId+'|'+view+'|'+pace}
   /* 화면에 처음 나오는 문장은 영어를 가린 상태로 시작 (보기를 누른 문장은 그대로 유지) */
   (idx||[]).concat(rev||[]).forEach(j=>{const hk=curId+'|'+j;if(!hideSeed[hk]){hideSeed[hk]=1;hiddenEn.add(j)}});
-  const listIdx=rev.length?['__R',...rev,'__T',...idx]:idx;
+  /* 남은 기간 맞춤에서 이미 외운 문장은 건너뛰므로, 번호가 비는 이유를 알려 줌 */
+  const maxNew=idx.length?Math.max(...idx):-1, prevMax=rev.length?Math.max(...rev):-1;
+  const skipped=bodyIdx.filter(j=>j>prevMax&&j<maxNew&&done[j]&&!idx.includes(j));
+  const skipHtml=skipped.length?`<li class="skipnote">✓ ${skipped.map(j=>numLabel(w,j)).join('·')}번은 이미 외워서 건너뛰었어요 <button class="alllink" data-view="all">전체 보기</button></li>`:'';
+  const listIdx=rev.length?['__R',...rev,'__T',...idx]:(skipped.length?['__S',...idx]:idx);
   const total=bodyIdx.length, nDone=bodyIdx.filter(i=>done[i]).length;
   const dTo=Math.round((sat-today())/864e5);
   const dLabel = dTo>0?`테스트까지 D-${dTo}`: dTo===0?'오늘 테스트':'테스트 완료 주차';
@@ -729,7 +735,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    <div class="sumrow"><b>${viewName}</b><span class="pc">${nDone}/${total} 암기</span><div class="bar"><i style="width:${total?nDone/total*100:0}%"></i></div><button class="alllink" id="hideAll">${idx.every(j=>hiddenEn.has(j))?"영어 모두 보기":"영어 모두 가리기"}</button></div>
    <p class="hint press">💡 ▶ 듣기를 <b>1초 누르면</b> 그 문장을 계속 반복합니다</p>
    <ol id="list">
-    ${listIdx.map(i=>{if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__T')return `<li class="revhead today"><b>📖 오늘 새 문장 · ${idx.length}문장</b></li>`;const s=w.sentences[i];const v=s.vocab||[];return `
+    ${listIdx.map(i=>{if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__S')return skipHtml;if(i==='__T'){const behind=idx.filter(j=>j<prevMax).length;return `<li class="revhead today"><b>📖 오늘 문장 · ${idx.length}문장</b>${behind?`<span>앞에서 아직 못 외운 ${behind}문장을 먼저 넣었어요.</span>`:''}</li>`+skipHtml};const s=w.sentences[i];const v=s.vocab||[];return `
      <li class="card${done[i]?' done':''}" id="c${i}">
        <span class="num">${numLabel(w,i)}</span>
        <div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div>
