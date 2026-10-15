@@ -834,7 +834,7 @@ Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.
 확인 퀴즈: '설탕 한 스푼을 계량해 덜어 두세요'를 영어로 말해 보세요.
 
 위 예시처럼 질문에 정확히 답하되, 예시의 내용을 그대로 베끼지 않는다.`;
-  delete detErr['qa'+key];qaLive[key]={q,a:''};qaDraft[key]='';render();
+  delete detErr['qa'+key];qaLive[key]={q,a:''};qaDraft[key]='';renderCard(i);
   try{
     const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
     let {text}=await sample(prompt,{cache:false,onText});
@@ -844,7 +844,7 @@ Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.
     const msg=err&&err.code==='not_granted'?'AI 키가 설정되지 않아 답할 수 없습니다. 관리자에게 알려 주세요.':err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'인터넷 연결이 불안정해 서버에 닿지 못했습니다. 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요. ('+String(err&&err.message||'').slice(0,60)+')';
     qaDraft[key]=q;detErr['qa'+key]=msg;
   }
-  delete qaLive[key];render();
+  delete qaLive[key];renderCard(i);
 });
 function detHtml(d,k){
   if(!d){
@@ -860,10 +860,19 @@ function detHtml(d,k){
    ${qaHtml(k)}`;
 }
 const DETAIL_EXAMPLE="{\"core\": \"문장 맨 앞의 'To + 동사원형'은 '~하기 위해서, ~하려면'이라는 목적을 나타내며, 뒤에 이어지는 주절이 그 목적을 이루기 위한 방법이나 단계임을 알려 줍니다. 요리법, 사용 설명서, 업무 절차처럼 '어떻게 하는지'를 설명하는 글에서 자주 쓰입니다.\", \"usage\": \"이 문장에서는 'To make rice in a pot'이 문장 앞에서 목적 부사구로 쓰여 '솥밥을 지으려면'이라는 뜻이고, 뒤의 명령문 'first measure out...'이 그 목적을 달성하는 첫 단계입니다. 목적 부사구가 문장 앞에 오면 쉼표(,)로 주절과 구분합니다.\", \"examples\": [{\"en\": \"To log in, click the button at the top right.\", \"ko\": \"로그인하려면 오른쪽 위의 버튼을 클릭하세요.\"}, {\"en\": \"To save time, I usually prepare my lunch the night before.\", \"ko\": \"시간을 아끼려고 저는 보통 점심을 전날 밤에 준비해 둡니다.\"}, {\"en\": \"To join the meeting, you need to use this link.\", \"ko\": \"회의에 참여하려면 이 링크를 사용해야 합니다.\"}], \"similar\": [{\"t\": \"In order to + 동사원형\", \"m\": \"'~하기 위해서'라는 뜻으로 To보다 목적이 더 분명하고 격식 있는 느낌입니다. 보고서나 공식 문서에서 자주 씁니다.\"}, {\"t\": \"So as to + 동사원형\", \"m\": \"In order to와 비슷하지만 주로 글에서 쓰며, 일상 회화에서는 드뭅니다.\"}, {\"t\": \"If you want to + 동사원형, ...\", \"m\": \"'~하고 싶다면'이라는 뜻으로 상대방에게 말하듯 더 구어적이고 부드럽습니다.\"}], \"tip\": \"'To + 동사원형'이 문장 맨 앞에 오면 '~하려면'으로 해석하고, 쉼표 뒤에 그 목적을 이루는 방법이 나온다고 생각하면 쉽게 외워집니다. 이때 to 뒤에는 항상 동사원형이 오며, 'To making'처럼 -ing 형태를 쓰지 않도록 주의하세요.\"}";
+/* 카드 하나만 다시 그리기: 전체를 다시 그리면 아이패드에서 화면이 튀므로 해당 카드만 교체 */
+function renderCard(i){
+  const real=$('main');if(!real||!real.querySelector('#c'+i)){render();return}
+  const tmp=document.createElement('div');tmp.style.display='none';
+  real.id='main__real';tmp.id='main';document.body.appendChild(tmp);
+  try{render()}finally{tmp.id='';real.id='main'}
+  const nc=tmp.querySelector('#c'+i),oc=real.querySelector('#c'+i);
+  if(nc&&oc)oc.replaceWith(nc);tmp.remove();
+}
 async function loadDetail(w,i,j,k){
   const s=w.sentences[i],v=s.vocab[j];
-  if(!sample||readOnly){detErr[k]='아직 만들어진 설명이 없습니다. 관리자가 AI 기능을 켜면 자세한 설명을 만들 수 있습니다.';render();return}
-  detBusy[k]=true;delete detErr[k];render();
+  if(!sample||readOnly){detErr[k]='아직 만들어진 설명이 없습니다. 관리자가 AI 기능을 켜면 자세한 설명을 만들 수 있습니다.';renderCard(i);return}
+  detBusy[k]=true;delete detErr[k];renderCard(i);
   const basePrompt=`너는 한국 성인 학습자(중급)의 영어 암기를 돕는 노련한 강사다. 학습자가 아래 지문 문장을 통째로 외우고 있다. 문장 속 표현 하나를 깊이 이해하도록 설명한다.
 
 [지문 문장] ${s.en}
@@ -907,12 +916,12 @@ ${DETAIL_EXAMPLE}
     const cur=weeks.find(x=>x.id===w.id)||w;
     const sents=JSON.parse(JSON.stringify(cur.sentences));
     if(sents[i]&&sents[i].vocab[j]&&sents[i].vocab[j].t===v.t){sents[i].vocab[j].detail=det;w.sentences[i].vocab[j].detail=det}
-    delete detBusy[k];render();
+    delete detBusy[k];renderCard(i);
     try{await db.doc('weeks/'+w.id).update({sentences:sents})}catch(e){}
   }catch(e){
     delete detBusy[k];
     detErr[k]=e&&e.code==='not_granted'?'AI 기능이 꺼져 있어 설명을 만들 수 없습니다.':e&&e.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':'설명을 만들지 못했습니다. 접었다가 다시 눌러 주세요.';
-    render();
+    renderCard(i);
   }
 }
 const hasAudio=w=>!!w.longAudio&&w.sentences.every(s=>s.audio&&s.alt&&s.alt.am&&s.alt.bf&&(s.vocab||[]).every(v=>v.audio));
@@ -990,10 +999,10 @@ document.addEventListener('click',async e=>{
   if(t.id==='vtog'){vocOpen=!vocOpen;t.setAttribute('aria-pressed',vocOpen);t.textContent=vocOpen?'단어·숙어 접기':'단어·숙어 펼치기';document.querySelectorAll('details.voc').forEach(d=>d.open=vocOpen);return}
   if(t.classList.contains('vmore')){
     const k=t.dataset.k,[i,j]=k.split('-').map(Number);
-    if(openDet.has(k)){openDet.delete(k);render();return}
+    if(openDet.has(k)){openDet.delete(k);renderCard(i);return}
     openDet.add(k);openVoc.add(i);
     const v=w.sentences[i].vocab[j];
-    if((!v.detail||!v.detail.usage||!v.detail.core)&&!detBusy[k])loadDetail(w,i,j,k);else render();
+    if((!v.detail||!v.detail.usage||!v.detail.core)&&!detBusy[k])loadDetail(w,i,j,k);else renderCard(i);
     return}
   if(t.classList.contains('vplay')){stop();speak(cleanTerm(t.dataset.t)||t.dataset.t,0.9,t.dataset.a||'');return}
   if(t.id==='psKo'){psKo=!psKo;render();return}
@@ -1247,7 +1256,10 @@ function weakHtml(w){
 }
 document.addEventListener('input',e=>{if(e.target.id==='mockIn'&&mock)mock.ans[mock.pos]=e.target.value});
 function applyWeeks(list){
-  weeks=list.filter(w=>w.monday&&Array.isArray(w.sentences));loaded=true;dbFailed=false;
+  const nw=list.filter(w=>w.monday&&Array.isArray(w.sentences));
+  /* 내용이 화면과 같으면(내가 방금 저장한 것 등) 다시 그리지 않음 → 화면 튐 방지 */
+  try{if(loaded&&!dbFailed&&JSON.stringify(nw)===JSON.stringify(weeks)){weeks=nw;return}}catch(_){}
+  weeks=nw;loaded=true;dbFailed=false;
   if(!weeks.find(w=>w.id===curId)){
     const last=ls.get('lastWeek',null), thisMon=ymd(mondayOf(today()));
     curId=(weeks.find(w=>w.id===last)||weeks.find(w=>w.id===thisMon)||weeks[0]||{}).id||null;
