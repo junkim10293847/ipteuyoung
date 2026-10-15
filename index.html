@@ -212,6 +212,7 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .acts .play.pressing::after{transform:scaleX(1);transition:transform 1s linear}
 .acts .play.looping{background:var(--done);border-color:var(--done)}
 .hint.press{margin:2px 0 10px}
+.acts .wr-check{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
 .acts .write[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
 .wr{display:grid;gap:6px;margin-top:6px}
 .wr textarea{font:inherit;font-size:.95rem;line-height:1.45;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;resize:vertical}
@@ -606,7 +607,6 @@ function writeHtml(w,i){
   const key=curId+'|'+i, r=writeRes[key];
   return `<div class="wr">
     <textarea id="wr-${i}" data-i="${i}" rows="3" placeholder="뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
-    <div class="wr-act"><button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button></div>
     ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?' 외움으로 표시하고 영어를 가려 두었어요.':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       <div class="wr-diff">${r.d.map(([t,x,y])=>t==='sub'?`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`:`<span class="${t}">${esc(x)}</span>`).join(' ')}</div>
 </div>`:''}
@@ -692,7 +692,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
          ${s.audio?`<button class="play" data-i="${i}">▶ 듣기</button>`:`<button class="play" data-i="${i}">▶ 듣기</button>`}
          <button class="slow" data-i="${i}">▶ 천천히</button>
          <button class="hideen" data-i="${i}" aria-pressed="${hiddenEn.has(i)}">${hiddenEn.has(i)?"영어 보기":"영어 가리기"}</button>
-         <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✍ 접기":"✍ 써보기"}</button>
+         <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✍ 접기":"✍ 써보기"}</button>${writeOpen.has(i)?`<button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button>`:''}
          <button class="mark" data-i="${i}" aria-pressed="${!!done[i]}">${done[i]?'✓ 외움':'☐ 외움'}</button>
        </div>
        ${writeOpen.has(i)?writeHtml(w,i):''}
@@ -969,7 +969,10 @@ document.addEventListener('click',async e=>{
   }
   if(t.classList.contains('mark')){const d={...doneOf(w.id)};if(d[i]){delete d[i];hiddenEn.delete(i);doneSeen.delete(i)}else d[i]=true;prog.done[w.id]=d;saveProg();stay(i,render);return}
   if(t.classList.contains('write')){writeOpen.has(i)?writeOpen.delete(i):writeOpen.add(i);stay(i,render);if(writeOpen.has(i))setTimeout(()=>{const ta=$('wr-'+i);if(ta)ta.focus({preventScroll:true})},30);return}
-  if(t.classList.contains('wr-clear')){const key=curId+'|'+i;delete writeDraft[key];delete writeRes[key];stay(i,render);setTimeout(()=>{const ta=$('wr-'+i);if(ta)ta.focus({preventScroll:true})},30);return}
+  if(t.classList.contains('wr-clear')){const key=curId+'|'+i;delete writeDraft[key];delete writeRes[key];
+    /* 다시 쓰기: 글과 결과만 그 자리에서 지움 (화면 다시 그리지 않음) */
+    const ta=$('wr-'+i),cd=$('c'+i);if(ta&&cd){ta.value='';const rr=cd.querySelector('.wr-res');if(rr)rr.remove();ta.focus({preventScroll:true});return}
+    stay(i,render);return}
   if(t.classList.contains('wr-check')){
     const key=curId+'|'+i, r=grade(w,i);if(!r){const ta=$('wr-'+i);if(ta)ta.focus();return}
     writeRes[key]=r;recordWeak(w.id,i,r,false);saveProg();
