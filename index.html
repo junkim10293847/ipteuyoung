@@ -66,6 +66,7 @@ h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;
 .day.sat .d{color:var(--done)}
 .day.sat[aria-pressed="true"] .d{color:var(--bg)}
 .allbtn{font:inherit;font-size:.8rem;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}
+.long .passage{margin-top:4px;padding:10px 14px}
 .passage{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 18px}
 .passage summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;list-style:none}
 .passage summary::-webkit-details-marker{display:none}
@@ -719,13 +720,20 @@ function render(){
   const late=addDays(start,days.length-1)>=sat;
   const rng=d=>{const n=d.map(j=>numLabel(w,j)).filter(x=>x!=='T');return !n.length?'복습':n.length===1?n[0]:`${n[0]}–${n[n.length-1]}`};
   const missing=w.sentences.some(s=>!s.ko);
+  const psHtml=`   <details class="passage" id="psBox"${psOpen?' open':''}>
+     <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장 · 눌러서 펼치기</span></summary>
+     <div class="ps-head"><span></span><button class="alllink" id="psKo">${psKo?'해석 숨기기':'해석 보기'}</button></div>
+     ${w.sentences.filter(x=>x.isTitle).map(x=>`<h3>${esc(x.en)}</h3>`).join('')}
+     <p class="ps-text">${w.sentences.map((x,j)=>x.isTitle?'':`<span class="ps" data-ps="${j}">${(()=>{const m=marksOf(w.id,j);return x.en.split(' ').map((t,k)=>`<span class="pw${m[k]?' mk-y':''}" data-w="${k}">${esc(t)}</span>`).join(' ')})()}</span>${psKo&&x.ko?`<span class="ps-ko">${esc(x.ko)}</span>`:''}`).join(' ')}</p>
+     <p class="hint">문장을 누르면 그 문장을 들을 수 있습니다.</p>
+   </details>`;
   main.innerHTML=`
    <header class="head">
      <div class="eyebrow">${mdw(prev)} 스터디에서 배정 → ${mdw(sat)} 오전 스터디 테스트</div>
      <h1>${esc(w.title)}</h1>
      ${w.sentences.some(x=>!x.audio)?`<div class="pending"><span class="dot" aria-hidden="true"></span><div><b>${window.__features.tts?'🔊 원어민 음성 만드는 중':'🔊 기기 음성으로 재생 중'}</b><span>${window.__features.tts?'15~20분 안에 자동으로 원어민 음성이 붙습니다. 그동안은 휴대폰 기본 음성으로 읽어 줍니다.':'휴대폰 기본 음성으로 읽어 줍니다.'}</span></div></div>`:''}
      <p class="meta"><b>${dLabel}</b> · ${total}문장${by?` · ${esc(by)} 님이 등록`:''}</p>
-     ${w.longAudio?`<div class="long"><div class="long-h"><b>한 주 분량 연속 듣기</b><span>전체 문장을 끊김 없이 이어서 재생</span></div><audio id="longAudio" controls preload="none" src="${esc(w.longAudio)}"></audio></div>`:''}
+     ${w.longAudio?`<div class="long"><div class="long-h"><b>한 주 분량 연속 듣기</b><span>재생하면 아래 전체 지문에서 지금 읽는 문장이 표시돼요</span></div><audio id="longAudio" controls preload="none" src="${esc(w.longAudio)}"></audio>${psHtml}</div>`:psHtml}
      <div class="pace">
        <span>하루 분량</span>
        ${[['auto','남은 기간 맞춤'],['1','1개'],['2','2개'],['3','3개'],['4','4개'],['5','5개']].map(([v,l])=>{const ok=v==='auto'||paceOk(w,+v);return `<button class="chip${ok?'':' off'}" data-pace="${v}" aria-pressed="${pace===v}"${ok?'':' disabled title="테스트 전까지 다 못 끝내는 분량이에요"'}>${l}</button>`}).join('')}
@@ -759,13 +767,6 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
        ${writeOpen.has(i)?writeHtml(w,i):''}
      </li>`}).join('')}
    </ol>
-   <details class="passage" id="psBox"${psOpen?' open':''}>
-     <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장 · 눌러서 펼치기</span></summary>
-     <div class="ps-head"><span></span><button class="alllink" id="psKo">${psKo?'해석 숨기기':'해석 보기'}</button></div>
-     ${w.sentences.filter(x=>x.isTitle).map(x=>`<h3>${esc(x.en)}</h3>`).join('')}
-     <p class="ps-text">${w.sentences.map((x,j)=>x.isTitle?'':`<span class="ps" data-ps="${j}">${(()=>{const m=marksOf(w.id,j);return x.en.split(' ').map((t,k)=>`<span class="pw${m[k]?' mk-y':''}" data-w="${k}">${esc(t)}</span>`).join(' ')})()}</span>${psKo&&x.ko?`<span class="ps-ko">${esc(x.ko)}</span>`:''}`).join(' ')}</p>
-     <p class="hint">문장을 누르면 그 문장을 들을 수 있습니다.</p>
-   </details>
    <details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
    <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">한글만 보고 처음부터 끝까지 써 보고 총점 받기</span></summary>${mockHtml(w)}</details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
@@ -1055,6 +1056,20 @@ $('stop').onclick=()=>{stop();const la=$('longAudio');if(la)la.pause()};
 try{const sv=localStorage.getItem('voice');if(sv)$('voiceSel').value=sv}catch(e){}
 $('voiceSel').onchange=e=>{try{localStorage.setItem('voice',e.target.value)}catch(_){}};
 document.addEventListener('play',e=>{if(e.target.id==='longAudio')stop()},true);
+/* 연속 듣기와 전체 지문 맞추기: 지금 재생 중인 문장을 지문에서 표시 (화면은 움직이지 않음) */
+const durCache={};
+function durOf(u){if(!u)return Promise.resolve(0);if(durCache[u]!=null)return Promise.resolve(durCache[u]);return new Promise(res=>{const a=new Audio();a.preload='metadata';a.onloadedmetadata=()=>{durCache[u]=isFinite(a.duration)?a.duration:0;res(durCache[u])};a.onerror=()=>res(0);a.src=u})}
+let longMap=null,longMapFor='';
+async function buildLongMap(w){const key=w.id+'|'+w.longAudio;if(longMapFor===key)return longMap;longMapFor=key;const ds=await Promise.all(w.sentences.map(s=>durOf(s.audio)));let t=0;longMap=ds.map((d,j)=>{const r=[t,t+d,j];t+=d;return r});return longMap}
+document.addEventListener('timeupdate',async e=>{
+  if(e.target.id!=='longAudio')return;const w=weeks.find(x=>x.id===curId);if(!w)return;
+  const map=await buildLongMap(w),t=e.target.currentTime;const hit=map&&map.find(r=>t>=r[0]&&t<r[1]);
+  const j=hit?hit[2]:-1;const cur=document.querySelector('.ps.on');
+  if(cur&&+cur.dataset.ps===j)return;if(cur)cur.classList.remove('on');
+  if(j>=0){const el=document.querySelector(`.ps[data-ps="${j}"]`);if(el)el.classList.add('on')}
+},true);
+document.addEventListener('play',e=>{if(e.target.id==='longAudio'){const w=weeks.find(x=>x.id===curId);if(w)buildLongMap(w)}},true);
+document.addEventListener('ended',e=>{if(e.target.id==='longAudio'){const c=document.querySelector('.ps.on');if(c)c.classList.remove('on')}},true);
 $('all').onclick=async()=>{
   const w=weeks.find(x=>x.id===curId); if(!w)return;
   stop();const my=token;const rate=+$('rate').value;
