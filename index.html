@@ -185,8 +185,10 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .vdet p{margin:0}
 .vdet ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
 .vdet .ko{font-size:.8rem}
-.vdet .sim{display:flex;flex-wrap:wrap;gap:6px}
-.vdet .sim span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:.78rem}
+.vdet .sim{display:grid;gap:6px}
+.vdet .sim span{display:block;position:relative;padding-left:16px;line-height:1.6}
+.vdet .sim span::before{content:'○';position:absolute;left:0;top:0;font-size:.7em;line-height:2.3;color:var(--muted)}
+.vdet .sim span b{font-weight:700}
 .qa{border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:8px}
 .qa-item{display:grid;gap:3px}
 .qa-q{font-weight:700;font-size:.82rem}
@@ -770,7 +772,7 @@ function detHtml(d,k){
   return `${detBusy[k]?`<p class="load">이 문장에서의 쓰임까지 보완하는 중… (10~30초)</p>`:''}${d.core?`<div><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
    ${d.usage?`<div><h4>이 문장에서의 쓰임</h4><p>${esc(d.usage)}</p></div>`:''}
    ${(d.examples||[]).length?`<div><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
-   ${(d.similar||[]).length?`<div><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span>${esc(x.t)} · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
+   ${(d.similar||[]).length?`<div><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
    ${d.tip?`<div><h4>외우는 팁 · 주의할 점</h4><p>${esc(d.tip)}</p></div>`:''}
    ${qaHtml(k)}`;
 }
