@@ -596,6 +596,21 @@ function patchCardState(w,i){
   const bar=document.querySelector('.sumrow .bar i');if(bar)bar.style.width=(body.length?n/body.length*100:0)+'%';
   return true;
 }
+/* 쓰기 칸을 손가락으로 눌러 처음 커서를 둘 때: 브라우저가 칸을 키보드 위로 끌어올리며 화면을 움직이지 않게 고정
+   (아이패드 펜 손글씨는 그대로 둠) */
+(function(){
+  let lastType='';
+  document.addEventListener('pointerdown',e=>{lastType=e.pointerType||''},true);
+  function hold(y,ms){const until=Date.now()+ms;const f=()=>{if(Date.now()<until){if(Math.abs(scrollY-y)>1)window.scrollTo(0,y)}else removeEventListener('scroll',f)};addEventListener('scroll',f);setTimeout(()=>removeEventListener('scroll',f),ms+50)}
+  document.addEventListener('touchend',e=>{
+    const ta=e.target.closest&&e.target.closest('.wr textarea, .mock textarea');
+    if(!ta||document.activeElement===ta||lastType==='pen')return;
+    e.preventDefault();const y=scrollY;
+    try{ta.focus({preventScroll:true})}catch(_){ta.focus()}
+    try{const n=ta.value.length;ta.setSelectionRange(n,n)}catch(_){}
+    hold(y,900);
+  },{passive:false,capture:true});
+})();
 /* 써보기 열기·접기: 그 카드 안에서만 쓰기 칸과 버튼을 넣고 빼기 (화면 다시 그리지 않음) */
 function patchWriteOpen(w,i){
   const c=$('c'+i),acts=c&&c.querySelector('.acts'),wb=acts&&acts.querySelector('.write');if(!wb)return false;
