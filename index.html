@@ -83,6 +83,9 @@ h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;
 .ps.on{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent-soft)}
 .ps .mk-y{background:#ffe066;color:#1f2620;border-radius:3px;box-shadow:0 0 0 2px #ffe066}
 .ps .mk-r{background:#ff9e8f;color:#1f2620;border-radius:3px;box-shadow:0 0 0 2px #ff9e8f}
+.ctag{display:inline-block;justify-self:start;width:max-content;font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 8px;margin:0 0 4px;border:1px solid var(--line);color:var(--muted)}
+.ctag.today{color:var(--accent);border-color:var(--accent)}
+.ctag.skip{color:var(--done);border-color:var(--done)}
 .revhead{list-style:none;display:grid;gap:2px;padding:8px 4px 2px;font-size:.84rem;color:var(--muted)}
 .revhead b{color:var(--done);font-size:.92rem}
 .revhead.today b{color:var(--accent)}
@@ -702,10 +705,13 @@ function render(){
   /* 화면에 처음 나오는 문장은 영어를 가린 상태로 시작 (보기를 누른 문장은 그대로 유지) */
   (idx||[]).concat(rev||[]).forEach(j=>{const hk=curId+'|'+j;if(!hideSeed[hk]){hideSeed[hk]=1;hiddenEn.add(j)}});
   /* 남은 기간 맞춤에서 이미 외운 문장은 건너뛰므로, 번호가 비는 이유를 알려 줌 */
-  const maxNew=idx.length?Math.max(...idx):-1, prevMax=rev.length?Math.max(...rev):-1;
-  const skipped=bodyIdx.filter(j=>j>prevMax&&j<maxNew&&done[j]&&!idx.includes(j));
-  const skipHtml=skipped.length?`<li class="skipnote">✓ ${skipped.map(j=>numLabel(w,j)).join('·')}번은 이미 외워서 건너뛰었어요 <button class="alllink" data-view="all">전체 보기</button></li>`:'';
-  const listIdx=rev.length?['__R',...rev,'__T',...idx]:(skipped.length?['__S',...idx]:idx);
+  /* 일차 화면은 번호가 끊기지 않게: 어제 복습·오늘 문장·이미 외운 문장을 번호 순서대로 한 줄로 이어서 보여 줌 */
+  const prevMax=rev.length?Math.max(...rev):-1;
+  const dayAll=[...new Set([...rev,...idx])];
+  const seq=(view&&view[0]==='d'&&dayAll.length)?bodyIdx.filter(j=>j>=Math.min(...dayAll)&&j<=Math.max(...dayAll)):idx;
+  const roleOf=j=>idx.includes(j)?'today':rev.includes(j)?'rev':'skip';
+  const nRev=seq.filter(j=>roleOf(j)==='rev').length,nSkip=seq.filter(j=>roleOf(j)==='skip').length,behind=idx.filter(j=>j<prevMax).length;
+  const listIdx=(view&&view[0]==='d'&&(rev.length||nSkip))?['__H',...seq]:seq;
   const total=bodyIdx.length, nDone=bodyIdx.filter(i=>done[i]).length;
   const dTo=Math.round((sat-today())/864e5);
   const dLabel = dTo>0?`테스트까지 D-${dTo}`: dTo===0?'오늘 테스트':'테스트 완료 주차';
@@ -735,10 +741,10 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    <div class="sumrow"><b>${viewName}</b><span class="pc">${nDone}/${total} 암기</span><div class="bar"><i style="width:${total?nDone/total*100:0}%"></i></div><button class="alllink" id="hideAll">${idx.every(j=>hiddenEn.has(j))?"영어 모두 보기":"영어 모두 가리기"}</button></div>
    <p class="hint press">💡 ▶ 듣기를 <b>1초 누르면</b> 그 문장을 계속 반복합니다</p>
    <ol id="list">
-    ${listIdx.map(i=>{if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__S')return skipHtml;if(i==='__T'){const behind=idx.filter(j=>j<prevMax).length;return `<li class="revhead today"><b>📖 오늘 문장 · ${idx.length}문장</b>${behind?`<span>앞에서 아직 못 외운 ${behind}문장을 먼저 넣었어요.</span>`:''}</li>`+skipHtml};const s=w.sentences[i];const v=s.vocab||[];return `
+    ${listIdx.map(i=>{if(i==='__H')return `<li class="revhead"><b>📖 오늘 ${idx.length}문장${nRev?` · 🔁 어제 복습 ${nRev}`:''}${nSkip?` · ✓ 이미 외움 ${nSkip}`:''}</b><span>번호 순서대로 이어서 보여 줘요.${nRev?' 어제 복습 문장은 영어를 가려 두었어요.':''}${behind?` 앞에서 아직 못 외운 ${behind}문장도 오늘 분량에 넣었어요.`:''}</span></li>`;if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__S')return skipHtml;if(i==='__T'){const behind=idx.filter(j=>j<prevMax).length;return `<li class="revhead today"><b>📖 오늘 문장 · ${idx.length}문장</b>${behind?`<span>앞에서 아직 못 외운 ${behind}문장을 먼저 넣었어요.</span>`:''}</li>`+skipHtml};const s=w.sentences[i];const v=s.vocab||[];return `
      <li class="card${done[i]?' done':''}" id="c${i}">
        <span class="num">${numLabel(w,i)}</span>
-       <div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div>
+       ${(view&&view[0]==='d'&&listIdx[0]==='__H')?(r=>r==='rev'?'<span class="ctag rev">🔁 어제 복습</span>':r==='skip'?'<span class="ctag skip">✓ 이미 외움</span>':'<span class="ctag today">📖 오늘</span>')(roleOf(i)):''}<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div>
        <div class="ko${s.ko?'':' empty'}">${s.ko?esc(s.ko):'해석 없음'}</div>
        ${(()=>{const e=weakOf(w.id,i);return e?`<div class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</div>`:''})()}
 
