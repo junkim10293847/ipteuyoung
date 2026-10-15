@@ -635,7 +635,7 @@ function writeHtml(w,i){
   const key=curId+'|'+i, r=writeRes[key];
   return `<div class="wr">
     <textarea id="wr-${i}" data-i="${i}" rows="3" placeholder="뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
-    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?' 외움으로 표시하고 영어를 가려 두었어요.':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
+    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?' 외움으로 표시했어요. 잠시 후 쓰기 칸을 접습니다.':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       <div class="wr-diff">${r.d.map(([t,x,y])=>t==='sub'?`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`:`<span class="${t}">${esc(x)}</span>`).join(' ')}</div>
 </div>`:''}
   </div>`;
@@ -1008,7 +1008,10 @@ document.addEventListener('click',async e=>{
     if(r.perfect)hiddenEn.add(i);
     /* 채점 결과만 그 자리 아래에 끼워 넣음 (화면 전체를 다시 그리지 않아 흔들림 없음) */
     const showRes=()=>{};   /* 화면은 움직이지 않음: 결과는 쓰기 칸 바로 아래에 나타남 */
-    if(patchWriteRes(w,i)&&patchCardState(w,i)){requestAnimationFrame(showRes);return}
+    if(patchWriteRes(w,i)&&patchCardState(w,i)){
+      /* 100%면 '완벽해요'를 잠깐 보여 준 뒤 써보기를 자동으로 접음 (외움 체크는 이미 됨) */
+      if(r.perfect)setTimeout(()=>{if(!writeOpen.has(i))return;const ta=$('wr-'+i);if(ta)ta.blur();writeOpen.delete(i);delete writeDraft[key];delete writeRes[key];patchWriteOpen(w,i)},1400);
+      return}
     stay(i,render,showRes);return}
   if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);stay(i,render);return}
   stop();const my=token;
