@@ -390,7 +390,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   let loadedOnce=false;
   async function refresh(force){
     for(let t=0;;t++){
-      try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);loadedOnce=true;const next=attach(wk||{}),sig=JSON.stringify(next);if(!force&&sig===lastSig)return;lastSig=sig;cache=next;emitSafe();return}
+      try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);loadedOnce=true;const next=attach(wk||{}),sig=JSON.stringify(next);if(!force&&sig===lastSig)return;lastSig=sig;cache=next;try{localStorage.setItem('weeksCache',sig)}catch(_){};emitSafe();return}
       catch(e){
         if(loadedOnce)return;                                   // 이미 화면에 주차가 있으면 조용히 넘어감
         if(t<3){await new Promise(z=>setTimeout(z,2000*(t+1)));continue}   // 처음 열 때는 세 번 더 시도
@@ -412,7 +412,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
       set:d=>run('saveProgress',key,d),update:d=>run('saveProgress',key,d),delete:async()=>{}};
   }
   const db={doc:docRef,collection:path=>({doc:id=>docRef(path+'/'+id),orderBy(){return this},
-    onSnapshot(next,err){listeners.push({next,err});refresh(true);poll();return()=>{}}})};
+    onSnapshot(next,err){listeners.push({next,err});
+      /* 지난번에 받아 둔 주차를 먼저 바로 보여 주고, 최신 자료는 뒤에서 받아 바꿔 끼움 */
+      try{const c=localStorage.getItem('weeksCache');if(c&&!lastSig){cache=JSON.parse(c);lastSig=c;loadedOnce=true;setTimeout(()=>{try{next(snap())}catch(_){}} ,0)}}catch(_){}
+      refresh();poll();return()=>{}}})};
 
   /* AI: Apps Script에 넣어 둔 Gemini 무료 키로 답함 */
   const flat=i=>typeof i==='string'?i:i.map(m=>(m.role==='assistant'?'[이전 답변] ':'')+m.content).join('\n\n');
@@ -480,8 +483,11 @@ async function attachProgRef(){
     const snap=await ref.get();
     if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})}}}
     progRef=ref;render();
+    if(snap.exists||Object.keys(prog.done||{}).length)saveProg();   /* 오프라인·다른 기기에서 쌓인 기록을 합친 결과를 서버에 다시 저장 */
   }catch(e){progRef=null}
 }
+window.addEventListener('online',()=>{if(!progRef&&nick)attachProgRef()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!progRef&&nick&&db)attachProgRef()});
 function saveProg(){
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
