@@ -596,6 +596,19 @@ function patchCardState(w,i){
   const bar=document.querySelector('.sumrow .bar i');if(bar)bar.style.width=(body.length?n/body.length*100:0)+'%';
   return true;
 }
+/* 써보기 열기·접기: 그 카드 안에서만 쓰기 칸과 버튼을 넣고 빼기 (화면 다시 그리지 않음) */
+function patchWriteOpen(w,i){
+  const c=$('c'+i),acts=c&&c.querySelector('.acts'),wb=acts&&acts.querySelector('.write');if(!wb)return false;
+  const open=writeOpen.has(i);
+  wb.setAttribute('aria-pressed',open);wb.textContent=open?'✍ 접기':'✍ 써보기';
+  acts.querySelectorAll('.wr-check,.wr-clear').forEach(x=>x.remove());
+  const old=c.querySelector('.wr');if(old)old.remove();
+  if(open){wb.insertAdjacentHTML('afterend',`<button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button>`);acts.insertAdjacentHTML('afterend',writeHtml(w,i))}
+  return true;
+}
+/* 채점·다시 쓰기 버튼을 눌러도 쓰기 칸의 입력 상태(키보드·펜)가 풀리지 않게 → 키보드가 닫히며 화면이 튀는 것 방지 */
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
+document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
 function patchWriteRes(w,i){
   const c=$('c'+i),wr=c&&c.querySelector('.wr');if(!wr)return false;
   const tmp=document.createElement('div');tmp.innerHTML=writeHtml(w,i);
@@ -968,7 +981,7 @@ document.addEventListener('click',async e=>{
     if(loopIdx===i){stop();return}
   }
   if(t.classList.contains('mark')){const d={...doneOf(w.id)};if(d[i]){delete d[i];hiddenEn.delete(i);doneSeen.delete(i)}else d[i]=true;prog.done[w.id]=d;saveProg();stay(i,render);return}
-  if(t.classList.contains('write')){writeOpen.has(i)?writeOpen.delete(i):writeOpen.add(i);stay(i,render);if(writeOpen.has(i))setTimeout(()=>{const ta=$('wr-'+i);if(ta)ta.focus({preventScroll:true})},30);return}
+  if(t.classList.contains('write')){writeOpen.has(i)?writeOpen.delete(i):writeOpen.add(i);if(!patchWriteOpen(w,i))stay(i,render);return}
   if(t.classList.contains('wr-clear')){const key=curId+'|'+i;delete writeDraft[key];delete writeRes[key];
     /* 다시 쓰기: 글과 결과만 그 자리에서 지움 (화면 다시 그리지 않음) */
     const ta=$('wr-'+i),cd=$('c'+i);if(ta&&cd){ta.value='';const rr=cd.querySelector('.wr-res');if(rr)rr.remove();ta.focus({preventScroll:true});return}
@@ -979,7 +992,7 @@ document.addEventListener('click',async e=>{
     if(r.perfect&&!doneOf(w.id)[i]){prog.done[w.id]={...doneOf(w.id),[i]:true};saveProg()}
     if(r.perfect)hiddenEn.add(i);
     /* 채점 결과만 그 자리 아래에 끼워 넣음 (화면 전체를 다시 그리지 않아 흔들림 없음) */
-    const showRes=()=>{const c=$('c'+i),x=c&&c.querySelector('.wr-res');if(!x)return;const b=x.getBoundingClientRect(),lim=innerHeight-120;if(b.bottom>lim)window.scrollBy({top:Math.min(b.bottom-lim,b.top-80),behavior:'smooth'})};
+    const showRes=()=>{};   /* 화면은 움직이지 않음: 결과는 쓰기 칸 바로 아래에 나타남 */
     if(patchWriteRes(w,i)&&patchCardState(w,i)){requestAnimationFrame(showRes);return}
     stay(i,render,showRes);return}
   if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);stay(i,render);return}
