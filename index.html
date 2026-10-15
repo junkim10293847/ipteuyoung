@@ -619,13 +619,28 @@ function patchCardState(w,i){
   let lastType='';
   document.addEventListener('pointerdown',e=>{lastType=e.pointerType||''},true);
   function hold(y,ms){const until=Date.now()+ms;const f=()=>{if(Date.now()<until){if(Math.abs(scrollY-y)>1)window.scrollTo(0,y)}else removeEventListener('scroll',f)};addEventListener('scroll',f);setTimeout(()=>removeEventListener('scroll',f),ms+50)}
+  /* 키보드(한글 자판)가 올라온 뒤: 쓰기 칸이 키보드 바로 위에 오도록 필요한 만큼만 조금 이동 */
+  function fitAboveKeyboard(ta){
+    const vv=window.visualViewport;if(!vv||!ta||document.activeElement!==ta)return;
+    if(vv.height>innerHeight*0.85)return;                       // 키보드가 안 떠 있으면 그대로
+    const r=ta.getBoundingClientRect(),top=vv.offsetTop+60,bottom=vv.offsetTop+vv.height-10;
+    let d=0;
+    if(r.height>bottom-top)d=r.top-top;                         // 칸이 아주 크면 위쪽에 맞춤
+    else if(r.bottom>bottom)d=r.bottom-bottom;                  // 키보드에 가리면 그만큼만 올림
+    else if(r.top<top)d=r.top-top;                              // 너무 올라갔으면 그만큼만 내림
+    if(Math.abs(d)>4)window.scrollBy({top:d,behavior:'smooth'});
+  }
+  let fitT=null;
+  const scheduleFit=ta=>{clearTimeout(fitT);fitT=setTimeout(()=>fitAboveKeyboard(ta),260)};
+  document.addEventListener('focusin',e=>{const ta=e.target.closest&&e.target.closest('.wr textarea, .mock textarea');if(!ta)return;setTimeout(()=>fitAboveKeyboard(ta),550)});
+  if(window.visualViewport)visualViewport.addEventListener('resize',()=>{const a=document.activeElement;if(a&&a.matches&&a.matches('.wr textarea, .mock textarea'))scheduleFit(a)});
   document.addEventListener('touchend',e=>{
     const ta=e.target.closest&&e.target.closest('.wr textarea, .mock textarea');
     if(!ta||document.activeElement===ta||lastType==='pen')return;
     e.preventDefault();const y=scrollY;
     try{ta.focus({preventScroll:true})}catch(_){ta.focus()}
     try{const n=ta.value.length;ta.setSelectionRange(n,n)}catch(_){}
-    hold(y,900);
+    hold(y,450);
   },{passive:false,capture:true});
 })();
 /* 써보기 열기·접기: 그 카드 안에서만 쓰기 칸과 버튼을 넣고 빼기 (화면 다시 그리지 않음) */
