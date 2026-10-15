@@ -580,6 +580,13 @@ function recordWeak(wid,i,r,save=true){
   if(save)saveProg();
 }
 const weakOf=(wid,i)=>((prog.weak||{})[wid]||{})[i];
+function patchWriteRes(w,i){
+  const c=$('c'+i),wr=c&&c.querySelector('.wr');if(!wr)return false;
+  const tmp=document.createElement('div');tmp.innerHTML=writeHtml(w,i);
+  const nr=tmp.querySelector('.wr-res'),old=wr.querySelector('.wr-res');
+  if(old&&nr)old.replaceWith(nr);else if(nr)wr.appendChild(nr);else if(old)old.remove();
+  return true;
+}
 function writeHtml(w,i){
   const key=curId+'|'+i, r=writeRes[key];
   return `<div class="wr">
@@ -954,7 +961,10 @@ document.addEventListener('click',async e=>{
     writeRes[key]=r;recordWeak(w.id,i,r,false);saveProg();
     if(r.perfect&&!doneOf(w.id)[i]){prog.done[w.id]={...doneOf(w.id),[i]:true};saveProg()}
     if(r.perfect)hiddenEn.add(i);
-    stay(i,render,()=>{const c=$('c'+i),x=c&&c.querySelector('.wr-res');if(x)x.scrollIntoView({block:'nearest',behavior:'smooth'})});return}
+    /* 채점 결과만 그 자리 아래에 끼워 넣음 (화면 전체를 다시 그리지 않아 흔들림 없음) */
+    const showRes=()=>{const c=$('c'+i),x=c&&c.querySelector('.wr-res');if(!x)return;const b=x.getBoundingClientRect(),lim=innerHeight-120;if(b.bottom>lim)window.scrollBy({top:Math.min(b.bottom-lim,b.top-80),behavior:'smooth'})};
+    if(!r.perfect&&patchWriteRes(w,i)){requestAnimationFrame(showRes);return}
+    stay(i,render,showRes);return}
   if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);stay(i,render);return}
   stop();const my=token;
   await playOne(s,i,t.classList.contains('slow')?0.7:+$('rate').value,my);
