@@ -219,7 +219,18 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .wr-act{display:flex;gap:6px}
 .wr-act .primary,.wr-act .ghost{padding:6px 14px;font-size:.84rem}
 .wr-res{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:6px;font-size:.88rem}
-.wr-res.perfect{background:var(--done-soft);border-color:var(--done)}
+.wr-res.perfect{background:var(--done-soft);border:2px solid var(--done);text-align:center;padding:14px 12px 16px;position:relative;overflow:hidden;animation:wrPop .55s cubic-bezier(.2,1.5,.4,1)}
+.wr-res.perfect .wr-score b{display:block;font-size:1.6rem;line-height:1.3;color:var(--done);margin-bottom:2px}
+.wr-res.perfect .wr-diff{display:none}
+.wr-res.perfect::after{content:'';position:absolute;left:0;bottom:0;height:4px;width:100%;background:var(--done);transform-origin:left;animation:wrBar 3s linear forwards}
+@keyframes wrPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes wrBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.card.celebrate{animation:wrGlow 1.8s ease-out}
+@keyframes wrGlow{0%{box-shadow:0 0 0 0 var(--done)}100%{box-shadow:0 0 0 16px transparent}}
+.wr-confetti{position:absolute;inset:0;pointer-events:none}
+.wr-confetti span{position:absolute;bottom:10px;font-size:1.2rem;opacity:0;animation:wrFly 1.6s ease-out forwards}
+@keyframes wrFly{0%{transform:translateY(0) scale(.6);opacity:1}100%{transform:translateY(-110px) scale(1.1) rotate(25deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.wr-res.perfect,.card.celebrate,.wr-confetti span{animation:none}.wr-confetti{display:none}}
 .wr-score{font-size:.84rem;color:var(--muted)}
 .wr-score b{color:var(--fg)}
 .wr-diff{line-height:1.8}
@@ -624,6 +635,16 @@ function patchWriteOpen(w,i){
 /* 채점·다시 쓰기 버튼을 눌러도 쓰기 칸의 입력 상태(키보드·펜)가 풀리지 않게 → 키보드가 닫히며 화면이 튀는 것 방지 */
 document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
 document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
+/* 100% 정답 축하: 결과 상자 튀어나옴 + 반짝이 + 카드 테두리 빛 + 짧은 진동·작은 '딩동' */
+function celebrate(i){
+  const cd=$('c'+i),box=cd&&cd.querySelector('.wr-res.perfect');if(!box)return;
+  cd.classList.remove('celebrate');void cd.offsetWidth;cd.classList.add('celebrate');setTimeout(()=>cd.classList.remove('celebrate'),1900);
+  const cf=document.createElement('div');cf.className='wr-confetti';
+  cf.innerHTML=Array.from({length:14},(_,k)=>`<span style="left:${4+Math.random()*92}%;animation-delay:${(Math.random()*.35).toFixed(2)}s">${['🎉','✨','⭐','🌟','💯'][k%5]}</span>`).join('');
+  box.appendChild(cf);setTimeout(()=>cf.remove(),2200);
+  try{if(navigator.vibrate)navigator.vibrate([30,40,30])}catch(_){}
+  try{const A=window.AudioContext||window.webkitAudioContext;if(A){const ac=celebrate.ac||(celebrate.ac=new A());const t=ac.currentTime;[[880,0],[1318.5,.12]].forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.07,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.35);o.connect(g).connect(ac.destination);o.start(t+d);o.stop(t+d+.4)})}}catch(_){}
+}
 function patchWriteRes(w,i){
   const c=$('c'+i),wr=c&&c.querySelector('.wr');if(!wr)return false;
   const tmp=document.createElement('div');tmp.innerHTML=writeHtml(w,i);
@@ -635,7 +656,7 @@ function writeHtml(w,i){
   const key=curId+'|'+i, r=writeRes[key];
   return `<div class="wr">
     <textarea id="wr-${i}" data-i="${i}" rows="3" placeholder="뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
-    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?' 외움으로 표시했어요. 잠시 후 쓰기 칸을 접습니다.':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
+    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       <div class="wr-diff">${r.d.map(([t,x,y])=>t==='sub'?`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`:`<span class="${t}">${esc(x)}</span>`).join(' ')}</div>
 </div>`:''}
   </div>`;
@@ -1010,7 +1031,7 @@ document.addEventListener('click',async e=>{
     const showRes=()=>{};   /* 화면은 움직이지 않음: 결과는 쓰기 칸 바로 아래에 나타남 */
     if(patchWriteRes(w,i)&&patchCardState(w,i)){
       /* 100%면 '완벽해요'를 잠깐 보여 준 뒤 써보기를 자동으로 접음 (외움 체크는 이미 됨) */
-      if(r.perfect)setTimeout(()=>{if(!writeOpen.has(i))return;const ta=$('wr-'+i);if(ta)ta.blur();writeOpen.delete(i);delete writeDraft[key];delete writeRes[key];patchWriteOpen(w,i)},1400);
+      if(r.perfect){celebrate(i);setTimeout(()=>{if(!writeOpen.has(i))return;const ta=$('wr-'+i);if(ta)ta.blur();writeOpen.delete(i);delete writeDraft[key];delete writeRes[key];patchWriteOpen(w,i)},3000)}
       return}
     stay(i,render,showRes);return}
   if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);stay(i,render);return}
