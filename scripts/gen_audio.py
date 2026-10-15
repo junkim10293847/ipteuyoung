@@ -28,8 +28,20 @@ def get_weeks(url):
     if os.environ.get('WEEKS_JSON'):
         return json.load(open(os.environ['WEEKS_JSON'], encoding='utf-8'))
     req = urllib.request.Request(url + ('&' if '?' in url else '?') + 'fn=getWeeks', headers={'User-Agent': 'ipteuyoung-audio'})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        j = json.loads(r.read().decode('utf-8'))
+    import time
+    last = None
+    for t in range(4):                      # 구글 서버가 잠깐 응답하지 않을 때 대비해 다시 시도
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                j = json.loads(r.read().decode('utf-8'))
+            break
+        except Exception as e:
+            last = e
+            print(f'주차 목록 받기 실패({t + 1}/4): {e}')
+            time.sleep(10 * (t + 1))
+    else:
+        print('서버가 응답하지 않아 이번 확인은 건너뜁니다. 15분 뒤 다시 확인합니다.')
+        return None
     if j.get('err'):
         raise SystemExit('Apps Script 오류: ' + j['err'])
     return j.get('res') or {}
@@ -99,6 +111,8 @@ def main():
     if not url and not os.environ.get('WEEKS_JSON'):
         out('todo', 0); return
     weeks = get_weeks(url)
+    if weeks is None:
+        out('todo', 0); return
     have = set(os.listdir(AUDIO))
     jobs, longs = plan(weeks, have)
     todo = len(jobs) + len(longs)
