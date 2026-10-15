@@ -692,7 +692,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
          ${s.audio?`<button class="play" data-i="${i}">▶ 듣기</button>`:`<button class="play" data-i="${i}">▶ 듣기</button>`}
          <button class="slow" data-i="${i}">느리게</button>
          <button class="hideen" data-i="${i}" aria-pressed="${hiddenEn.has(i)}">${hiddenEn.has(i)?"영어 보기":"영어 가리기"}</button>
-         <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">✍ 써보기</button>
+         <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✕ 쓰기 닫기":"✍ 써보기"}</button>
          <button class="mark" data-i="${i}" aria-pressed="${!!done[i]}">${done[i]?'✓ 암기 완료':'암기 체크'}</button>
        </div>
        ${writeOpen.has(i)?writeHtml(w,i):''}
