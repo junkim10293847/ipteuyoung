@@ -293,7 +293,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <form class="gate-card" id="gateForm">
     <div class="eyebrow">입트영 스터디</div>
     <h2>닉네임을 입력하세요</h2>
-    <p>암기 체크와 하루 분량이 이 이름으로 따로 저장됩니다. 다른 멤버와 겹치지 않는 이름을 써 주세요.</p>
+    <p>외움 표시와 하루 분량이 이 이름으로 따로 저장됩니다. 다른 멤버와 겹치지 않는 이름을 써 주세요.</p>
     <label for="nickInput" class="sr">닉네임</label>
     <input id="nickInput" maxlength="20" autocomplete="nickname" placeholder="예: 배라">
     <div id="nickList" class="nick-list"></div>
@@ -302,7 +302,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <div class="who" id="who" hidden>👤 <b id="whoName"></b><button id="nickChange" type="button">사용자 바꾸기</button></div>
+  <div class="who" id="who" hidden>👤 <b id="whoName"></b><button id="nickChange" type="button">닉네임 변경</button></div>
   <div class="weeks scroller"><div class="row" id="weekRow"></div></div>
 
   <section class="panel" id="addPanel" hidden>
@@ -313,7 +313,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     <p class="hint">저장하면 문장을 나누고 한국어 해석과 단어·숙어를 정리합니다(30초~1분). 원어민 음성(미국 여·남, 영국 여)은 15~20분 안에 자동으로 만들어져 붙고, 그 전까지는 기기 음성으로 재생됩니다.</p>
     <p class="status" id="fStatus"></p>
     <div class="btns">
-      <button class="primary" id="fSave">저장하고 자동 정리</button>
+      <button class="primary" id="fSave">저장</button>
       <button class="ghost" id="fCancel">닫기</button>
     </div>
   </section>
@@ -325,11 +325,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
   <span>형광펜</span>
-  <button type="button" data-mk="y" class="mkb y">노랑 표시</button>
-  <button type="button" data-mk="x" class="mkb x">지우기</button>
+  <button type="button" data-mk="y" class="mkb y">형광펜</button>
+  <button type="button" data-mk="x" class="mkb x">형광펜 지우기</button>
 </div>
 <div class="dock"><div class="in">
-  <button class="big" id="all">▶ 목록 전체 듣기</button>
+  <button class="big" id="all">▶ 전체 듣기</button>
   <button class="stop" id="stop">■ 정지</button>
   <label for="rate">속도 <select id="rate"><option value="0.85">0.85×</option><option value="1" selected>1.0×</option><option value="1.25">1.25×</option></select></label>
   <label for="rep">반복 <select id="rep"><option selected>1</option><option>2</option><option>3</option><option>5</option></select></label>
@@ -587,7 +587,7 @@ function patchCardState(w,i){
   c.classList.toggle('done',!!dn[i]);
   const en=c.querySelector('.en');if(en)en.innerHTML=wordsHtml(w.sentences[i].en,i);
   const hb=c.querySelector('.hideen');if(hb){hb.setAttribute('aria-pressed',hid);hb.textContent=hid?'영어 보기':'영어 가리기'}
-  const mb=c.querySelector('.mark');if(mb){mb.setAttribute('aria-pressed',!!dn[i]);mb.textContent=dn[i]?'✓ 암기 완료':'암기 체크'}
+  const mb=c.querySelector('.mark');if(mb){mb.setAttribute('aria-pressed',!!dn[i]);mb.textContent=dn[i]?'✓ 외움':'☐ 외움'}
   const e=weakOf(w.id,i),ob=c.querySelector('.wbadge');
   if(e){const t=document.createElement('div');t.innerHTML=`<div class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</div>`;const nb=t.firstChild;if(ob)ob.replaceWith(nb);else{const ko=c.querySelector('.ko');if(ko)ko.after(nb)}}
   const body=w.sentences.map((_,j)=>j).filter(j=>!w.sentences[j].isTitle),n=body.filter(j=>dn[j]).length;
@@ -607,7 +607,7 @@ function writeHtml(w,i){
   return `<div class="wr">
     <textarea id="wr-${i}" data-i="${i}" rows="3" placeholder="뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
     <div class="wr-act"><button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button></div>
-    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?' 암기 체크하고 영어를 가려 두었어요.':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
+    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?' 외움으로 표시하고 영어를 가려 두었어요.':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       <div class="wr-diff">${r.d.map(([t,x,y])=>t==='sub'?`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`:`<span class="${t}">${esc(x)}</span>`).join(' ')}</div>
 </div>`:''}
   </div>`;
@@ -690,17 +690,17 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
        ${v.length?`<details class="voc" data-i="${i}"${vocOpen||openVoc.has(i)?' open':''}><summary>단어·숙어 ${v.length}</summary><dl>${v.map((x,j)=>{const k=i+'-'+j,op=openDet.has(k);return `<div class="vi"><dt><button class="vplay${x.audio?'':' waiting'}" data-t="${esc(x.t)}" data-a="${esc(x.audio||'')}" aria-label="${esc(x.t)} 듣기">${x.audio?'🔊':'⏳'}</button>${esc(x.t)}</dt><dd>${esc(x.m)} <button class="vmore" data-k="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button></dd>${op?`<div class="vdet">${detHtml(x.detail,k)}</div>`:''}</div>`}).join('')}</dl></details>`:''}
        <div class="acts">
          ${s.audio?`<button class="play" data-i="${i}">▶ 듣기</button>`:`<button class="play" data-i="${i}">▶ 듣기</button>`}
-         <button class="slow" data-i="${i}">느리게</button>
+         <button class="slow" data-i="${i}">▶ 천천히</button>
          <button class="hideen" data-i="${i}" aria-pressed="${hiddenEn.has(i)}">${hiddenEn.has(i)?"영어 보기":"영어 가리기"}</button>
          <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✍ 접기":"✍ 써보기"}</button>
-         <button class="mark" data-i="${i}" aria-pressed="${!!done[i]}">${done[i]?'✓ 암기 완료':'암기 체크'}</button>
+         <button class="mark" data-i="${i}" aria-pressed="${!!done[i]}">${done[i]?'✓ 외움':'☐ 외움'}</button>
        </div>
        ${writeOpen.has(i)?writeHtml(w,i):''}
      </li>`}).join('')}
    </ol>
    <details class="passage" id="psBox"${psOpen?' open':''}>
      <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장 · 눌러서 펼치기</span></summary>
-     <div class="ps-head"><span></span><button class="alllink" id="psKo">${psKo?'해석 숨기기':'해석도 보기'}</button></div>
+     <div class="ps-head"><span></span><button class="alllink" id="psKo">${psKo?'해석 숨기기':'해석 보기'}</button></div>
      ${w.sentences.filter(x=>x.isTitle).map(x=>`<h3>${esc(x.en)}</h3>`).join('')}
      <p class="ps-text">${w.sentences.map((x,j)=>x.isTitle?'':`<span class="ps" data-ps="${j}">${(()=>{const m=marksOf(w.id,j);return x.en.split(' ').map((t,k)=>`<span class="pw${m[k]?' mk-y':''}" data-w="${k}">${esc(t)}</span>`).join(' ')})()}</span>${psKo&&x.ko?`<span class="ps-ko">${esc(x.ko)}</span>`:''}`).join(' ')}</p>
      <p class="hint">문장을 누르면 그 문장을 들을 수 있습니다.</p>
@@ -708,14 +708,13 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    <details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
    <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">한글만 보고 처음부터 끝까지 써 보고 총점 받기</span></summary>${mockHtml(w)}</details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
-   <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[노랑 표시]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
-   <p class="note">암기 체크와 하루 분량은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
+   <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
+   <p class="note">외움 표시와 하루 분량은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
    <p class="note">${(()=>{const vm=w.sentences.reduce((n,x)=>n+(x.vocab||[]).filter(v=>!v.audio).length,0),sOk=!!w.longAudio&&w.sentences.every(x=>x.audio&&x.alt);return sOk&&vm?`문장 음성은 준비돼 있습니다. 새로 정리된 단어·숙어 ${vm}개의 원어민 음성은 15~20분 안에 자동으로 만들어지고, 그동안은 기기 음성으로 재생됩니다.`:''})()||(hasAudio(w)?'원어민 스타일 음성 파일로 재생됩니다. 소리가 작으면 미디어 볼륨을 올려 주세요.':w.audioRequested?'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다.':'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다. 다 만들어지면 새로고침 시 자동으로 바뀝니다.')}</p>
    <p class="status" id="wStatus"></p>
    ${(isOwner||(me&&w.addedBy===me&&missing))?`<details class="admin"><summary>⚙ 관리</summary><div class="tools">
-     ${missing?`<button id="regen">해석·단어 자동 정리</button>`:`<button id="regen">해석·단어 다시 정리</button>`}
-     <span id="regenConfirm" class="confirm" hidden>모두의 해석·단어 설명이 새로 바뀝니다. 계속할까요? <button id="regenYes" class="danger">다시 정리</button> <button id="regenNo">취소</button></span>
-     ${hasAudio(w)||!isOwner?'':`<button id="mkAudio">${w.audioRequested?'음성 다시 요청':'음성 만들기'}</button>`}
+     ${missing?`<button id="regen">해석·단어 자동 정리</button>`:`<button id="regen">해석·단어 다시 만들기</button>`}
+     <span id="regenConfirm" class="confirm" hidden>모두의 해석·단어 설명이 새로 바뀝니다. 계속할까요? <button id="regenYes" class="danger">다시 만들기</button> <button id="regenNo">취소</button></span>
      <button id="delAsk">이 주차 삭제</button>
      <span id="delConfirm" class="confirm" hidden>이 주차를 모두의 학습장에서 지웁니다. <button id="delYes" class="danger">삭제 확인</button> <button id="delNo">취소</button></span>
    </div></details>`:''}`;
@@ -1136,7 +1135,7 @@ function seqHtml(w){
 function mockHtml(w){
   const b=bodyOf(w), hist=((prog.tests||{})[w.id]||[]).slice(-3).reverse();
   const histHtml=hist.length?`<div class="mk-hist">최근 기록: ${hist.map(h=>`<span>${new Date(h.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})} <b>${h.score}점</b></span>`).join(' ')}</div>`:'';
-  if(!mock||mock.wid!==w.id)return `<div class="mock"><p>토요일 테스트처럼 <b>한글 해석만 보고 ${b.length}문장을 순서대로</b> 써 봅니다. 마지막에 문장별 결과와 총점을 보여주고, 틀린 부분은 '내 약점'에 쌓입니다.</p><p class="hint">키보드 마이크로 말해서 입력하면 말하기 테스트 연습도 됩니다.</p>${histHtml}<button class="primary" id="mockStart">모의 테스트 시작</button></div>`;
+  if(!mock||mock.wid!==w.id)return `<div class="mock"><p>토요일 테스트처럼 <b>한글 해석만 보고 ${b.length}문장을 순서대로</b> 써 봅니다. 마지막에 문장별 결과와 총점을 보여주고, 틀린 부분은 '내 약점'에 쌓입니다.</p><p class="hint">키보드 마이크로 말해서 입력하면 말하기 테스트 연습도 됩니다.</p>${histHtml}<button class="primary" id="mockStart">테스트 시작</button></div>`;
   if(mock.res){
     const avg=Math.round(mock.res.reduce((a,r)=>a+(r?r.score:0),0)/b.length), perfect=mock.res.filter(r=>r&&r.perfect).length;
     return `<div class="mock"><div class="mk-total"><b>${avg}점</b><span>완벽 ${perfect} / ${b.length}문장</span></div>
@@ -1148,8 +1147,8 @@ function mockHtml(w){
     <div class="mk-ko">${esc(w.sentences[j].ko||'(해석 없음)')}</div>
     <textarea id="mockIn" rows="3" placeholder="영어 문장을 써 보세요" autocapitalize="sentences" spellcheck="false">${esc(mock.ans[k]||'')}</textarea>
     <div class="seq-act"><button class="ghost" id="mockPrev"${k===0?' disabled':''}>◀ 이전</button>
-    ${k===b.length-1?`<button class="primary" id="mockGrade">채점하기</button>`:`<button class="primary" id="mockNext">다음 ▶</button>`}
-    <button class="ghost" id="mockClose">그만하기</button></div></div>`;
+    ${k===b.length-1?`<button class="primary" id="mockGrade">채점</button>`:`<button class="primary" id="mockNext">다음 ▶</button>`}
+    <button class="ghost" id="mockClose">끝내기</button></div></div>`;
 }
 /* 4. 내 약점 */
 function weakHtml(w){
