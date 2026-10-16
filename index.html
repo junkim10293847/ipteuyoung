@@ -35,6 +35,7 @@ html{font-size:16px}
 .brand{display:flex;align-items:center;gap:12px;padding:6px 0 14px;margin-bottom:12px;border-bottom:2px solid var(--accent-soft)}
 .brand-mark{flex:none;width:52px;height:52px;border-radius:14px;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.7rem;box-shadow:0 3px 10px rgba(0,0,0,.12)}
 .brand-t{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,7vw,2.6rem);line-height:1.1;color:var(--accent);letter-spacing:-.01em}
+.gate-brand{margin-bottom:18px}
 .brand-s{color:var(--muted);font-size:.84rem;margin-top:3px;text-wrap:balance}
 .eyebrow{font-size:.75rem;letter-spacing:.08em;color:var(--muted);font-weight:700}
 h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;text-wrap:balance;line-height:1.15}
@@ -320,11 +321,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
 <div class="gate" id="gate" hidden>
   <form class="gate-card" id="gateForm">
-    <div class="eyebrow">입트영 스터디</div>
+    <div class="brand gate-brand"><span class="brand-mark" aria-hidden="true">입</span><div><div class="brand-t">입트영 스터디</div><div class="brand-s">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div></div>
     <h2>닉네임을 입력하세요</h2>
     <p>외움 표시와 하루 분량이 이 이름으로 따로 저장됩니다. 다른 멤버와 겹치지 않는 이름을 써 주세요.</p>
     <label for="nickInput" class="sr">닉네임</label>
-    <input id="nickInput" maxlength="20" autocomplete="nickname" placeholder="예: 배라">
+    <input id="nickInput" maxlength="20" autocomplete="nickname" placeholder="예: 홍길동">
     <div id="nickList" class="nick-list"></div>
     <button class="primary" type="submit">시작하기</button>
     <p class="status" id="gateMsg"></p>
