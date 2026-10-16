@@ -246,6 +246,9 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .wr-legend{font-size:.74rem;display:flex;flex-wrap:wrap;gap:4px 10px}
 .wr-diff .sub,.wr-legend .sub{background:var(--done-soft);border-radius:4px;padding:0 3px;white-space:nowrap}
 .wr-diff .sub s,.wr-legend .sub s{color:var(--warn)}
+.wr-diff .pun{display:inline-block;min-width:.9em;text-align:center;border-radius:4px;font-weight:800;text-decoration:none;margin-left:1px}
+.wr-diff .miss.pun{background:var(--done-soft);outline:1.5px dashed var(--done)}
+.wr-diff .bad.pun{background:rgba(220,60,60,.12)}
 .wr-diff .sub b,.wr-legend .sub b{color:var(--done)}
 .allrow{margin:-4px 0 10px}
 .alllink{font:inherit;font-size:.82rem;font-weight:700;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
@@ -558,43 +561,105 @@ function renderWeeks(){
 /* ✍ 써보기: 외운 문장을 직접 입력하고 원문과 단어 단위로 비교 (로그인 없이도 사용 가능) */
 const writeOpen=new Set(), writeDraft={}, writeRes={};
 const normTok=x=>x.toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9']/g,'');
+/* 숫자: 240 = two hundred forty = two hundred and forty, 21st = twenty-first — 같은 값이면 맞음 */
+const NUM_ONES={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19};
+const NUM_TENS={twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90};
+const NUM_ORD={first:1,second:2,third:3,fourth:4,fifth:5,sixth:6,seventh:7,eighth:8,ninth:9,tenth:10,eleventh:11,twelfth:12,thirteenth:13,fourteenth:14,fifteenth:15,sixteenth:16,seventeenth:17,eighteenth:18,nineteenth:19,twentieth:20,thirtieth:30,fortieth:40,fiftieth:50,sixtieth:60,seventieth:70,eightieth:80,ninetieth:90,hundredth:100,thousandth:1000};
+const NUM_SCALE={hundred:100,thousand:1000,million:1e6,billion:1e9};
+const numPart=p=>p in NUM_ONES||p in NUM_TENS||p in NUM_SCALE||p in NUM_ORD;
+const isNumWord=w=>{const p=w.split('-');return p.every(numPart)&&p.length<=2};
+/* 단어 묶음 → 값: 'two hundred forty' → 240, 'twenty-first' → 21(서수) */
+function numVal(words){let total=0,cur=0,ord=false;
+  for(const w of words)for(const p of w.split('-')){
+    if(p in NUM_ONES)cur+=NUM_ONES[p];else if(p in NUM_TENS)cur+=NUM_TENS[p];
+    else if(p in NUM_ORD){const v=NUM_ORD[p];ord=true;if(v>=100){cur=(cur||1)*v;}else cur+=v}
+    else if(p==='hundred')cur=(cur||1)*100;else if(p in NUM_SCALE){total+=(cur||1)*NUM_SCALE[p];cur=0}
+  }return {v:total+cur,ord}}
+const ordSuf=n=>{const t=n%100;return t>=11&&t<=13?'th':['th','st','nd','rd'][n%10]||'th'};
+/* 문장 → 토큰 [{t:보이는 글자, k:비교 키}] — 쉼표는 따로 한 토큰(빠지거나 더 쓰면 틀림) */
+function tokenize(text){
+  const raw=[];
+  for(let w of (text||'').trim().split(/\s+/).filter(Boolean)){
+    w=w.replace(/[’‘]/g,"'");
+    const lead=[];while(/^[,，]/.test(w)){lead.push(',');w=w.slice(1)}
+    let trail=[];const m=w.match(/^(.*?)([,，][^a-zA-Z0-9]*)$/);
+    if(m&&m[1]){w=m[1];trail=[','];}
+    /* 단어 사이 쉼표(apples,oranges) — 숫자 1,000 은 그대로 */
+    const parts=w.split(/(?<![0-9])[,，]|[,，](?![0-9])/);
+    lead.forEach(c=>raw.push(c));
+    parts.forEach((p,i)=>{if(i)raw.push(',');if(p)raw.push(p)});
+    trail.forEach(c=>raw.push(c));
+  }
+  const out=[];
+  for(let i=0;i<raw.length;i++){
+    const w=raw[i];
+    if(w===','){out.push({t:',',k:','});continue}
+    const core=w.toLowerCase().replace(/^[^a-z0-9$]+|[^a-z0-9%]+$/g,'');
+    /* 숫자로 쓴 경우: 240, 1,000, $5, 30%, 21st */
+    const dm=core.match(/^\$?([0-9][0-9,]*(?:\.[0-9]+)?)(st|nd|rd|th|%)?$/);
+    if(dm){const v=dm[1].replace(/,/g,'');let t=w,pc=dm[2]==='%';
+      if(!pc&&/^percent\b/i.test(raw[i+1]||'')){t+=' '+raw[++i];pc=true}
+      out.push({t,k:'#'+v+(dm[2]&&!pc?'o':'')+(pc?'%':'')});continue}
+    /* 영어로 쓴 숫자 묶음 (and 는 숫자 사이에서만) */
+    if(isNumWord(core)){
+      const grp=[w],ws=[core];let j=i+1;
+      while(j<raw.length&&raw[j]!==','&&!/[.!?;:]$/.test(raw[j-1])){
+        const c=raw[j].toLowerCase().replace(/^[^a-z0-9]+|[^a-z0-9-]+$/g,'');
+        if(isNumWord(c)){grp.push(raw[j]);ws.push(c);j++;if(/[.!?;:]$/.test(raw[j-1]))break;continue}
+        if(c==='and'&&j+1<raw.length){const c2=raw[j+1].toLowerCase().replace(/^[^a-z0-9]+|[^a-z0-9-]+$/g,'');
+          if(isNumWord(c2)&&ws.some(x=>/hundred|thousand|million|billion/.test(x))){grp.push(raw[j]);j++;continue}}
+        break}
+      const {v,ord}=numVal(ws);let pc=false;
+      if(/^percent\b/i.test(raw[j]||'')){grp.push(raw[j]);j++;pc=true}
+      out.push({t:grp.join(' '),k:'#'+v+(ord?'o':'')+(pc?'%':'')});i=j-1;continue}
+    out.push({t:w,k:normTok(w)});
+  }
+  return out.filter(o=>o.k);
+}
 /* 단어 정렬: 맞음 0, 철자 비슷하면 0.6, 다른 단어로 바꿈 1, 빠짐/더 씀 1 — 오타는 '바꿔 쓴 단어'로 짝지어짐 */
 function charDist(a,b){const m=a.length,n=b.length,d=Array.from({length:m+1},(_,x)=>[x,...Array(n).fill(0)]);for(let y=1;y<=n;y++)d[0][y]=y;
   for(let x=1;x<=m;x++)for(let y=1;y<=n;y++)d[x][y]=Math.min(d[x-1][y]+1,d[x][y-1]+1,d[x-1][y-1]+(a[x-1]===b[y-1]?0:1));return d[m][n]}
-const similar=(a,b)=>a&&b&&Math.max(a.length,b.length)>=4&&charDist(a,b)<=Math.ceil(Math.max(a.length,b.length)*0.4);
+const similar=(a,b)=>a&&b&&a[0]!=='#'&&b[0]!=='#'&&Math.max(a.length,b.length)>=4&&charDist(a,b)<=Math.ceil(Math.max(a.length,b.length)*0.4);
 function alignWords(ans,usr){
-  const A=ans.map(normTok),U=usr.map(normTok),n=A.length,m=U.length;
+  const A=ans.map(o=>o.k),U=usr.map(o=>o.k),n=A.length,m=U.length;
   const C=Array.from({length:n+1},()=>new Float32Array(m+1));
   for(let x=0;x<=n;x++)C[x][0]=x;for(let y=0;y<=m;y++)C[0][y]=y;
-  const sc=(a,b)=>a===b?0:similar(a,b)?0.6:1;
+  const sc=(a,b)=>a===b?0:(a===','||b===',')?2:similar(a,b)?0.6:1;
   for(let x=1;x<=n;x++)for(let y=1;y<=m;y++)C[x][y]=Math.min(C[x-1][y-1]+sc(A[x-1],U[y-1]),C[x-1][y]+1,C[x][y-1]+1);
   const out=[];let x=n,y=m;
   while(x>0||y>0){
     if(x>0&&y>0&&Math.abs(C[x][y]-(C[x-1][y-1]+sc(A[x-1],U[y-1])))<1e-6){
-      if(A[x-1]===U[y-1])out.push(['ok',ans[x-1]]);else out.push(['sub',usr[y-1],ans[x-1],similar(A[x-1],U[y-1])]);x--;y--;
-    }else if(x>0&&Math.abs(C[x][y]-(C[x-1][y]+1))<1e-6){out.push(['miss',ans[x-1]]);x--}
-    else{out.push(['bad',usr[y-1]]);y--}
+      if(A[x-1]===U[y-1])out.push(['ok',ans[x-1].t,'',false,ans[x-1].k]);else out.push(['sub',usr[y-1].t,ans[x-1].t,similar(A[x-1],U[y-1]),ans[x-1].k]);x--;y--;
+    }else if(x>0&&Math.abs(C[x][y]-(C[x-1][y]+1))<1e-6){out.push(['miss',ans[x-1].t,'',false,ans[x-1].k]);x--}
+    else{out.push(['bad',usr[y-1].t,'',false,usr[y-1].k]);y--}
   }
-  return out.reverse().filter(o=>o[0]!=='bad'||normTok(o[1])).filter(o=>o[0]!=='miss'||normTok(o[1]));
+  return out.reverse();
 }
 function gradeText(ansT,usrT){
-  const ans=ansT.split(/\s+/).filter(Boolean), usr=(usrT||'').trim().split(/\s+/).filter(Boolean);
+  const ans=tokenize(ansT), usr=tokenize(usrT);
   if(!usr.length)return null;
-  const d=alignWords(ans,usr);
-  const total=ans.filter(t=>normTok(t)).length, ok=d.filter(x=>x[0]==='ok').length;
-  const sub=d.filter(x=>x[0]==='sub'&&!x[3]).length, spell=d.filter(x=>x[0]==='sub'&&x[3]).length, miss=d.filter(x=>x[0]==='miss').length, bad=d.filter(x=>x[0]==='bad').length;
-  const score=total?Math.round(ok/total*100):0, perfect=ok===total&&bad===0&&sub===0&&spell===0;
-  return {d,score,sub,spell,miss,bad,perfect};
+  const d=alignWords(ans,usr), isC=o=>o[4]===',';
+  const total=ans.length;
+  const sub=d.filter(x=>x[0]==='sub'&&!x[3]).length, spell=d.filter(x=>x[0]==='sub'&&x[3]).length;
+  const miss=d.filter(x=>x[0]==='miss'&&!isC(x)).length, bad=d.filter(x=>x[0]==='bad'&&!isC(x)).length;
+  const cmiss=d.filter(x=>x[0]==='miss'&&isC(x)).length, cbad=d.filter(x=>x[0]==='bad'&&isC(x)).length;
+  const okAll=d.filter(x=>x[0]==='ok').length;
+  const perfect0=okAll===total&&!sub&&!spell&&!miss&&!bad&&!cmiss&&!cbad;
+  const score=perfect0?100:Math.min(99,total?Math.round(okAll/(total+bad+cbad)*100):0), perfect=okAll===total&&!sub&&!spell&&!miss&&!bad&&!cmiss&&!cbad;
+  return {d,score,sub,spell,miss,bad,cmiss,cbad,perfect};
 }
 function grade(w,i){return gradeText(w.sentences[i].en,writeDraft[curId+'|'+i]||'')}
-const diffHtml=r=>`<div class="wr-diff">${r.d.map(([t,x,y])=>t==='sub'?`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`:`<span class="${t}">${esc(x)}</span>`).join(' ')}</div>`;
-const errCount=r=>[r.spell?`철자 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠짐 ${r.miss}`:'',r.bad?`더 씀 ${r.bad}`:''].filter(Boolean).join(' · ');
+/* 쉼표는 앞 단어에 붙여서 표시, 빠진 쉼표는 눈에 띄게 */
+const diffHtml=r=>`<div class="wr-diff">${r.d.map(([t,x,y,s,k],n)=>{const sp=n&&k!==','?' ':'';
+  if(k===','&&t!=='ok')return `<span class="${t} pun" title="${t==='miss'?'쉼표 빠짐':'쉼표 더 씀'}">,</span>`;
+  return sp+(t==='sub'?`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`:`<span class="${t}">${esc(x)}</span>`)}).join('')}</div>`;
+const errCount=r=>[r.spell?`철자 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠짐 ${r.miss}`:'',r.bad?`더 씀 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).join(' · ');
 /* 4. 약점 기록: 써보기·모의 테스트 결과를 닉네임별로 누적 */
 function recordWeak(wid,i,r,save=true){
   prog.weak=prog.weak||{};const W=prog.weak[wid]=prog.weak[wid]||{};
   const e=W[i]={...(W[i]||{n:0,best:0,words:{}})};e.words={...(e.words||{})};
   e.n=(e.n||0)+1;e.last=r.score;e.best=Math.max(e.best||0,r.score);e.at=Date.now();
-  r.d.forEach(o=>{if(o[0]==='sub'||o[0]==='miss'){const k=(o[0]==='sub'?o[2]:o[1]).replace(/[.,!?;:"“”]+$/,'');if(normTok(k))e.words[k]=(e.words[k]||0)+1}});
+  r.d.forEach(o=>{if(o[0]==='sub'||o[0]==='miss'){const k=(o[0]==='sub'?o[2]:o[1]).replace(/[.,!?;:"“”]+$/,'');if(o[4]!==','&&normTok(k))e.words[k]=(e.words[k]||0)+1}});
   if(save)saveProg();
 }
 const weakOf=(wid,i)=>((prog.weak||{})[wid]||{})[i];
@@ -677,8 +742,8 @@ function writeHtml(w,i){
   const key=curId+'|'+i, r=writeRes[key];
   return `<div class="wr">
     <textarea id="wr-${i}" data-i="${i}" rows="3" placeholder="뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
-    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
-      <div class="wr-diff">${r.d.map(([t,x,y])=>t==='sub'?`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`:`<span class="${t}">${esc(x)}</span>`).join(' ')}</div>
+    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
+      ${diffHtml(r)}
 </div>`:''}
   </div>`;
 }
