@@ -735,8 +735,8 @@ function patchWriteOpen(w,i){
   return true;
 }
 /* 채점·다시 쓰기 버튼을 눌러도 쓰기 칸의 입력 상태(키보드·펜)가 풀리지 않게 → 키보드가 닫히며 화면이 튀는 것 방지 */
-document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
-document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear,#mockPrev,#mockNext');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
+document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear,#mockPrev,#mockNext');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
 /* 100% 정답 축하: 결과 상자 튀어나옴 + 반짝이 + 카드 테두리 빛 + 짧은 진동·작은 '딩동' */
 function celebrate(i){
   const cd=$('c'+i),box=cd&&cd.querySelector('.wr-res.perfect');if(!box)return;
@@ -1109,8 +1109,8 @@ document.addEventListener('click',async e=>{
   if(t.id==='seqPlay'){const j=+t.dataset.j;stop();const my=token;await playOne(w.sentences[j],j,+$('rate').value,my);return}
   if(t.id==='mockStart'){mock={wid:w.id,pos:0,ans:[],res:null};toolOpen.mockBox=true;render();setTimeout(()=>{const m=$('mockIn');if(m)m.focus()},40);return}
   if(t.id==='mockClose'){mock=null;render();return}
-  if(t.id==='mockPrev'){mock.pos=Math.max(0,mock.pos-1);stay('mockBox',render);setTimeout(()=>{const m=$('mockIn');if(m)m.focus({preventScroll:true})},40);return}
-  if(t.id==='mockNext'){mock.pos++;stay('mockBox',render);setTimeout(()=>{const m=$('mockIn');if(m)m.focus({preventScroll:true})},40);return}
+  if(t.id==='mockPrev'){mock.pos=Math.max(0,mock.pos-1);patchMockStep(w);return}
+  if(t.id==='mockNext'){mock.pos++;patchMockStep(w);return}
   if(t.id==='mockGrade'){
     const b=bodyOf(w);mock.res=b.map((j,k)=>gradeText(w.sentences[j].en,mock.ans[k]||''));
     b.forEach((j,k)=>{const r=mock.res[k];if(r)recordWeak(w.id,j,r,false);if(r&&r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true}}});
@@ -1319,6 +1319,19 @@ function seqHtml(w){
     </div></div>`;
 }
 /* 3. 모의 테스트 */
+/* 모의 테스트 이전/다음: 화면을 다시 그리지 않고 글자만 바꿔 키보드·스크롤이 그대로 유지되게 */
+function patchMockStep(w){
+  const box=document.querySelector('#mockBox .mock'),ta=$('mockIn');
+  if(!box||!ta){stay('mockBox',render);return}
+  const b=bodyOf(w),k=mock.pos,j=b[k];
+  box.querySelector('.seq-step').textContent=`${k+1} / ${b.length}`;
+  box.querySelector('.mk-ko').textContent=w.sentences[j].ko||'(해석 없음)';
+  ta.value=mock.ans[k]||'';
+  const pv=$('mockPrev');if(pv)pv.disabled=k===0;
+  const nx=$('mockNext')||$('mockGrade');
+  if(nx){const last=k===b.length-1;nx.id=last?'mockGrade':'mockNext';nx.textContent=last?'채점':'다음 ▶'}
+  if(document.activeElement===ta){try{ta.setSelectionRange(ta.value.length,ta.value.length)}catch(_){}}
+}
 function mockHtml(w){
   const b=bodyOf(w), hist=((prog.tests||{})[w.id]||[]).slice(-3).reverse();
   const histHtml=hist.length?`<div class="mk-hist">최근 기록: ${hist.map(h=>`<span>${new Date(h.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})} <b>${h.score}점</b></span>`).join(' ')}</div>`:'';
