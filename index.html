@@ -32,6 +32,10 @@
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:.9375rem;line-height:1.55}
 html{font-size:16px}
 .wrap{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:18px 160px}
+.brand{display:flex;align-items:center;gap:12px;padding:6px 0 14px;margin-bottom:12px;border-bottom:2px solid var(--accent-soft)}
+.brand-mark{flex:none;width:52px;height:52px;border-radius:14px;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.7rem;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.brand-t{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,7vw,2.6rem);line-height:1.1;color:var(--accent);letter-spacing:-.01em}
+.brand-s{color:var(--muted);font-size:.84rem;margin-top:3px;text-wrap:balance}
 .eyebrow{font-size:.75rem;letter-spacing:.08em;color:var(--muted);font-weight:700}
 h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;text-wrap:balance;line-height:1.15}
 .meta{color:var(--muted);font-size:.88rem;margin:.3rem 0 0}
@@ -327,6 +331,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
+  <header class="brand"><span class="brand-mark" aria-hidden="true">입</span><div><div class="brand-t">입트영 스터디</div><div class="brand-s">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div></header>
   <div class="who" id="who" hidden>👤 <b id="whoName"></b><button id="nickChange" type="button">닉네임 변경</button></div>
   <div class="weeks scroller"><div class="row" id="weekRow"></div></div>
 
