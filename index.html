@@ -352,7 +352,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button></p>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.</p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver">v1016-2120</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -710,7 +710,8 @@ function patchCardState(w,i){
      · 키보드가 올라와도 칸이 보이면 → 화면을 전혀 움직이지 않음
      · 가려질 것 같으면 → 키보드가 올라오는 동안 칸 아랫선이 키보드 바로 위에 오도록 한 번만 부드럽게 이동 */
   function placeOnce(ta,y){
-    const r=ta.getBoundingClientRect(),top=70,bottom=innerHeight-predictKb()-12;
+    /* 키보드 높이 예측이 빗나가도 가리지 않도록, 화면 위쪽 절반 안쪽을 '안전 구역'으로 씀 */
+    const r=ta.getBoundingClientRect(),top=70,bottom=Math.min(innerHeight-predictKb()-12,Math.round(innerHeight*0.5));
     let d=0;
     if(r.height>bottom-top)d=r.top-top;
     else if(r.bottom>bottom)d=r.bottom-bottom;
