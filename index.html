@@ -355,7 +355,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button></p>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v48</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v49</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -698,54 +698,7 @@ function patchCardState(w,i){
   const bar=document.querySelector('.sumrow .bar i');if(bar)bar.style.width=(body.length?n/body.length*100:0)+'%';
   return true;
 }
-/* 쓰기 칸을 손가락으로 눌러 처음 커서를 둘 때: 브라우저가 칸을 키보드 위로 끌어올리며 화면을 움직이지 않게 고정
-   (아이패드 펜 손글씨는 그대로 둠) */
-(function(){
-  let lastType='';
-  document.addEventListener('pointerdown',e=>{lastType=e.pointerType||''},true);
-  function hold(y,ms){const until=Date.now()+ms;const f=()=>{if(Date.now()<until){if(Math.abs(scrollY-y)>1)window.scrollTo(0,y)}else removeEventListener('scroll',f)};addEventListener('scroll',f);setTimeout(()=>removeEventListener('scroll',f),ms+50)}
-  /* 키보드 높이: 한 번 뜨면 기억해 두고, 다음부터는 키보드가 올라오기 전에 미리 계산 */
-  let kbH=0;try{kbH=+localStorage.getItem('kbH')||0}catch(_){}
-  const SEL='.wr textarea, .mock textarea';
-  const predictKb=()=>kbH||Math.round(innerHeight*(innerWidth>=700?0.40:0.45));
-  let fixedFor=null;                                          // 이번 커서에서 이미 한 번 맞췄는지
-  /* 커서를 둘 때 딱 한 번만 판단:
-     · 키보드가 올라와도 칸이 보이면 → 화면을 전혀 움직이지 않음
-     · 가려질 것 같으면 → 키보드가 올라오는 동안 칸 아랫선이 키보드 바로 위에 오도록 한 번만 부드럽게 이동 */
-  function placeOnce(ta,y){
-    /* 키보드 높이 예측이 빗나가도 가리지 않도록, 화면 위쪽 절반 안쪽을 '안전 구역'으로 씀 */
-    const r=ta.getBoundingClientRect(),top=70,bottom=Math.min(innerHeight-predictKb()-12,Math.round(innerHeight*0.5));
-    let d=0;
-    if(r.height>bottom-top)d=r.top-top;
-    else if(r.bottom>bottom)d=r.bottom-bottom;
-    if(d>4){window.scrollTo({top:y+d,behavior:'smooth'})}
-    else hold(y,700);                                         // 움직일 필요 없으면 브라우저가 멋대로 끌어올리는 것도 막음
-    fixedFor=ta;
-  }
-  /* 키보드가 다 올라온 뒤 확인: 그래도 가려져 있을 때만(예측이 빗나간 첫 사용) 한 번 보정. 자판 추천줄이 생겼다 사라져도 다시 움직이지 않음 */
-  let settleT=null,corrected=null;
-  function settle(){
-    const vv=window.visualViewport,a=document.activeElement;if(!vv)return;
-    if(vv.height<innerHeight*0.85){const h=Math.round(innerHeight-vv.height);if(h>120){kbH=h;try{localStorage.setItem('kbH',h)}catch(_){}}}
-    if(!a||!a.matches||!a.matches(SEL)||corrected===a)return;
-    if(vv.height>innerHeight*0.85)return;
-    const r=a.getBoundingClientRect(),bottom=vv.offsetTop+vv.height-8;
-    if(r.bottom>bottom+6&&r.height<vv.height-80){window.scrollBy({top:r.bottom-bottom,behavior:'smooth'})}
-    corrected=a;
-  }
-  if(window.visualViewport)visualViewport.addEventListener('resize',()=>{clearTimeout(settleT);settleT=setTimeout(settle,320)});
-  document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches(SEL)){fixedFor=null;corrected=null}});
-  /* 펜·마우스·외부 키보드 등 손가락 터치가 아닌 방법으로 들어온 경우 */
-  document.addEventListener('focusin',e=>{const ta=e.target.closest&&e.target.closest(SEL);if(!ta||fixedFor===ta||lastType==='pen')return;setTimeout(()=>{if(document.activeElement===ta&&fixedFor!==ta)placeOnce(ta,scrollY)},30)});
-  document.addEventListener('touchend',e=>{
-    const ta=e.target.closest&&e.target.closest(SEL);
-    if(!ta||document.activeElement===ta||lastType==='pen')return;
-    e.preventDefault();const y=scrollY;fixedFor=ta;
-    try{ta.focus({preventScroll:true})}catch(_){ta.focus()}
-    try{const n=ta.value.length;ta.setSelectionRange(n,n)}catch(_){}
-    placeOnce(ta,y);
-  },{passive:false,capture:true});
-})();
+/* 쓰기 칸에 커서를 둘 때 화면 위치는 앱이 건드리지 않고 브라우저 기본 동작에 맡김 (키보드가 가릴 때만 휴대폰이 알아서 한 번 올려 줌) */
 /* 써보기 열기·접기: 그 카드 안에서만 쓰기 칸과 버튼을 넣고 빼기 (화면 다시 그리지 않음) */
 function patchWriteOpen(w,i){
   const c=$('c'+i),acts=c&&c.querySelector('.acts'),wb=acts&&acts.querySelector('.write');if(!wb)return false;
