@@ -239,6 +239,10 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 @media (prefers-reduced-motion:reduce){.wr-res.perfect,.card.celebrate,.wr-confetti span{animation:none}.wr-confetti{display:none}}
 .wr-score{font-size:.84rem;color:var(--muted)}
 .wr-score b{color:var(--fg)}
+.wr-res.almost{background:#fff7e6;border:2px solid #e8a33d}
+.wr-res.almost .wr-score b{display:block;font-size:1.15rem;color:#b26a00;margin-bottom:2px}
+.wr-res.almost .al-note{color:#8a5a00}
+@media (prefers-color-scheme:dark){.wr-res.almost{background:rgba(232,163,61,.12)}.wr-res.almost .wr-score b,.wr-res.almost .al-note{color:#f0b85a}}
 .wr-diff{line-height:1.8}
 .wr-diff .ok,.wr-legend .ok{color:var(--accent)}
 .wr-diff .miss,.wr-legend .miss{color:var(--done);text-decoration:underline;text-decoration-style:dotted;font-weight:700}
@@ -646,7 +650,9 @@ function gradeText(ansT,usrT){
   const okAll=d.filter(x=>x[0]==='ok').length;
   const perfect0=okAll===total&&!sub&&!spell&&!miss&&!bad&&!cmiss&&!cbad;
   const score=perfect0?100:Math.min(99,total?Math.round(okAll/(total+bad+cbad)*100):0), perfect=okAll===total&&!sub&&!spell&&!miss&&!bad&&!cmiss&&!cbad;
-  return {d,score,sub,spell,miss,bad,cmiss,cbad,perfect};
+  /* 단어는 다 맞고 쉼표만 틀림 → '거의 완벽' (외움 체크는 아직) */
+  const almost=!perfect&&!sub&&!spell&&!miss&&!bad&&(cmiss+cbad)>0;
+  return {d,score,sub,spell,miss,bad,cmiss,cbad,perfect,almost};
 }
 function grade(w,i){return gradeText(w.sentences[i].en,writeDraft[curId+'|'+i]||'')}
 /* 쉼표는 앞 단어에 붙여서 표시, 빠진 쉼표는 눈에 띄게 */
@@ -742,7 +748,7 @@ function writeHtml(w,i){
   const key=curId+'|'+i, r=writeRes[key];
   return `<div class="wr">
     <textarea id="wr-${i}" data-i="${i}" rows="3" placeholder="뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
-    ${r?`<div class="wr-res${r.perfect?' perfect':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
+    ${r?`<div class="wr-res${r.perfect?' perfect':r.almost?' almost':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':r.almost?'거의 완벽! 단어는 모두 맞았어요 👍':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':r.almost?`<span class="al-note">쉼표 ${r.cmiss?r.cmiss+'곳 빠짐':''}${r.cmiss&&r.cbad?', ':''}${r.cbad?r.cbad+'곳 더 씀':''} — 표시된 자리만 고치면 완벽이에요</span>`:[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       ${diffHtml(r)}
 </div>`:''}
   </div>`;
@@ -1310,7 +1316,7 @@ function mockHtml(w){
   if(mock.res){
     const avg=Math.round(mock.res.reduce((a,r)=>a+(r?r.score:0),0)/b.length), perfect=mock.res.filter(r=>r&&r.perfect).length;
     return `<div class="mock"><div class="mk-total"><b>${avg}점</b><span>완벽 ${perfect} / ${b.length}문장</span></div>
-      <ol class="mk-list">${b.map((j,k)=>{const r=mock.res[k];return `<li class="${r&&r.perfect?'ok':''}"><div class="mk-h"><span>${numLabel(w,j)}번</span><b>${r?r.score+'%':'미작성'}</b>${r&&!r.perfect?`<em>${errCount(r)}</em>`:''}</div>${r?(r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:diffHtml(r)):`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`}</li>`}).join('')}</ol>
+      <ol class="mk-list">${b.map((j,k)=>{const r=mock.res[k];return `<li class="${r&&r.perfect?'ok':''}"><div class="mk-h"><span>${numLabel(w,j)}번</span><b>${r?(r.almost?'거의 완벽':r.score+'%'):'미작성'}</b>${r&&!r.perfect?`<em>${errCount(r)}</em>`:''}</div>${r?(r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:diffHtml(r)):`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`}</li>`}).join('')}</ol>
       ${histHtml}<div class="seq-act"><button class="primary" id="mockStart">다시 도전</button><button class="ghost" id="mockClose">닫기</button></div></div>`;
   }
   const k=mock.pos, j=b[k];
