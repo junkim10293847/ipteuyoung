@@ -75,7 +75,41 @@ function setup() {
 function testAI() { Logger.log(aiText('Say hello in one short English sentence.')); }
 
 /* ---------- 화면이 부르는 함수 ---------- */
-function getWeeks() { return readJson_(folder_('DATA_ID'), 'weeks.json') || {}; }
+function getWeeks() { return readWeeks_(folder_('DATA_ID')); }
+
+/* 주차 파일 읽기: 드라이브가 잠깐 응답을 못 해도 '빈 목록'으로 착각하지 않도록 다시 시도하고, 그래도 안 되면 최근 백업을 씀 */
+function readWeeks_(f) {
+  for (let t = 0; t < 3; t++) {
+    try {
+      const it = f.getFilesByName('weeks.json');
+      if (it.hasNext()) { const s = it.next().getBlob().getDataAsString('UTF-8'); if (s && s.trim()) return JSON.parse(s); }
+    } catch (e) {}
+    Utilities.sleep(400 * (t + 1));
+  }
+  const b = latestBackup_(f); if (b) return b;
+  throw new Error('read_failed');
+}
+function latestBackup_(f) {
+  const list = [], it = f.getFiles();
+  while (it.hasNext()) { const x = it.next(); if (/^weeks-bak-/.test(x.getName())) list.push(x); }
+  list.sort((a, b) => b.getName() < a.getName() ? -1 : 1);
+  for (const x of list) { try { return JSON.parse(x.getBlob().getDataAsString('UTF-8')); } catch (e) {} }
+  return null;
+}
+/* 저장할 때마다 바로 전 상태를 백업으로 남김 (최근 15개 보관) */
+function writeWeeks_(f, all) {
+  try {
+    const it = f.getFilesByName('weeks.json');
+    if (it.hasNext()) {
+      const prev = it.next().getBlob().getDataAsString('UTF-8');
+      if (prev && prev.length > 2) f.createFile('weeks-bak-' + Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyyMMdd-HHmmss') + '.json', prev, 'application/json');
+    }
+    const list = [], it2 = f.getFiles();
+    while (it2.hasNext()) { const x = it2.next(); if (/^weeks-bak-/.test(x.getName())) list.push(x); }
+    list.sort((a, b) => b.getName() < a.getName() ? -1 : 1).slice(15).forEach(x => x.setTrashed(true));
+  } catch (e) {}
+  writeJson_(f, 'weeks.json', all);
+}
 
 function saveWeek(id, data, merge) {
   id = String(id || '').replace(/[^0-9-]/g, '');
@@ -83,10 +117,10 @@ function saveWeek(id, data, merge) {
   if (!data || typeof data !== 'object') throw new Error('bad_data');
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
-    const f = folder_('DATA_ID'), all = readJson_(f, 'weeks.json') || {};
+    const f = folder_('DATA_ID'), all = readWeeks_(f);
     if (merge && !all[id]) throw new Error('not_found');
     all[id] = merge ? Object.assign({}, all[id], data) : data;
-    writeJson_(f, 'weeks.json', all);
+    writeWeeks_(f, all);
   } finally { lock.releaseLock(); }
   if (!merge || data.sentences) kickAudio_();
   return true;
@@ -95,7 +129,7 @@ function saveWeek(id, data, merge) {
 function deleteWeek(id, pw) {
   if (!checkAdmin(pw)) throw new Error('not_admin');
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
-  try { const f = folder_('DATA_ID'), all = readJson_(f, 'weeks.json') || {}; delete all[id]; writeJson_(f, 'weeks.json', all); return true; }
+  try { const f = folder_('DATA_ID'), all = readWeeks_(f); delete all[id]; writeWeeks_(f, all); return true; }
   finally { lock.releaseLock(); }
 }
 

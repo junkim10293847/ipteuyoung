@@ -415,9 +415,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   document.addEventListener('focusout',()=>{if(pendingEmit)setTimeout(()=>{if(pendingEmit&&!typing())emitSafe()},400)});
   /* 연결이 잠깐 끊겨도(화면 꺼짐·절전·와이파이 전환) 이미 받은 주차는 그대로 두고 다음 확인 때 다시 시도 */
   let loadedOnce=false;
+  const tries={has:()=>{try{const c=localStorage.getItem('weeksCache');return !!(c&&c.length>2)}catch(_){return false}}};
   async function refresh(force){
     for(let t=0;;t++){
-      try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);loadedOnce=true;const next=attach(wk||{}),sig=JSON.stringify(next);if(!force&&sig===lastSig)return;lastSig=sig;cache=next;try{localStorage.setItem('weeksCache',sig)}catch(_){};emitSafe();return}
+      try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);
+        /* 서버가 잠깐 빈 목록을 주면(드라이브 일시 오류) 이미 가진 주차를 지우지 않고 오류로 보고 다시 시도 */
+        if((!wk||!Object.keys(wk).length)&&(Object.keys(cache).length||tries.has()))throw{code:'upstream_error',message:'empty_weeks'};
+        loadedOnce=true;const next=attach(wk||{}),sig=JSON.stringify(next);if(!force&&sig===lastSig)return;lastSig=sig;cache=next;try{if(Object.keys(next).length)localStorage.setItem('weeksCache',sig)}catch(_){};emitSafe();return}
       catch(e){
         if(loadedOnce)return;                                   // 이미 화면에 주차가 있으면 조용히 넘어감
         if(t<3){await new Promise(z=>setTimeout(z,2000*(t+1)));continue}   // 처음 열 때는 세 번 더 시도
