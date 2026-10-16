@@ -181,7 +181,8 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .mkb{font:inherit;font-weight:700;border:0;border-radius:999px;padding:6px 12px;cursor:pointer;color:#1f2620}
 .mkb.y{background:#ffe066}.mkb.r{background:#ff9e8f}.mkb.x{background:var(--bg);color:var(--fg)}
 .en{font-size:1.02rem;font-weight:500;cursor:pointer}
-.en .hid{color:transparent;background:var(--line);border-radius:3px}
+.en .hid{color:transparent;background:#86c0c3;background:color-mix(in srgb,var(--accent) 52%,var(--surface));border-radius:4px;box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--accent) 55%,transparent)}
+.card.done .en .hid{background:#f2c890;background:color-mix(in srgb,var(--done) 52%,var(--surface));box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--done) 60%,transparent)}
 .ko{color:var(--muted);font-size:.85rem}
 .ko.empty{font-style:italic;opacity:.7}
 .voc summary{cursor:pointer;font-size:.8rem;font-weight:700;color:var(--accent);padding:2px 0}
@@ -352,7 +353,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button></p>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v44</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v45</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
