@@ -375,7 +375,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v58</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v59</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -401,8 +401,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     if(!API||/여기에/.test(API))throw{code:'upstream_error',message:'no_api'};
     let r;
     for(let t=0;;t++){
-      try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args}),redirect:'follow'});break}
-      catch(e){if(t>=1)throw{code:'network',message:String(e)};await new Promise(z=>setTimeout(z,1200))}
+      /* 구글 서버가 가끔 멈춘 듯 응답이 없을 때가 있어 20초(AI는 60초) 넘으면 끊고 한 번 더 시도 */
+      const ac=typeof AbortController!=='undefined'?new AbortController():null,lim=/^ai/.test(fn)?60000:20000,tm=ac&&setTimeout(()=>ac.abort(),lim);
+      try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args}),redirect:'follow',signal:ac?ac.signal:undefined});clearTimeout(tm);break}
+      catch(e){clearTimeout(tm);if(t>=1)throw{code:'network',message:String(e)};await new Promise(z=>setTimeout(z,1200))}
     }
     let j;try{j=await r.json()}catch(e){throw{code:'upstream_error',message:'bad_response '+r.status}}
     if(j&&j.err)throw{code:errCode(j.err),message:j.err};
