@@ -1,0 +1,4 @@
+features 106.8s len=43 {"ok":true,"app":"입트영 주간 암기 API","ai":true}
+getWeeks 41.3s EXC <HTTPError 404: 'Not Found'>
+members 1.0s len=19 {"err":"not_admin"}
+checkAdmin 0.8s len=12 {"res":true}
