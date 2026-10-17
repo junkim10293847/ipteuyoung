@@ -33,12 +33,19 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:.937
 html{font-size:16px}
 .wrap{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:18px 160px}
 .install-slot:empty{display:none}
-.inst{display:flex;align-items:center;gap:10px;background:var(--accent);color:#fff;border-radius:14px;padding:10px 12px;margin:0 0 12px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
-.inst .ic{flex:none;width:38px;height:38px;border-radius:50%;background:#fff;color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:1.2rem}
-.inst .tx{flex:1;font-size:.86rem;line-height:1.4}.inst .tx b{display:block;font-size:.95rem}
+.inst{position:relative;display:grid;justify-items:center;text-align:center;gap:6px;background:var(--accent);color:#fff;border-radius:16px;padding:16px 14px 14px;margin:0 0 14px;box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.inst .ic{width:46px;height:46px;border-radius:50%;background:#fff;color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:1.4rem}
+.inst .t{font-size:1.1rem}
+.inst .s{font-size:.86rem;opacity:.95;margin:0}
 .inst button{font:inherit;border:0;cursor:pointer}
-.inst .go{background:#fff;color:var(--accent);font-weight:800;border-radius:999px;padding:8px 14px;white-space:nowrap}
-.inst .x{background:none;color:#fff;opacity:.8;font-size:1.1rem;padding:4px}
+.inst .go{margin-top:4px;width:100%;max-width:340px;background:#fff;color:var(--accent);font-weight:800;font-size:1.08rem;border-radius:999px;padding:12px 18px;animation:instPulse 1.8s ease-in-out infinite}
+@keyframes instPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.6)}50%{box-shadow:0 0 0 8px rgba(255,255,255,0)}}
+.inst .x{position:absolute;top:6px;right:8px;background:none;color:#fff;opacity:.75;font-size:1.05rem;padding:6px}
+.inst .steps{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:8px;text-align:left;width:100%;max-width:340px}
+.inst .steps li{background:rgba(255,255,255,.14);border-radius:10px;padding:8px 10px;font-size:.95rem;line-height:1.7}
+.inst .k{width:22px;height:22px;margin-right:6px;vertical-align:middle;border-radius:50%;background:#fff;color:var(--accent);display:inline-grid;place-items:center;font-weight:800;font-size:.8rem}
+.inst .shr{vertical-align:middle;display:inline-grid;place-items:center;width:24px;height:24px;border:1.5px solid #fff;border-radius:6px;font-size:.8rem}
+@media (prefers-reduced-motion:reduce){.inst .go{animation:none}}
 .brand{display:flex;align-items:center;gap:12px;padding:6px 0 14px;margin-bottom:12px;border-bottom:2px solid var(--accent-soft)}
 .brand-mark{flex:none;width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.7rem;box-shadow:0 3px 10px rgba(0,0,0,.12)}
 .brand-t{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,7vw,2.6rem);line-height:1.1;color:var(--accent);letter-spacing:-.01em}
@@ -369,7 +376,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v55</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v56</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1430,33 +1437,39 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
   },()=>{liveDb=false;db=null;loadPublic(true)});
 })();
 
-/* ===== 앱으로 설치: 안드로이드(크롬·삼성 인터넷)는 버튼 한 번에 설치 창, 아이폰은 방법 안내, 카톡 안에서는 바깥 브라우저로 ===== */
+/* ===== 앱으로 설치 — 누구나 버튼 하나로 =====
+   · 카톡 안에서 열면: 자동으로 바깥 브라우저로 옮겨 열림
+   · 갤럭시: [앱 설치하기] 한 번 → 설치 창 (설치가 안 되는 창이면 같은 버튼이 크롬으로 열어 줌)
+   · 아이폰·아이패드: 그림으로 2단계 안내 */
 (function(){
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
   const ua=navigator.userAgent||'',standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   if(standalone)return;
+  const isKakao=/KAKAOTALK/i.test(ua),isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),isAndroid=/Android/i.test(ua);
+  const isIPad=/iPad/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  /* 카톡 안에서 처음 열면 바로 바깥 브라우저(크롬/사파리)로 */
+  try{if(isKakao&&!sessionStorage.getItem('kkOut')){sessionStorage.setItem('kkOut','1');location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href);}}catch(_){}
   let off=false;try{off=localStorage.getItem('instOff')==='1'}catch(_){}
   if(off)return;
-  const isKakao=/KAKAOTALK|KAKAO|NAVER\(inapp|; wv\)/i.test(ua),isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),isAndroid=/Android/i.test(ua);
   let deferred=null;
-  const show=(title,text,btn,act)=>{
-    document.querySelectorAll('.install-slot').forEach(sl=>{
-      sl.innerHTML=`<div class="inst"><span class="ic">입</span><span class="tx"><b>${title}</b>${text}</span>${btn?`<button type="button" class="go">${btn}</button>`:''}<button type="button" class="x" aria-label="닫기">✕</button></div>`;
-      const g=sl.querySelector('.go');if(g)g.onclick=act;
-      sl.querySelector('.x').onclick=()=>{try{localStorage.setItem('instOff','1')}catch(_){}document.querySelectorAll('.install-slot').forEach(x=>x.innerHTML='')};
-    });
-  };
-  const hide=()=>document.querySelectorAll('.install-slot').forEach(x=>x.innerHTML='');
-  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;
-    show('입트영 앱 설치','홈 화면에 앱으로 깔아 두고 바로 여세요','설치',async()=>{deferred.prompt();const r=await deferred.userChoice.catch(()=>null);deferred=null;if(r&&r.outcome==='accepted')hide()})});
-  window.addEventListener('appinstalled',hide);
+  const toChrome=()=>{const u=location.href.replace(/^https?:\/\//,'');location.href='intent://'+u+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(location.href)+';end'};
+  const close=()=>{try{localStorage.setItem('instOff','1')}catch(_){}document.querySelectorAll('.install-slot').forEach(x=>x.innerHTML='')};
+  const render=html=>document.querySelectorAll('.install-slot').forEach(sl=>{sl.innerHTML=html;
+    const g=sl.querySelector('.go');if(g)g.onclick=act;const x=sl.querySelector('.x');if(x)x.onclick=close});
+  async function act(){
+    if(deferred){deferred.prompt();const r=await deferred.userChoice.catch(()=>null);deferred=null;if(r&&r.outcome==='accepted')document.querySelectorAll('.install-slot').forEach(x=>x.innerHTML='');return}
+    if(isKakao){location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href);return}
+    if(isAndroid){toChrome();return}
+  }
+  const btnCard=(sub)=>`<div class="inst big"><button type="button" class="x" aria-label="닫기">✕</button><span class="ic">입</span><b class="t">입트영을 앱으로 설치</b><span class="s">${sub}</span><button type="button" class="go">📲 앱 설치하기</button></div>`;
+  const iosCard=()=>`<div class="inst big ios"><button type="button" class="x" aria-label="닫기">✕</button><span class="ic">입</span><b class="t">입트영을 앱으로 설치</b>
+    <ol class="steps"><li><span class="k">1</span>${isIPad?'화면 <b>오른쪽 위</b>':'화면 <b>맨 아래</b>'} 공유 버튼 <span class="shr">⬆︎</span> 누르기</li><li><span class="k">2</span><b>홈 화면에 추가</b> 누르기 → <b>추가</b></li></ol>
+    ${isKakao?'<p class="s">카톡 안이면 먼저 오른쪽 아래 <b>⋯ → Safari로 열기</b></p>':''}</div>`;
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;render(btnCard('버튼을 누르고 <b>설치</b>만 누르면 끝'))});
+  window.addEventListener('appinstalled',()=>document.querySelectorAll('.install-slot').forEach(x=>x.innerHTML=''));
   const ready=()=>{
-    if(isKakao){show('카톡 안에서 열려 있어요','바깥 브라우저로 열어야 앱으로 설치할 수 있어요',isAndroid?'브라우저로 열기':'',()=>{if(/KAKAOTALK/i.test(ua))location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href);else{const u=location.href.replace(/^https?:\/\//,'');location.href='intent://'+u+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(location.href)+';end'}});
-      if(!isAndroid)show('카톡 안에서 열려 있어요','오른쪽 아래 ⋯ → <b style="display:inline">Safari로 열기</b>를 누른 뒤 앱으로 추가하세요','',null);return}
-    if(isIOS){show('아이폰·아이패드 앱으로 쓰기','아래(아이패드는 위) <b style="display:inline">공유 □↑</b> → <b style="display:inline">홈 화면에 추가</b>','',null);return}
-    /* 카톡·밴드 등에서 링크를 누르면 '앱 안 미리보기 창'(위에 ✕·제목·⋮)으로 열려 설치 버튼이 안 나옴 → 크롬으로 바로 열기 */
-    const toChrome=()=>{const u=location.href.replace(/^https?:\/\//,'');location.href='intent://'+u+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(location.href)+';end'};
-    setTimeout(()=>{if(!deferred&&isAndroid)show('입트영 앱 설치','지금 창에서는 설치가 안 돼요. <b style="display:inline">크롬으로 열기</b>를 누른 뒤 나오는 <b style="display:inline">[설치]</b>를 누르세요','크롬으로 열기',toChrome)},1800);
+    if(isIOS){render(iosCard());return}
+    if(isAndroid){setTimeout(()=>{if(!deferred)render(btnCard('버튼을 누르면 크롬이 열려요. 거기서 한 번 더 누르면 설치돼요'))},1200)}
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
 })();
