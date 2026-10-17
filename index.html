@@ -375,7 +375,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v60</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v61</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -613,7 +613,7 @@ function numLabel(w,i){const s=w.sentences;if(s[i].isTitle)return 'T';return s[0
 
 /* ---------- render ---------- */
 function renderWeeks(){
-  $('weekRow').innerHTML=weeks.map(w=>`<button class="chip" data-week="${esc(w.id)}" aria-pressed="${w.id===curId}">${md(studyOf(w))} 테스트 · ${esc(w.title)}</button>`).join('')+(canWrite?`<button class="chip add" id="addBtn">+ 새 주차</button>`:'');
+  $('weekRow').innerHTML=weeks.map(w=>`<button class="chip" data-week="${esc(w.id)}" aria-pressed="${w.id===curId}" title="${md(studyOf(w))} 테스트">${esc(w.title)}</button>`).join('')+(canWrite?`<button class="chip add" id="addBtn">+ 새 주차</button>`:'');
 }
 /* ✍ 써보기: 외운 문장을 직접 입력하고 원문과 단어 단위로 비교 (로그인 없이도 사용 가능) */
 const writeOpen=new Set(), writeDraft={}, writeRes={};
