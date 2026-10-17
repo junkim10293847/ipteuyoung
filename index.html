@@ -357,7 +357,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button></p>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v51</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v52</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1164,7 +1164,8 @@ $('all').onclick=async()=>{
 /* ---------- add week ---------- */
 function openAdd(){
   const p=$('addPanel');p.hidden=false;
-  if(!$('fDate').value)$('fDate').value=ymd(addDays(mondayOf(today()),5));
+  /* 테스트 날짜 기본값: 오늘 이후 첫 토요일 (토요일에 등록하면 다음 주 토요일) */
+  if(!$('fDate').value){const t=today(),d=(6-t.getDay()+7)%7||7;$('fDate').value=ymd(addDays(t,d))}
   $('fStatus').textContent='';$('fStatus').className='status';
   p.scrollIntoView({block:'start',behavior:'smooth'});
 }
