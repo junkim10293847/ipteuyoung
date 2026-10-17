@@ -369,7 +369,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v54</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v55</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1437,7 +1437,7 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
   if(standalone)return;
   let off=false;try{off=localStorage.getItem('instOff')==='1'}catch(_){}
   if(off)return;
-  const isKakao=/KAKAOTALK/i.test(ua),isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),isAndroid=/Android/i.test(ua);
+  const isKakao=/KAKAOTALK|KAKAO|NAVER\(inapp|; wv\)/i.test(ua),isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),isAndroid=/Android/i.test(ua);
   let deferred=null;
   const show=(title,text,btn,act)=>{
     document.querySelectorAll('.install-slot').forEach(sl=>{
@@ -1451,10 +1451,12 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
     show('입트영 앱 설치','홈 화면에 앱으로 깔아 두고 바로 여세요','설치',async()=>{deferred.prompt();const r=await deferred.userChoice.catch(()=>null);deferred=null;if(r&&r.outcome==='accepted')hide()})});
   window.addEventListener('appinstalled',hide);
   const ready=()=>{
-    if(isKakao){show('카톡 안에서 열려 있어요','바깥 브라우저로 열어야 앱으로 설치할 수 있어요',isAndroid?'브라우저로 열기':'',()=>{location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href)});
+    if(isKakao){show('카톡 안에서 열려 있어요','바깥 브라우저로 열어야 앱으로 설치할 수 있어요',isAndroid?'브라우저로 열기':'',()=>{if(/KAKAOTALK/i.test(ua))location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href);else{const u=location.href.replace(/^https?:\/\//,'');location.href='intent://'+u+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(location.href)+';end'}});
       if(!isAndroid)show('카톡 안에서 열려 있어요','오른쪽 아래 ⋯ → <b style="display:inline">Safari로 열기</b>를 누른 뒤 앱으로 추가하세요','',null);return}
     if(isIOS){show('아이폰·아이패드 앱으로 쓰기','아래(아이패드는 위) <b style="display:inline">공유 □↑</b> → <b style="display:inline">홈 화면에 추가</b>','',null);return}
-    setTimeout(()=>{if(!deferred&&isAndroid)show('입트영 앱 설치','브라우저 메뉴(⋮ 또는 ≡) → <b style="display:inline">홈 화면에 추가</b> 또는 <b style="display:inline">앱 설치</b>','',null)},2500);
+    /* 카톡·밴드 등에서 링크를 누르면 '앱 안 미리보기 창'(위에 ✕·제목·⋮)으로 열려 설치 버튼이 안 나옴 → 크롬으로 바로 열기 */
+    const toChrome=()=>{const u=location.href.replace(/^https?:\/\//,'');location.href='intent://'+u+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(location.href)+';end'};
+    setTimeout(()=>{if(!deferred&&isAndroid)show('입트영 앱 설치','지금 창에서는 설치가 안 돼요. <b style="display:inline">크롬으로 열기</b>를 누른 뒤 나오는 <b style="display:inline">[설치]</b>를 누르세요','크롬으로 열기',toChrome)},1800);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
 })();
