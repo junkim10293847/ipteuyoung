@@ -19,7 +19,7 @@
 
 const PROPS = PropertiesService.getScriptProperties();
 const ROOT_NAME = '입트영 주간 암기';
-const API_FNS = ['getWeeks', 'saveWeek', 'deleteWeek', 'checkAdmin', 'getProgress', 'saveProgress', 'aiText', 'aiJson', 'aiEnabled', 'features'];
+const API_FNS = ['getWeeks', 'saveWeek', 'deleteWeek', 'checkAdmin', 'getProgress', 'saveProgress', 'aiText', 'aiJson', 'aiEnabled', 'features', 'members'];
 
 /* ---------- API ---------- */
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
@@ -134,6 +134,20 @@ function deleteWeek(id, pw) {
 }
 
 function checkAdmin(pw) { const p = PROPS.getProperty('ADMIN_PASSWORD'); return !!p && pw === p; }
+
+/* 관리자용: 닉네임별 진도 파일 목록 (이름·마지막 활동·외운 문장 수) */
+function members(pw) {
+  if (!checkAdmin(pw)) throw new Error('not_admin');
+  const out = [], it = folder_('PROG_ID').getFiles();
+  while (it.hasNext()) {
+    const f = it.next(); if (!/\.json$/.test(f.getName())) continue;
+    let d = {}; try { d = JSON.parse(f.getBlob().getDataAsString('UTF-8')); } catch (e) {}
+    const done = {}; Object.keys(d.done || {}).forEach(w => { done[w] = Object.keys(d.done[w] || {}).filter(k => d.done[w][k]).length; });
+    let writes = 0; Object.keys(d.weak || {}).forEach(w => Object.keys(d.weak[w] || {}).forEach(i => { writes += (d.weak[w][i] || {}).n || 0; }));
+    out.push({ nick: d.nick || '', updated: d.updated || f.getLastUpdated().getTime(), done: done, writes: writes, tests: Object.keys(d.tests || {}).reduce((a, w) => a + (d.tests[w] || []).length, 0) });
+  }
+  return out.sort((a, b) => b.updated - a.updated);
+}
 
 function getProgress(key) { const d = readJson_(folder_('PROG_ID'), safe_(key) + '.json'); return d ? { exists: true, data: d } : { exists: false }; }
 function saveProgress(key, data) {

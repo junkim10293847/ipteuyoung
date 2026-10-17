@@ -139,6 +139,8 @@ h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;
 .wk-words span{background:var(--done-soft);border-radius:999px;padding:3px 10px;font-size:.84rem;font-weight:600}
 .wk-words i{font-style:normal;font-size:.72rem;color:var(--muted);margin-left:4px}
 .weak .ghost{justify-self:start;padding:5px 12px;font-size:.78rem}
+.members h2{font-size:1.05rem;margin:0 0 8px}.members h2 small{color:var(--muted);font-weight:600}
+.mem{margin:0;padding-left:1.3em;display:grid;gap:8px}.mem li span{display:block;color:var(--muted);font-size:.82rem}.mem li em{display:block;font-style:normal;font-size:.82rem;color:var(--accent)}
 .adminfoot{text-align:center;margin:28px 0 0}
 .copyright-note{text-align:center;font-size:.72rem;line-height:1.6;color:var(--muted);margin:10px 0 0;opacity:.85}
 .adminfoot button{font:inherit;font-size:.76rem;color:var(--muted);background:none;border:0;cursor:pointer;opacity:.7}
@@ -356,8 +358,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </section>
 
   <div id="main"></div>
-  <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button></p>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v52</span></p>
+  <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
+  <section class="panel members" id="membersPanel" hidden></section>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v53</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -477,7 +480,20 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     const ok=await run('checkAdmin',pw).catch(()=>false);
     if(ok){try{localStorage.setItem('adminPw',pw)}catch(_){}location.reload()}else alert('비밀번호가 맞지 않습니다.');
   });
-  document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('adminBtn');if(b&&adminPw)b.textContent='🔐 관리자 (로그인됨)'});
+  document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('adminBtn');if(b&&adminPw)b.textContent='🔐 관리자 (로그인됨)';
+    const mb=document.getElementById('membersBtn'),mp=document.getElementById('membersPanel');if(!mb||!adminPw)return;mb.hidden=false;
+    mb.onclick=async()=>{
+      if(!mp.hidden){mp.hidden=true;return}
+      mp.hidden=false;mp.innerHTML='<p class="load">불러오는 중…</p>';
+      try{
+        const list=await run('members',adminPw),wk=(window.__weekTitles||{});
+        const ago=t=>{const m=Math.round((Date.now()-t)/60000);return m<60?m+'분 전':m<1440?Math.round(m/60)+'시간 전':Math.round(m/1440)+'일 전'};
+        const e=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+        mp.innerHTML=`<h2>👥 회원 현황 <small>${list.length}명</small></h2><ol class="mem">${list.map(m=>{
+          const d=Object.keys(m.done||{}).sort().reverse().filter(w=>m.done[w]).slice(0,2).map(w=>`${e(wk[w]||w)} ${m.done[w]}문장`).join(' · ');
+          return `<li><b>${m.nick?e(m.nick):'(이름 미기록)'}</b><span>${ago(m.updated)} · 써보기 ${m.writes||0}회${m.tests?` · 모의 ${m.tests}회`:''}</span>${d?`<em>외움: ${d}</em>`:''}</li>`}).join('')}</ol><p class="hint">'이름 미기록'은 이 기능을 넣기 전에 들어온 회원이에요. 다음에 앱을 열면 이름이 채워져요.</p>`;
+      }catch(err){mp.innerHTML=`<p class="load" style="color:var(--warn)">${/not_admin/.test(err&&err.message||'')?'관리자 로그인이 필요해요.':'서버에 회원 현황 기능이 아직 없어요. Apps Script에 새 Code.gs를 붙여 넣고 새 버전으로 배포해 주세요.'}</p>`}
+    }});
 })();
 
 </script>
@@ -534,7 +550,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 function saveProg(){
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},updated:Date.now()}).catch(()=>{progRef=null})},600);
+  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
 }
 const doneOf=id=>prog.done[id]||{};
 /* 공부 가능한 날: 배정 다음 날(일) ~ 테스트 전날(금) = 6일 */
@@ -1372,7 +1388,7 @@ function applyWeeks(list){
   const nw=list.filter(w=>w.monday&&Array.isArray(w.sentences));
   /* 내용이 화면과 같으면(내가 방금 저장한 것 등) 다시 그리지 않음 → 화면 튐 방지 */
   try{if(loaded&&!dbFailed&&JSON.stringify(nw)===JSON.stringify(weeks)){weeks=nw;return}}catch(_){}
-  weeks=nw;loaded=true;dbFailed=false;reconcileProg();
+  weeks=nw;loaded=true;dbFailed=false;reconcileProg();try{window.__weekTitles=Object.fromEntries(nw.map(w=>[w.id,w.title]))}catch(_){}
   if(!weeks.find(w=>w.id===curId)){
     const last=ls.get('lastWeek',null), thisMon=ymd(mondayOf(today()));
     curId=(weeks.find(w=>w.id===last)||weeks.find(w=>w.id===thisMon)||weeks[0]||{}).id||null;
