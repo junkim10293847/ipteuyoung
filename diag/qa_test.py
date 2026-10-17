@@ -9,5 +9,9 @@ def call(fn, *args):
     out.append(f'{fn} {time.time()-t:.1f}s len={len(r)} {r[:220]}')
   except Exception as e:
     out.append(f'{fn} {time.time()-t:.1f}s EXC {repr(e)[:300]}')
-call('features'); call('getWeeks'); call('members', 'wrong-pw'); call('checkAdmin', 'change-me-7528')
+for k in range(3):
+  call('features'); call('getWeeks'); call('checkAdmin', 'x')
+  try:
+    t=time.time();r=urllib.request.urlopen(urllib.request.Request(url+'?fn=getWeeks',headers={'User-Agent':'diag'}),timeout=90).read().decode();out.append(f'GET getWeeks {time.time()-t:.1f}s len={len(r)}')
+  except Exception as e: out.append('GET getWeeks EXC '+repr(e)[:200])
 open('diag/qa_result.txt', 'w').write('\n'.join(out) + '\n'); print('\n'.join(out))
