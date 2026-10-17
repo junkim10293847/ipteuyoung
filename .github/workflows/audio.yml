@@ -69,11 +69,11 @@ jobs:
         run: python scripts/gen_audio.py
 
       - name: 저장소에 올리기
-        if: steps.plan.outputs.todo != '0' || steps.unzip.outputs.done == '1'
+        if: steps.plan.outputs.todo != '0' || steps.plan.outputs.data == '1' || steps.unzip.outputs.done == '1'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A audio audio.zip 2>/dev/null || git add -A audio
+          git add -A audio data audio.zip 2>/dev/null || git add -A audio data
           if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
           git commit -m "새 주차 음성 자동 생성"
           git pull --rebase -q origin main

@@ -58,6 +58,18 @@ def vkey(t):
 
 
 TEXTS = os.path.join(AUDIO, 'texts.json')
+WEEKS = os.path.join(os.path.dirname(AUDIO), 'data', 'weeks.json')
+
+
+def save_weeks(weeks):
+    """화면이 바로 열리도록 주차 목록을 이 사이트(GitHub Pages)에 정적 파일로도 둠. 바뀐 경우에만 씀"""
+    os.makedirs(os.path.dirname(WEEKS), exist_ok=True)
+    new = json.dumps(weeks, ensure_ascii=False, separators=(',', ':'), sort_keys=True)
+    old = open(WEEKS, encoding='utf-8').read() if os.path.exists(WEEKS) else ''
+    if new != old:
+        open(WEEKS, 'w', encoding='utf-8').write(new)
+        return True
+    return False
 
 
 def load_texts():
@@ -143,6 +155,8 @@ def main():
     weeks = get_weeks(url)
     if weeks is None:
         out('todo', 0); return
+    if '--plan' in sys.argv and not os.environ.get('WEEKS_JSON') and weeks and save_weeks(weeks):
+        out('data', 1)
     have = set(os.listdir(AUDIO))
     texts = load_texts()
     jobs, longs = plan(weeks, have, texts)

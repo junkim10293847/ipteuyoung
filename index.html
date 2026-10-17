@@ -375,7 +375,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v59</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v60</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -478,6 +478,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     onSnapshot(next,err){listeners.push({next,err});
       /* 지난번에 받아 둔 주차를 먼저 바로 보여 주고, 최신 자료는 뒤에서 받아 바꿔 끼움 */
       try{const c=localStorage.getItem('weeksCache');if(c&&!lastSig){cache=JSON.parse(c);lastSig=c;loadedOnce=true;setTimeout(()=>{try{next(snap())}catch(_){}} ,0)}}catch(_){}
+      /* 이 사이트에 함께 올려 둔 주차 파일(data/weeks.json)을 먼저 받아 바로 보여 줌 — 구글 서버가 느려도 1초 안에 화면이 뜸.
+         최신 내용은 아래 refresh()가 서버에서 받아 바꿔 끼움 */
+      if(!lastSig)Promise.all([fetch('data/weeks.json?t='+Math.floor(Date.now()/60000),{cache:'no-store'}).then(r=>r.ok?r.json():null),loadIndex()]).then(([wk])=>{
+        if(!wk||!Object.keys(wk).length||lastSig)return;const nx=attach(wk),sg=JSON.stringify(nx);cache=nx;lastSig=sg;loadedOnce=true;emitSafe()}).catch(()=>{});
       refresh();poll();return()=>{}}})};
 
   /* AI: Apps Script에 넣어 둔 Gemini 무료 키로 답함 */
