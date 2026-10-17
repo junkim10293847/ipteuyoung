@@ -376,7 +376,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v56</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v57</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1459,7 +1459,7 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
   async function act(){
     if(deferred){deferred.prompt();const r=await deferred.userChoice.catch(()=>null);deferred=null;if(r&&r.outcome==='accepted')document.querySelectorAll('.install-slot').forEach(x=>x.innerHTML='');return}
     if(isKakao){location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href);return}
-    if(isAndroid){toChrome();return}
+    if(isAndroid&&isInApp){toChrome();return}
   }
   const btnCard=(sub)=>`<div class="inst big"><button type="button" class="x" aria-label="닫기">✕</button><span class="ic">입</span><b class="t">입트영을 앱으로 설치</b><span class="s">${sub}</span><button type="button" class="go">📲 앱 설치하기</button></div>`;
   const iosCard=()=>`<div class="inst big ios"><button type="button" class="x" aria-label="닫기">✕</button><span class="ic">입</span><b class="t">입트영을 앱으로 설치</b>
@@ -1467,9 +1467,17 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
     ${isKakao?'<p class="s">카톡 안이면 먼저 오른쪽 아래 <b>⋯ → Safari로 열기</b></p>':''}</div>`;
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;render(btnCard('버튼을 누르고 <b>설치</b>만 누르면 끝'))});
   window.addEventListener('appinstalled',()=>document.querySelectorAll('.install-slot').forEach(x=>x.innerHTML=''));
+  const isSamsung=/SamsungBrowser/i.test(ua),isInApp=isKakao||/; wv\)|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|BAND\//i.test(ua);
+  const stepCard=(items,foot)=>`<div class="inst big ios"><button type="button" class="x" aria-label="닫기">✕</button><span class="ic">입</span><b class="t">입트영을 앱으로 설치</b><ol class="steps">${items.map((t,k)=>`<li><span class="k">${k+1}</span>${t}</li>`).join('')}</ol>${foot?`<p class="s">${foot}</p>`:''}</div>`;
   const ready=()=>{
     if(isIOS){render(iosCard());return}
-    if(isAndroid){setTimeout(()=>{if(!deferred)render(btnCard('버튼을 누르면 크롬이 열려요. 거기서 한 번 더 누르면 설치돼요'))},1200)}
+    if(!isAndroid)return;
+    /* 삼성 인터넷: 주소창의 '입' 아이콘이 설치 버튼 (다른 브라우저로 넘기지 않음 → '열기' 선택창 반복 방지) */
+    if(isSamsung){setTimeout(()=>{if(!deferred)render(stepCard(['주소창 오른쪽 <span class="shr">입</span> 아이콘 누르기','<b>설치</b> 누르기'],'아이콘이 안 보이면 아래 <b>≡ → 현재 페이지 추가 → 홈 화면</b>'))},800);return}
+    /* 카톡 등 앱 안 미리보기 창에서만 크롬으로 넘김 */
+    if(isInApp){render(btnCard('버튼을 누르면 크롬이 열려요. 거기서 한 번 더 누르면 설치돼요'));return}
+    /* 크롬: 설치 창이 바로 안 뜨면 메뉴로 안내 */
+    setTimeout(()=>{if(!deferred)render(stepCard(['오른쪽 위 <b>⋮</b> 누르기','<b>앱 설치</b> 또는 <b>홈 화면에 추가</b> 누르기'],'이미 설치했다면 홈 화면·앱 목록에서 <b>입트영</b>을 찾아 여세요'))},1500);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
 })();
