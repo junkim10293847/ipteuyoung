@@ -57,9 +57,31 @@ def vkey(t):
     return re.sub(r'[^a-z0-9]+', '-', clean(t).lower()).strip('-') or 'x'
 
 
-def plan(weeks, have):
-    """화면이 찾을 음성 파일 중 audio 폴더에 없는 것을 모두 고름 (이미 경로가 적혀 있어도 파일이 없으면 만듦)"""
+TEXTS = os.path.join(AUDIO, 'texts.json')
+
+
+def load_texts():
+    try:
+        return json.load(open(TEXTS, encoding='utf-8'))
+    except Exception:
+        return {}
+
+
+def save_texts(t):
+    new = json.dumps(t, ensure_ascii=False, sort_keys=True, indent=0)
+    old = open(TEXTS, encoding='utf-8').read() if os.path.exists(TEXTS) else ''
+    if new != old:
+        open(TEXTS, 'w', encoding='utf-8').write(new)
+        return True
+    return False
+
+
+def plan(weeks, have, texts=None):
+    """화면이 찾을 음성 파일 중 없거나, 같은 이름인데 문장이 바뀐 것(같은 날짜에 새 지문을 올린 경우)을 고름.
+    texts.json 에 파일별로 어떤 문장을 읽었는지 기록해 두고 비교함"""
+    texts = {} if texts is None else texts
     jobs, longs = {}, []
+    stale = lambda n, text: n in have and texts.get(n) not in (None, text)
     name = lambda path, default: os.path.basename(path) if path else default
     for wid, w in sorted(weeks.items()):
         if not isinstance(w, dict) or not w.get('sentences'):
@@ -75,15 +97,23 @@ def plan(weeks, have):
             main = name(s.get('audio'), f'{wk}-s{p}.mp3')
             src.append(main)
             for n, v in ((main, 'af'), (name(alt.get('am'), f'{wk}-m-s{p}.mp3'), 'am'), (name(alt.get('bf'), f'{wk}-b-s{p}.mp3'), 'bf')):
-                if n not in have:
+                if n not in have or stale(n, en):
                     jobs[n] = (en, v)
+                elif n not in texts:
+                    texts[n] = en
             for vc in s.get('vocab') or []:
                 n = name(vc.get('audio'), f'v-{vkey(vc.get("t"))}.mp3')
-                if n not in have:
-                    jobs[n] = (clean(vc.get('t')), 'af')
+                t = clean(vc.get('t'))
+                if n not in have or stale(n, t):
+                    jobs[n] = (t, 'af')
+                elif n not in texts:
+                    texts[n] = t
         ln = name(w.get('longAudio'), f'{wk}-long2.mp3')
-        if ln not in have and src:
+        sig = '|'.join(src)
+        if src and (ln not in have or any(n in jobs for n in src) or stale(ln, sig)):
             longs.append((ln, src))
+        elif src and ln not in texts:
+            texts[ln] = sig
     return jobs, longs
 
 
@@ -114,12 +144,13 @@ def main():
     if weeks is None:
         out('todo', 0); return
     have = set(os.listdir(AUDIO))
-    jobs, longs = plan(weeks, have)
+    texts = load_texts()
+    jobs, longs = plan(weeks, have, texts)
     todo = len(jobs) + len(longs)
     print(f'만들 음성 {len(jobs)}개, 연속 듣기 {len(longs)}개')
     out('todo', todo)
     if '--plan' in sys.argv:
-        if not todo and write_index():
+        if not todo and (write_index() | save_texts(texts)):
             out('todo', 1)
         return
     sys.path.insert(0, os.path.dirname(__file__))
@@ -127,6 +158,7 @@ def main():
     for k, (name, (text, v)) in enumerate(sorted(jobs.items()), 1):
         print(f'[{k}/{len(jobs)}] {name}: {text[:60]}')
         save_mp3(synth(text, VOICE[v]), os.path.join(AUDIO, name))
+        texts[name] = text
     for ln, src in longs:
         files = [os.path.join(AUDIO, n) for n in src if os.path.exists(os.path.join(AUDIO, n))]
         if len(files) != len(src):
@@ -138,7 +170,9 @@ def main():
         subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lst,
                         '-ar', '24000', '-ac', '1', '-b:a', '64k', os.path.join(AUDIO, ln)], check=True)
         os.remove(lst)
+        texts[ln] = '|'.join(src)
         print('연속 듣기:', ln)
+    save_texts(texts)
     write_index()
 
 

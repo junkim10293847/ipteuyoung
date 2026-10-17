@@ -357,7 +357,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button></p>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v50</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v51</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -524,8 +524,8 @@ async function attachProgRef(){
   try{
     const ref=db.collection('data/users/'+me).doc('progress-'+hashNick(nick));
     const snap=await ref.get();
-    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})}}}
-    progRef=ref;render();
+    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})}}}
+    progRef=ref;reconcileProg();render();
     if(snap.exists||Object.keys(prog.done||{}).length)saveProg();   /* 오프라인·다른 기기에서 쌓인 기록을 합친 결과를 서버에 다시 저장 */
   }catch(e){progRef=null}
 }
@@ -534,7 +534,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 function saveProg(){
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},updated:Date.now()}).catch(()=>{progRef=null})},600);
+  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},updated:Date.now()}).catch(()=>{progRef=null})},600);
 }
 const doneOf=id=>prog.done[id]||{};
 /* 공부 가능한 날: 배정 다음 날(일) ~ 테스트 전날(금) = 6일 */
@@ -1204,6 +1204,8 @@ $('fSave').onclick=async()=>{
   if(!db){st.textContent='저장소에 연결되지 않아 저장할 수 없습니다.';st.className='status err';return}
   const pd=parse(date); if(pd.getDay()!==6){st.textContent='스터디 날짜는 토요일로 선택해 주세요.';st.className='status err';return}
   const mon=ymd(addDays(pd,-5));
+  const ex=weeks.find(x=>x.id===mon);
+  if(ex&&!confirm(`${pd.getMonth()+1}/${pd.getDate()} 테스트 주차에는 이미 "${ex.title}" 지문이 있어요.\n\n덮어쓰면 그 지문과 음성은 사라집니다. 정말 바꿀까요?\n(새 지문이면 '취소'를 누르고 다음 주 토요일을 고르세요)`)){st.textContent='날짜를 다시 골라 주세요.';st.className='status err';return}
   const {title,sentences}=splitText(raw,$('fTitle').value);
   btn.disabled=true;st.className='status';
   let final=sentences, note='';
@@ -1342,11 +1344,34 @@ function weakHtml(w){
     <button class="ghost" id="weakReset">기록 초기화</button></div>`;
 }
 document.addEventListener('input',e=>{if(e.target.id==='mockIn'&&mock)mock.ans[mock.pos]=e.target.value});
+/* 같은 날짜 주차에 다른 지문을 새로 올리면, 예전 지문의 외움·써보기·형광펜·질문 기록이 따라오지 않게 정리 */
+function weekSig(w){const t=w.sentences.map(x=>x.en||'').join('\n');let h=5381;for(let k=0;k<t.length;k++)h=((h*33)^t.charCodeAt(k))>>>0;return h.toString(36)+'.'+w.sentences.length}
+function staleByWords(w){
+  const W=(prog.weak||{})[w.id];if(!W)return false;let n=0,bad=0;
+  Object.keys(W).forEach(i=>{const s=w.sentences[+i],ws=Object.keys((W[i]||{}).words||{});if(!ws.length)return;n++;
+    const nz=x=>String(x).toLowerCase().replace(/[’‘]/g,"'"),en=s?nz(s.en||''):'';if(!ws.some(x=>en.includes(nz(x))))bad++});
+  return n>0&&bad/n>=0.5;
+}
+function reconcileProg(){
+  if(!weeks.length)return false;prog.sig=prog.sig||{};let ch=false;
+  weeks.forEach(w=>{
+    const sg=weekSig(w),old=prog.sig[w.id];
+    const stale=(old!=null&&old!==sg)||staleByWords(w);
+    if(old===sg&&!stale)return;
+    if(stale){
+      ['done','weak','tests','marks'].forEach(k=>{if(prog[k]&&prog[k][w.id]){delete prog[k][w.id]}});
+      if(prog.qa)Object.keys(prog.qa).forEach(k=>{if(k.startsWith(w.id+'|'))delete prog.qa[k]});
+      if(w.id===curId){try{hiddenEn.clear();doneSeen.clear()}catch(_){}}
+    }
+    prog.sig[w.id]=sg;ch=true;
+  });
+  if(ch)saveProg();return ch;
+}
 function applyWeeks(list){
   const nw=list.filter(w=>w.monday&&Array.isArray(w.sentences));
   /* 내용이 화면과 같으면(내가 방금 저장한 것 등) 다시 그리지 않음 → 화면 튐 방지 */
   try{if(loaded&&!dbFailed&&JSON.stringify(nw)===JSON.stringify(weeks)){weeks=nw;return}}catch(_){}
-  weeks=nw;loaded=true;dbFailed=false;
+  weeks=nw;loaded=true;dbFailed=false;reconcileProg();
   if(!weeks.find(w=>w.id===curId)){
     const last=ls.get('lastWeek',null), thisMon=ymd(mondayOf(today()));
     curId=(weeks.find(w=>w.id===last)||weeks.find(w=>w.id===thisMon)||weeks[0]||{}).id||null;
