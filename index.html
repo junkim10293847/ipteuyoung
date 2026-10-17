@@ -344,7 +344,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 <div class="gate" id="gate" hidden>
   <form class="gate-card" id="gateForm">
     <div class="brand gate-brand"><span class="brand-mark" aria-hidden="true">입</span><div><div class="brand-t">입트영 스터디</div><div class="brand-s">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div></div>
-    <div class="install-slot"></div>
     <h2>닉네임을 입력하세요</h2>
     <p>외움 표시와 하루 분량이 이 이름으로 따로 저장됩니다. 다른 멤버와 겹치지 않는 이름을 써 주세요.</p>
     <label for="nickInput" class="sr">닉네임</label>
@@ -376,7 +375,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v57</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v58</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1448,7 +1447,11 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
   const isKakao=/KAKAOTALK/i.test(ua),isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),isAndroid=/Android/i.test(ua);
   const isIPad=/iPad/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   /* 카톡 안에서 처음 열면 바로 바깥 브라우저(크롬/사파리)로 */
-  try{if(isKakao&&!sessionStorage.getItem('kkOut')){sessionStorage.setItem('kkOut','1');location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href);}}catch(_){}
+  /* 카톡 안에서도 그대로 다 쓸 수 있으므로 억지로 다른 브라우저로 옮기지 않음. 설치 안내도 카톡 안에서는 안 띄움 */
+  if(isKakao||/; wv\)|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|BAND\//i.test(ua))return;
+  /* 처음 온 날은 안내 없이 바로 쓰게 하고, 두 번째 방문부터 작게 한 번 안내 */
+  let visits=0;try{const d=new Date().toDateString(),last=localStorage.getItem('visitDay');visits=+(localStorage.getItem('visits')||0);if(last!==d){visits++;localStorage.setItem('visits',visits);localStorage.setItem('visitDay',d)}}catch(_){}
+  if(visits<2)return;
   let off=false;try{off=localStorage.getItem('instOff')==='1'}catch(_){}
   if(off)return;
   let deferred=null;
