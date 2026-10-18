@@ -133,10 +133,14 @@ h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;
 .seq-q em.dim{opacity:.7}
 .seq-act{display:flex;flex-wrap:wrap;gap:6px}
 .seq-act .primary,.seq-act .ghost{padding:7px 14px;font-size:.84rem}
+.seq-r{display:grid;gap:4px;background:var(--bg);border-radius:10px;padding:10px 12px}
+.seq-r em{font-style:normal;font-size:.8rem;color:var(--muted)}
+.seq-r.ok b{color:#16a34a}
+.mic.on{background:#fee2e2;color:#b91c1c;border-color:#fca5a5}
 .seq-act button:disabled{opacity:.4}
 .mock p{margin:0;font-size:.88rem}
 .mk-ko{font-size:1rem;background:var(--bg);border-radius:10px;padding:10px 12px}
-.mock textarea{font:inherit;font-size:.95rem;line-height:1.45;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;resize:vertical}
+.mock textarea,.seq textarea{font:inherit;font-size:.95rem;line-height:1.45;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;resize:vertical}
 .mk-total{display:flex;align-items:baseline;gap:10px}
 .mk-total b{font-family:var(--display);font-size:1.8rem;color:var(--accent);font-variant-numeric:tabular-nums}
 .mk-total span{font-size:.84rem;color:var(--muted)}
@@ -347,9 +351,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 @media (min-width:700px){html{font-size:18px}.wrap,.dock .in{max-width:860px}.wrap{padding-inline:28px}.card{padding:16px 20px}.acts button{padding:7px 14px}.dock select{padding:6px}}
 @media (min-width:1000px){html{font-size:20px}.wrap,.dock .in{max-width:1040px}.wrap{padding-inline:40px}.card{padding:18px 24px;gap:6px 16px}.gate-card{max-width:460px}}
 @media (min-width:1400px){html{font-size:22px}.wrap,.dock .in{max-width:1180px}}
-.wr textarea,.mock textarea{min-height:5.4rem;font-size:1.05rem;line-height:1.9;padding:12px 14px;background-image:repeating-linear-gradient(transparent 0 calc(1.9em - 1px),var(--line) calc(1.9em - 1px) 1.9em);background-position:0 12px;background-attachment:local}
-@media (min-width:700px){.wr textarea,.mock textarea{min-height:8rem;font-size:1.2rem;line-height:2.2;padding:16px 18px;background-image:repeating-linear-gradient(transparent 0 calc(2.2em - 1px),var(--line) calc(2.2em - 1px) 2.2em);background-position:0 16px}}
-@media (pointer:coarse) and (min-width:700px){.wr textarea,.mock textarea{min-height:9.2rem}}
+.wr textarea,.mock textarea,.seq textarea{min-height:5.4rem;font-size:1.05rem;line-height:1.9;padding:12px 14px;background-image:repeating-linear-gradient(transparent 0 calc(1.9em - 1px),var(--line) calc(1.9em - 1px) 1.9em);background-position:0 12px;background-attachment:local}
+@media (min-width:700px){.wr textarea,.mock textarea,.seq textarea{min-height:8rem;font-size:1.2rem;line-height:2.2;padding:16px 18px;background-image:repeating-linear-gradient(transparent 0 calc(2.2em - 1px),var(--line) calc(2.2em - 1px) 2.2em);background-position:0 16px}}
+@media (pointer:coarse) and (min-width:700px){.wr textarea,.mock textarea,.seq textarea{min-height:9.2rem}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
 </head>
@@ -389,7 +393,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v71</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v72</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -812,7 +816,7 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
 document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))setTimeout(()=>{const a=document.activeElement;if(!(a&&a.matches&&a.matches('textarea,.qa-form input')))document.body.classList.remove('typing')},150)});
 document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWith('wr-'))writeDraft[curId+'|'+el.dataset.i]=el.value});
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
-let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null;
+let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null, seqAns={};
 const toolOpen={};
 document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox')toolOpen[id]=e.target.open},true);
 let psKo=false, psOpen=false;
@@ -1175,9 +1179,13 @@ document.addEventListener('click',async e=>{
       stop();const my=token;setTimeout(()=>{playOne(w.sentences[first],first,+$('rate').value,my,true)},500)};
     requestAnimationFrame(go);return}
   if(t.id==='psKo'){psKo=!psKo;render();return}
-  if(t.id==='seqPrev'){seqPos=Math.max(0,seqPos-1);seqShow=false;seqHint=false;render();return}
-  if(t.id==='seqNext'){const n=bodyOf(w).length;seqPos=seqPos>=n-1?0:seqPos+1;seqShow=false;seqHint=false;render();return}
-  if(t.id==='seqShow'){seqShow=!seqShow;render();return}
+  if(t.id==='seqPrev'){micStop();seqPos=Math.max(0,seqPos-1);seqShow=false;seqHint=false;stay('seqBox',render);return}
+  if(t.id==='seqNext'){const n=bodyOf(w).length;micStop();seqPos=seqPos>=n-1?0:seqPos+1;seqShow=false;seqHint=false;stay('seqBox',render);return}
+  if(t.id==='seqShow'){seqShow=!seqShow;stay('seqBox',render);return}
+  if(t.id==='seqCheck'){const j=+t.dataset.j,ta=$('seqIn'),v=ta?ta.value:'';if(!v.trim()){toast('먼저 써 보거나 🎤로 말해 보세요');return}
+    micStop();const r=gradeText(w.sentences[j].en,v);recordWeak(w.id,j,r,false);if(r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true}}saveProg();
+    const box=$('seqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;
+    if(ta)ta.blur();return}
   if(t.id==='seqHint'){seqHint=!seqHint;render();return}
   if(t.id==='seqPlay'){const j=+t.dataset.j;stop();const my=token;await playOne(w.sentences[j],j,+$('rate').value,my);return}
   if(t.id==='mockStart'){mock={wid:w.id,pos:0,ans:[],res:null};toolOpen.mockBox=true;render();setTimeout(()=>{const m=$('mockIn');if(m)m.focus()},40);return}
@@ -1392,11 +1400,14 @@ function seqHtml(w){
   return `<div class="seq">
     <div class="seq-step">${p+1} / ${b.length}</div>
     <div class="seq-prev"><span>${p===0?'제목':'앞 문장'}</span>${esc(prev)}</div>
-    <div class="seq-q"><span>다음 문장은?</span>${seqShow?`<b>${esc(cur.en)}</b><em>${esc(cur.ko||'')}</em>`:seqHint?`<em>힌트: ${esc(cur.ko||'')}</em>`:`<em class="dim">소리 내어 말해 본 뒤 정답을 확인하세요</em>`}</div>
+    <div class="seq-q"><span>다음 문장은?</span>${seqShow?`<b>${esc(cur.en)}</b><em>${esc(cur.ko||'')}</em>`:seqHint?`<em>힌트: ${esc(cur.ko||'')}</em>`:`<em class="dim">써 보거나 🎤로 말해 본 뒤 채점하세요</em>`}</div>
+    <textarea id="seqIn" rows="2" placeholder="다음 문장을 영어로 써 보세요" autocapitalize="sentences" spellcheck="false">${esc(seqAns[w.id+'|'+p]||'')}</textarea>
+    <div class="seq-act">${micBtn('seqIn')}<button class="primary" id="seqCheck" data-j="${j}">채점</button></div>
+    <div id="seqRes"></div>
     <div class="seq-act">
       <button class="ghost" id="seqPrev"${p===0?' disabled':''}>◀ 이전</button>
       ${seqShow?'':`<button class="ghost" id="seqHint">${seqHint?'힌트 숨기기':'한글 힌트'}</button>`}
-      <button class="${seqShow?'ghost':'primary'}" id="seqShow">${seqShow?'정답 숨기기':'정답 보기'}</button>
+      <button class="ghost" id="seqShow">${seqShow?'정답 숨기기':'정답 보기'}</button>
       ${seqShow?`<button class="ghost" id="seqPlay" data-j="${j}">▶ 듣기</button>`:''}
       <button class="primary" id="seqNext">${p===b.length-1?'처음부터':'다음 ▶'}</button>
     </div></div>`;
@@ -1428,7 +1439,7 @@ function gradeMock(w,partial){
 function mockHtml(w){
   const b=bodyOf(w), hist=((prog.tests||{})[w.id]||[]).slice(-3).reverse();
   const histHtml=hist.length?`<div class="mk-hist">최근 기록: ${hist.map(h=>`<span>${new Date(h.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})} <b>${h.score}점</b></span>`).join(' ')}</div>`:'';
-  if(!mock||mock.wid!==w.id)return `<div class="mock"><p>토요일 테스트처럼 <b>한글 해석만 보고 ${b.length}문장을 순서대로</b> 써 봅니다. 마지막에 문장별 결과와 총점을 보여주고, 틀린 부분은 '내 약점'에 쌓입니다.</p><p class="hint">키보드 마이크로 말해서 입력하면 말하기 테스트 연습도 됩니다.</p>${histHtml}<button class="primary" id="mockStart">테스트 시작</button></div>`;
+  if(!mock||mock.wid!==w.id)return `<div class="mock"><p>토요일 테스트처럼 <b>한글 해석만 보고 ${b.length}문장을 순서대로</b> 써 봅니다. 마지막에 문장별 결과와 총점을 보여주고, 틀린 부분은 '내 약점'에 쌓입니다.</p><p class="hint">🎤 말하기 버튼을 누르고 영어로 말하면 글자로 바뀌어 들어가요. 말하기 테스트 연습도 됩니다.</p>${histHtml}<button class="primary" id="mockStart">테스트 시작</button></div>`;
   if(mock.res){
     const n=(mock.upto!=null?mock.upto:b.length-1)+1,shown=b.slice(0,n);
     const avg=Math.round(mock.res.slice(0,n).reduce((a,r)=>a+(r?r.score:0),0)/Math.max(1,n)), perfect=mock.res.filter(r=>r&&r.perfect).length;
@@ -1440,6 +1451,7 @@ function mockHtml(w){
   return `<div class="mock"><div class="seq-step">${k+1} / ${b.length}</div>
     <div class="mk-ko">${esc(w.sentences[j].ko||'(해석 없음)')}</div>
     <textarea id="mockIn" rows="3" placeholder="영어 문장을 써 보세요" autocapitalize="sentences" spellcheck="false">${esc(mock.ans[k]||'')}</textarea>
+    <div class="seq-act">${micBtn('mockIn')}</div>
     <div class="seq-act"><button class="ghost" id="mockPrev"${k===0?' disabled':''}>◀ 이전</button>
     ${k===b.length-1?`<button class="primary" id="mockGrade">채점</button>`:`<button class="primary" id="mockNext">다음 ▶</button>`}
     <button class="ghost" id="mockClose">끝내기</button></div></div>`;
@@ -1457,7 +1469,22 @@ function weakHtml(w){
     ${top.length?`<div class="wk-sec">자주 틀린 단어</div><div class="wk-words">${top.map(([k,n])=>`<span>${esc(k)}<i>${n}</i></span>`).join('')}</div>`:''}
     <button class="ghost" id="weakReset">기록 초기화</button></div>`;
 }
-document.addEventListener('input',e=>{if(e.target.id==='mockIn'&&mock)mock.ans[mock.pos]=e.target.value});
+document.addEventListener('input',e=>{if(e.target.id==='mockIn'&&mock)mock.ans[mock.pos]=e.target.value;if(e.target.id==='seqIn'&&curId!=null)seqAns[curId+'|'+seqPos]=e.target.value});
+/* 🎤 말하기: 브라우저 음성 인식(영어)으로 말한 내용을 입력칸에 넣음. 지원 안 하는 브라우저는 키보드 마이크 안내 */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let micRec=null,micId=null;
+function micBtn(id){return `<button class="ghost mic${micId===id?' on':''}" data-mic="${id}">${micId===id?'● 듣는 중 · 멈추기':'🎤 말하기'}</button>`}
+function micUI(){document.querySelectorAll('[data-mic]').forEach(b=>{const on=b.dataset.mic===micId;b.classList.toggle('on',on);b.textContent=on?'● 듣는 중 · 멈추기':'🎤 말하기'})}
+function micStop(){if(micRec){try{micRec.stop()}catch(_){}}micRec=null;micId=null;micUI()}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-mic]');if(!b)return;e.preventDefault();e.stopPropagation();
+  const id=b.dataset.mic;if(micId===id){micStop();return}micStop();
+  const ta=$(id);if(!ta)return;
+  if(!SR){alert('이 브라우저는 바로 말하기를 지원하지 않아요.\n\n입력칸을 누른 뒤 키보드의 🎤(마이크) 버튼을 눌러 영어로 말하세요.\n※ 키보드를 영어로 바꾼 뒤(🌐) 마이크를 눌러야 영어로 받아 적어요.');ta.focus();return}
+  const base=ta.value.trim();const r=new SR();r.lang='en-US';r.interimResults=true;r.continuous=true;
+  r.onresult=ev=>{let txt='';for(let i=0;i<ev.results.length;i++)txt+=ev.results[i][0].transcript;txt=txt.trim();if(txt)txt=txt.charAt(0).toUpperCase()+txt.slice(1);ta.value=(base?base+' ':'')+txt;ta.dispatchEvent(new Event('input',{bubbles:true}))};
+  r.onerror=ev=>{const m=ev.error==='not-allowed'||ev.error==='service-not-allowed'?'마이크 사용을 허용해 주세요 (주소창 옆 설정)':ev.error==='no-speech'?'소리가 들리지 않았어요. 다시 눌러 말해 보세요':'';if(m)toast(m);micStop()};
+  r.onend=()=>{if(micRec===r){micRec=null;micId=null;micUI()}};
+  try{r.start();micRec=r;micId=id;micUI()}catch(_){micStop();toast('마이크를 켤 수 없어요. 키보드의 🎤를 써 주세요')}
+},true);
 /* 같은 날짜 주차에 다른 지문을 새로 올리면, 예전 지문의 외움·써보기·형광펜·질문 기록이 따라오지 않게 정리 */
 function weekSig(w){const t=w.sentences.map(x=>x.en||'').join('\n');let h=5381;for(let k=0;k<t.length;k++)h=((h*33)^t.charCodeAt(k))>>>0;return h.toString(36)+'.'+w.sentences.length}
 function staleByWords(w){
