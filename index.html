@@ -203,7 +203,11 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .en .hid{color:transparent;background:var(--line);border-radius:3px}
 .ko{color:var(--muted);font-size:.85rem}
 .ko.empty{font-style:italic;opacity:.7}
-.voc summary{cursor:pointer;font-size:.8rem;font-weight:700;color:var(--accent);padding:2px 0}
+.voc summary{cursor:pointer;font-size:.82rem;font-weight:700;color:var(--accent);display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 12px;border:1.5px solid var(--accent);border-radius:999px;background:var(--surface);list-style:none;user-select:none}
+.voc summary::-webkit-details-marker{display:none}
+.voc summary::after{content:'펼치기 ▾';font-size:.74rem;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:2px 8px}
+.voc[open] summary::after{content:'접기 ▴';background:var(--muted)}
+.voc[open] summary{margin-bottom:4px}
 .voc dl{margin:6px 0 2px;display:grid;gap:4px;border-top:1px dashed var(--line);padding-top:6px}
 .vi{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px;font-size:.84rem;align-items:baseline}
 .vi dt{font-weight:600;display:flex;gap:4px;align-items:baseline;min-width:0}
@@ -381,7 +385,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v67</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v68</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
