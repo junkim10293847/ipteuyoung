@@ -389,7 +389,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v70</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v71</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1181,15 +1181,13 @@ document.addEventListener('click',async e=>{
   if(t.id==='seqHint'){seqHint=!seqHint;render();return}
   if(t.id==='seqPlay'){const j=+t.dataset.j;stop();const my=token;await playOne(w.sentences[j],j,+$('rate').value,my);return}
   if(t.id==='mockStart'){mock={wid:w.id,pos:0,ans:[],res:null};toolOpen.mockBox=true;render();setTimeout(()=>{const m=$('mockIn');if(m)m.focus()},40);return}
-  if(t.id==='mockClose'){mock=null;render();return}
+  /* 끝내기: 쓰던 중이면 지금까지 쓴 문장만 채점해서 첨삭을 보여 줌 (아무것도 안 썼으면 그냥 닫음) */
+  if(t.id==='mockClose'){
+    if(mock&&!mock.res){const ta=$('mockIn');if(ta)mock.ans[mock.pos]=ta.value;if(mock.ans.some(a=>a&&a.trim())){gradeMock(w,true);return}}
+    mock=null;render();return}
   if(t.id==='mockPrev'){mock.pos=Math.max(0,mock.pos-1);patchMockStep(w);return}
   if(t.id==='mockNext'){mock.pos++;patchMockStep(w);return}
-  if(t.id==='mockGrade'){
-    const b=bodyOf(w);mock.res=b.map((j,k)=>gradeText(w.sentences[j].en,mock.ans[k]||''));
-    b.forEach((j,k)=>{const r=mock.res[k];if(r)recordWeak(w.id,j,r,false);if(r&&r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true}}});
-    const avg=Math.round(mock.res.reduce((a,r)=>a+(r?r.score:0),0)/b.length);
-    prog.tests=prog.tests||{};prog.tests[w.id]=((prog.tests[w.id]||[]).concat([{at:Date.now(),score:avg}])).slice(-20);
-    saveProg();render();setTimeout(()=>{const m=$('mockBox');if(m)m.scrollIntoView({block:'start',behavior:'smooth'})},40);return}
+  if(t.id==='mockGrade'){gradeMock(w,false);return}
   if(t.id==='weakReset'){if(t.dataset.sure){if(prog.weak)delete prog.weak[w.id];saveProg();render()}else{t.dataset.sure='1';t.textContent='한 번 더 누르면 초기화';}return}
   if(t.classList.contains('weakgo')){const j=+t.dataset.j;view='all';hiddenEn.delete(j);render();setTimeout(()=>{const c=$('c'+j);if(c){c.scrollIntoView({block:'center',behavior:'smooth'});c.classList.add('playing');setTimeout(()=>c.classList.remove('playing'),1500)}},60);return}
   if(t.id==='hideAll'){const ids=[...document.querySelectorAll('#list .card')].map(c=>+c.id.slice(1));const allH=ids.every(j=>hiddenEn.has(j));ids.forEach(j=>allH?hiddenEn.delete(j):hiddenEn.add(j));
@@ -1417,14 +1415,25 @@ function patchMockStep(w){
   if(nx){const last=k===b.length-1;nx.id=last?'mockGrade':'mockNext';nx.textContent=last?'채점':'다음 ▶'}
   if(document.activeElement===ta){try{ta.setSelectionRange(ta.value.length,ta.value.length)}catch(_){}}
 }
+function gradeMock(w,partial){
+  const b=bodyOf(w);let upto=b.length-1;
+  if(partial){upto=-1;mock.ans.forEach((a,k)=>{if(a&&a.trim())upto=Math.max(upto,k)})}
+  mock.upto=upto;mock.partial=partial&&upto<b.length-1;
+  mock.res=b.map((j,k)=>k<=upto?gradeText(w.sentences[j].en,mock.ans[k]||''):null);
+  b.forEach((j,k)=>{const r=mock.res[k];if(r)recordWeak(w.id,j,r,false);if(r&&r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true}}});
+  const n=upto+1,avg=Math.round(mock.res.slice(0,n).reduce((a,r)=>a+(r?r.score:0),0)/Math.max(1,n));
+  prog.tests=prog.tests||{};prog.tests[w.id]=((prog.tests[w.id]||[]).concat([{at:Date.now(),score:avg,n,of:b.length}])).slice(-20);
+  saveProg();render();setTimeout(()=>{const m=$('mockBox');if(m)m.scrollIntoView({block:'start',behavior:'smooth'})},40);
+}
 function mockHtml(w){
   const b=bodyOf(w), hist=((prog.tests||{})[w.id]||[]).slice(-3).reverse();
   const histHtml=hist.length?`<div class="mk-hist">최근 기록: ${hist.map(h=>`<span>${new Date(h.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})} <b>${h.score}점</b></span>`).join(' ')}</div>`:'';
   if(!mock||mock.wid!==w.id)return `<div class="mock"><p>토요일 테스트처럼 <b>한글 해석만 보고 ${b.length}문장을 순서대로</b> 써 봅니다. 마지막에 문장별 결과와 총점을 보여주고, 틀린 부분은 '내 약점'에 쌓입니다.</p><p class="hint">키보드 마이크로 말해서 입력하면 말하기 테스트 연습도 됩니다.</p>${histHtml}<button class="primary" id="mockStart">테스트 시작</button></div>`;
   if(mock.res){
-    const avg=Math.round(mock.res.reduce((a,r)=>a+(r?r.score:0),0)/b.length), perfect=mock.res.filter(r=>r&&r.perfect).length;
-    return `<div class="mock"><div class="mk-total"><b>${avg}점</b><span>완벽 ${perfect} / ${b.length}문장</span></div>
-      <ol class="mk-list">${b.map((j,k)=>{const r=mock.res[k];return `<li class="${r&&r.perfect?'ok':''}"><div class="mk-h"><span>${numLabel(w,j)}번</span><b>${r?(r.almost?'거의 완벽':r.score+'%'):'미작성'}</b>${r&&!r.perfect?`<em>${errCount(r)}</em>`:''}</div>${r?(r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:diffHtml(r)):`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`}</li>`}).join('')}</ol>
+    const n=(mock.upto!=null?mock.upto:b.length-1)+1,shown=b.slice(0,n);
+    const avg=Math.round(mock.res.slice(0,n).reduce((a,r)=>a+(r?r.score:0),0)/Math.max(1,n)), perfect=mock.res.filter(r=>r&&r.perfect).length;
+    return `<div class="mock"><div class="mk-total"><b>${avg}점</b><span>완벽 ${perfect} / ${n}문장${mock.partial?` <small>(전체 ${b.length}문장 중 ${n}문장까지 채점)</small>`:''}</span></div>
+      <ol class="mk-list">${shown.map((j,k)=>{const r=mock.res[k];return `<li class="${r&&r.perfect?'ok':''}"><div class="mk-h"><span>${numLabel(w,j)}번</span><b>${r?(r.almost?'거의 완벽':r.score+'%'):'미작성'}</b>${r&&!r.perfect?`<em>${errCount(r)}</em>`:''}</div>${r?(r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:diffHtml(r)):`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`}</li>`}).join('')}</ol>
       ${histHtml}<div class="seq-act"><button class="primary" id="mockStart">다시 도전</button><button class="ghost" id="mockClose">닫기</button></div></div>`;
   }
   const k=mock.pos, j=b[k];
