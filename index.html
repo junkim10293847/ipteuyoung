@@ -231,6 +231,8 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .qa-form{display:flex;gap:6px}
 .qa-form input{flex:1;min-width:0;font:inherit;font-size:.86rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
 .qa-form .primary{padding:8px 12px;font-size:.84rem}
+.vmore[aria-expanded="true"]{background:var(--accent);color:#fff;border-radius:999px;padding:3px 12px;margin-left:6px}
+.vdet .vfold{justify-self:center;margin:2px 0 0;padding:8px 22px;font-size:.88rem;border-radius:999px;background:var(--accent);color:#fff;font-weight:700}
 .vdet .load{color:var(--muted)}
 .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .acts button{font:inherit;font-size:.8rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
@@ -379,7 +381,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v63</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v64</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -972,7 +974,8 @@ function detHtml(d,k){
    ${(d.examples||[]).length?`<div class="d-ex"><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
    ${(d.similar||[]).length?`<div class="d-sim"><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
    ${d.tip?`<div class="d-tip"><h4>외우는 팁 · 주의할 점</h4><p>${esc(d.tip)}</p></div>`:''}
-   ${qaHtml(k)}`;
+   ${qaHtml(k)}
+   <button class="vmore vfold" data-k="${k}" aria-expanded="true">▲ 접기</button>`;
 }
 const DETAIL_EXAMPLE="{\"core\": \"문장 맨 앞의 'To + 동사원형'은 '~하기 위해서, ~하려면'이라는 목적을 나타내며, 뒤에 이어지는 주절이 그 목적을 이루기 위한 방법이나 단계임을 알려 줍니다. 요리법, 사용 설명서, 업무 절차처럼 '어떻게 하는지'를 설명하는 글에서 자주 쓰입니다.\", \"usage\": \"이 문장에서는 'To make rice in a pot'이 문장 앞에서 목적 부사구로 쓰여 '솥밥을 지으려면'이라는 뜻이고, 뒤의 명령문 'first measure out...'이 그 목적을 달성하는 첫 단계입니다. 목적 부사구가 문장 앞에 오면 쉼표(,)로 주절과 구분합니다.\", \"examples\": [{\"en\": \"To log in, click the button at the top right.\", \"ko\": \"로그인하려면 오른쪽 위의 버튼을 클릭하세요.\"}, {\"en\": \"To save time, I usually prepare my lunch the night before.\", \"ko\": \"시간을 아끼려고 저는 보통 점심을 전날 밤에 준비해 둡니다.\"}, {\"en\": \"To join the meeting, you need to use this link.\", \"ko\": \"회의에 참여하려면 이 링크를 사용해야 합니다.\"}], \"similar\": [{\"t\": \"In order to + 동사원형\", \"m\": \"'~하기 위해서'라는 뜻으로 To보다 목적이 더 분명하고 격식 있는 느낌입니다. 보고서나 공식 문서에서 자주 씁니다.\"}, {\"t\": \"So as to + 동사원형\", \"m\": \"In order to와 비슷하지만 주로 글에서 쓰며, 일상 회화에서는 드뭅니다.\"}, {\"t\": \"If you want to + 동사원형, ...\", \"m\": \"'~하고 싶다면'이라는 뜻으로 상대방에게 말하듯 더 구어적이고 부드럽습니다.\"}], \"tip\": \"'To + 동사원형'이 문장 맨 앞에 오면 '~하려면'으로 해석하고, 쉼표 뒤에 그 목적을 이루는 방법이 나온다고 생각하면 쉽게 외워집니다. 이때 to 뒤에는 항상 동사원형이 오며, 'To making'처럼 -ing 형태를 쓰지 않도록 주의하세요.\"}";
 /* 카드 하나만 다시 그리기: 전체를 다시 그리면 아이패드에서 화면이 튀므로 해당 카드만 교체 */
@@ -1114,7 +1117,10 @@ document.addEventListener('click',async e=>{
   if(t.id==='vtog'){vocOpen=!vocOpen;t.setAttribute('aria-pressed',vocOpen);t.textContent=vocOpen?'단어·숙어 접기':'단어·숙어 펼치기';document.querySelectorAll('details.voc').forEach(d=>d.open=vocOpen);return}
   if(t.classList.contains('vmore')){
     const k=t.dataset.k,[i,j]=k.split('-').map(Number);
-    if(openDet.has(k)){openDet.delete(k);renderCard(i);return}
+    if(openDet.has(k)){openDet.delete(k);renderCard(i);
+      /* 아래쪽 접기를 누르면 설명이 사라지며 화면이 위로 당겨지므로, 그 단어 줄이 화면에 보이게 맞춤 */
+      if(t.classList.contains('vfold')){const el=document.querySelector(`.vmore[data-k="${k}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<60||r.bottom>innerHeight-140)el.scrollIntoView({block:'center'})}}
+      return}
     openDet.add(k);openVoc.add(i);
     const v=w.sentences[i].vocab[j];
     if((!v.detail||!v.detail.usage||!v.detail.core)&&!detBusy[k])loadDetail(w,i,j,k);else renderCard(i);
