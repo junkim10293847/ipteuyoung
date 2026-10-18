@@ -381,7 +381,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v65</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v66</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1340,7 +1340,14 @@ $('mkbar').addEventListener('click',e=>{
   mkSel.ks.forEach(k=>{if(c==='x')delete m[k];else m[k]=c});
   if(!Object.keys(m).length)delete wk[mkSel.i];
   saveProg();try{window.getSelection().removeAllRanges()}catch(_){}
-  mkSel=null;$('mkbar').hidden=true;render();
+  /* 화면 전체를 다시 그리지 않고 그 문장(카드·전체 지문)의 단어 색만 바꿈 → 아이패드에서 화면이 움직이지 않음 */
+  const mi=mkSel.i,wk0=weeks.find(x=>x.id===curId);
+  mkSel=null;$('mkbar').hidden=true;
+  if(wk0){
+    const mm=marksOf(curId,mi);
+    document.querySelectorAll(`.ps[data-ps="${mi}"] [data-w]`).forEach(sp=>sp.classList.toggle('mk-y',!!mm[+sp.dataset.w]));
+    if(!patchCardState(wk0,mi)&&!document.querySelector(`.ps[data-ps="${mi}"]`))render();
+  }else render();
   toast(c==='x'?'표시를 지웠어요':'맨 아래 전체 지문에 노랑으로 표시했어요');
 });
 function toast(m){let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}t.textContent=m;t.classList.add('on');clearTimeout(window.__tT);window.__tT=setTimeout(()=>t.classList.remove('on'),1800)}
