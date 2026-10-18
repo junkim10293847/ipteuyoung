@@ -381,7 +381,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v66</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v67</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1160,7 +1160,9 @@ document.addEventListener('click',async e=>{
     saveProg();render();setTimeout(()=>{const m=$('mockBox');if(m)m.scrollIntoView({block:'start',behavior:'smooth'})},40);return}
   if(t.id==='weakReset'){if(t.dataset.sure){if(prog.weak)delete prog.weak[w.id];saveProg();render()}else{t.dataset.sure='1';t.textContent='한 번 더 누르면 초기화';}return}
   if(t.classList.contains('weakgo')){const j=+t.dataset.j;view='all';hiddenEn.delete(j);render();setTimeout(()=>{const c=$('c'+j);if(c){c.scrollIntoView({block:'center',behavior:'smooth'});c.classList.add('playing');setTimeout(()=>c.classList.remove('playing'),1500)}},60);return}
-  if(t.id==='hideAll'){const ids=[...document.querySelectorAll('#list .card')].map(c=>+c.id.slice(1));const allH=ids.every(j=>hiddenEn.has(j));ids.forEach(j=>allH?hiddenEn.delete(j):hiddenEn.add(j));render();return}
+  if(t.id==='hideAll'){const ids=[...document.querySelectorAll('#list .card')].map(c=>+c.id.slice(1));const allH=ids.every(j=>hiddenEn.has(j));ids.forEach(j=>allH?hiddenEn.delete(j):hiddenEn.add(j));
+    /* 화면 전체를 다시 그리지 않고 카드마다 영어 부분만 바꿈 */
+    ids.forEach(j=>patchCardState(w,j));t.textContent=allH?'영어 모두 가리기':'영어 모두 보기';return}
   if(t.id==='regen'){if(missing0(w)){regen(w);return}$('regenConfirm').hidden=false;t.hidden=true;return}
   if(t.id==='regenNo'){$('regenConfirm').hidden=true;$('regen').hidden=false;return}
   if(t.id==='regenYes'){$('regenConfirm').hidden=true;$('regen').hidden=false;regen(w);return}
@@ -1175,7 +1177,7 @@ document.addEventListener('click',async e=>{
     if(suppressClick){suppressClick=false;return}
     if(loopIdx===i){stop();return}
   }
-  if(t.classList.contains('mark')){const d={...doneOf(w.id)};if(d[i]){delete d[i];hiddenEn.delete(i);doneSeen.delete(i)}else d[i]=true;prog.done[w.id]=d;saveProg();stay(i,render);return}
+  if(t.classList.contains('mark')){const d={...doneOf(w.id)};if(d[i]){delete d[i];hiddenEn.delete(i);doneSeen.delete(i)}else d[i]=true;prog.done[w.id]=d;saveProg();if(!patchCardState(w,i))stay(i,render);return}
   if(t.classList.contains('write')){writeOpen.has(i)?writeOpen.delete(i):writeOpen.add(i);if(!patchWriteOpen(w,i))stay(i,render);return}
   if(t.classList.contains('wr-clear')){const key=curId+'|'+i;delete writeDraft[key];delete writeRes[key];
     /* 다시 쓰기: 글과 결과만 그 자리에서 지움 (화면 다시 그리지 않음) */
@@ -1193,7 +1195,7 @@ document.addEventListener('click',async e=>{
       if(r.perfect){celebrate(i);setTimeout(()=>{if(!writeOpen.has(i))return;foldWriteSmooth(w,i,()=>{writeOpen.delete(i);delete writeDraft[key];delete writeRes[key];patchWriteOpen(w,i)})},3000)}
       return}
     stay(i,render,showRes);return}
-  if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);stay(i,render);return}
+  if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);if(!patchCardState(w,i))stay(i,render);return}
   stop();const my=token;
   await playOne(s,i,t.classList.contains('slow')?0.7:+$('rate').value,my);
   if(my===token)hl(null);
