@@ -46,6 +46,11 @@ html{font-size:16px}
 .inst .k{width:22px;height:22px;margin-right:6px;vertical-align:middle;border-radius:50%;background:#fff;color:var(--accent);display:inline-grid;place-items:center;font-weight:800;font-size:.8rem}
 .inst .shr{vertical-align:middle;display:inline-grid;place-items:center;width:24px;height:24px;border:1.5px solid #fff;border-radius:6px;font-size:.8rem}
 @media (prefers-reduced-motion:reduce){.inst .go{animation:none}}
+.todo{margin:12px 0 4px;background:var(--surface);border:2px solid var(--accent);border-radius:14px;padding:12px 14px;display:grid;gap:8px}
+.todo-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.todo-h b{font-size:1.02rem;color:var(--accent)}.todo-h span{color:var(--muted);font-size:.86rem}
+.todo-steps{font-size:.88rem;color:var(--fg)}.todo-steps small{color:var(--muted)}
+.todo-go{font:inherit;font-weight:800;font-size:1.02rem;border:0;border-radius:12px;padding:12px;background:var(--accent);color:#fff;cursor:pointer}
+.todo.done{border-color:var(--done)}.todo.done .todo-h b{color:var(--done)}
 .brand{display:flex;align-items:center;gap:12px;padding:6px 0 14px;margin-bottom:12px;border-bottom:2px solid var(--accent-soft)}
 .brand-mark{flex:none;width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.7rem;box-shadow:0 3px 10px rgba(0,0,0,.12)}
 .brand-t{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,7vw,2.6rem);line-height:1.1;color:var(--accent);letter-spacing:-.01em}
@@ -384,7 +389,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v69</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v70</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -863,12 +868,28 @@ function render(){
      <p class="ps-text">${w.sentences.map((x,j)=>x.isTitle?'':`<span class="ps" data-ps="${j}">${(()=>{const m=marksOf(w.id,j);return x.en.split(' ').map((t,k)=>`<span class="pw${m[k]?' mk-y':''}" data-w="${k}">${esc(t)}</span>`).join(' ')})()}</span>${psKo&&x.ko?`<span class="ps-ko">${esc(x.ko)}</span>`:''}`).join(' ')}</p>
      <p class="hint">문장을 누르면 그 문장을 들을 수 있습니다.</p>
    </details>`;
+  /* 오늘 할 일: 처음 온 사람도 무엇을 하면 되는지 한눈에 — 버튼 하나로 오늘 첫 문장부터 시작 */
+  let todoHtml='';
+  if(dTo>=0){
+    const tIdx=tv==='sat'?bodyIdx:tv[0]==='d'?(days[+tv.slice(1)]||[]):[];
+    const left=tIdx.filter(j=>!done[j]);
+    const tName=tv==='sat'?'테스트 날 · 전체 복습':tv[0]==='d'?`${+tv.slice(1)+1}일차 · ${rng(tIdx)}번`:'';
+    if(tIdx.length){
+      todoHtml=left.length
+        ?`<div class="todo"><div class="todo-h"><b>📖 오늘 할 일</b><span>${tName} · ${left.length}문장 남음</span></div>
+           <div class="todo-steps">① 듣기 → ② 떠올리기 → ③ ✍ 써보기 <small>· 완벽하면 자동 외움</small></div>
+           <button class="todo-go" id="todoGo">▶ 오늘 문장 시작하기</button></div>`
+        :`<div class="todo done"><div class="todo-h"><b>🎉 오늘 분량 끝!</b><span>${tName}</span></div>
+           <div class="todo-steps">${tv==='sat'?'테스트 잘 보세요!':'내일 분량을 미리 보거나 📝 모의 테스트로 전체를 점검해 보세요.'}</div></div>`;
+    }
+  }
   main.innerHTML=`
    <header class="head">
      <div class="eyebrow">${mdw(prev)} 스터디에서 배정 → ${mdw(sat)} 오전 스터디 테스트</div>
      <h1>${esc(w.title)}</h1>
      ${w.sentences.some(x=>!x.audio)?`<div class="pending"><span class="dot" aria-hidden="true"></span><div><b>${window.__features.tts?'🔊 원어민 음성 만드는 중':'🔊 기기 음성으로 재생 중'}</b><span>${window.__features.tts?'15~20분 안에 자동으로 원어민 음성이 붙습니다. 그동안은 휴대폰 기본 음성으로 읽어 줍니다.':'휴대폰 기본 음성으로 읽어 줍니다.'}</span></div></div>`:''}
      <p class="meta"><b>${dLabel}</b> · ${total}문장${by?` · ${esc(by)} 님이 등록`:''}</p>
+     ${todoHtml}
      ${w.longAudio?`<div class="long"><div class="long-h"><b>한 주 분량 연속 듣기</b><span>재생하면 아래 전체 지문에서 지금 읽는 문장이 표시돼요</span></div><audio id="longAudio" controls preload="none" src="${esc(w.longAudio)}"></audio>${psHtml}</div>`:psHtml}
      <div class="pace">
        <span>하루 분량</span>
@@ -1145,6 +1166,14 @@ document.addEventListener('click',async e=>{
     if((!v.detail||!v.detail.usage||!v.detail.core)&&!detBusy[k])loadDetail(w,i,j,k);else renderCard(i);
     return}
   if(t.classList.contains('vplay')){stop();speak(cleanTerm(t.dataset.t)||t.dataset.t,0.9,t.dataset.a||'');return}
+  if(t.id==='todoGo'){
+    const tv0=todayView(w),days0=plan(w),bi=w.sentences.map((_,k)=>k).filter(k=>!w.sentences[k].isTitle);
+    const tIdx=tv0==='sat'?bi:tv0[0]==='d'?(days0[+tv0.slice(1)]||[]):bi,dn0=doneOf(w.id),first=tIdx.find(j=>!dn0[j]);
+    if(view!==tv0){view=tv0;render()}
+    if(first==null)return;
+    const go=()=>{const c=$('c'+first);if(!c)return;c.scrollIntoView({block:'start',behavior:'smooth'});
+      stop();const my=token;setTimeout(()=>{playOne(w.sentences[first],first,+$('rate').value,my,true)},500)};
+    requestAnimationFrame(go);return}
   if(t.id==='psKo'){psKo=!psKo;render();return}
   if(t.id==='seqPrev'){seqPos=Math.max(0,seqPos-1);seqShow=false;seqHint=false;render();return}
   if(t.id==='seqNext'){const n=bodyOf(w).length;seqPos=seqPos>=n-1?0:seqPos+1;seqShow=false;seqHint=false;render();return}
