@@ -211,8 +211,10 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .vplay{border:0;background:none;padding:0 2px;cursor:pointer;font-size:.8rem;line-height:1;color:var(--fg)}
 @media (max-width:420px){.vi{grid-template-columns:1fr}.vi dd{padding-left:22px;margin-top:-2px}}
 .vmore{border:0;background:none;padding:0 0 0 4px;cursor:pointer;font:inherit;font-size:.76rem;font-weight:700;color:var(--accent);white-space:nowrap}
-.vdet{grid-column:1/-1;background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin:2px 0 6px;display:grid;gap:8px;font-size:.84rem;color:var(--fg)}
-.vdet h4{margin:0 0 2px;font-size:.72rem;letter-spacing:.06em;color:var(--accent)}
+.vdet{grid-column:1/-1;background:var(--surface);border:1.5px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:12px;padding:12px 12px;margin:4px 0 8px;display:grid;gap:12px;font-size:.86rem;color:var(--fg)}
+.vdet>div{border-left:3px solid var(--sec,var(--accent));padding:1px 0 1px 10px}
+.vdet .d-core{--sec:var(--accent)}.vdet .d-use{--sec:var(--done)}.vdet .d-ex{--sec:#3b7dd8}.vdet .d-sim{--sec:#8a6fc7}.vdet .d-tip{--sec:var(--warn)}
+.vdet h4{display:inline-block;width:max-content;max-width:100%;justify-self:start;margin:0 0 6px;font-size:.74rem;letter-spacing:.02em;color:#fff;background:var(--sec,var(--accent));border-radius:999px;padding:2px 10px}
 .vdet p{margin:0}
 .vdet ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
 .vdet .ko{font-size:.8rem}
@@ -375,7 +377,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v61</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v62</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -963,11 +965,11 @@ function detHtml(d,k){
     if(detErr[k])return `<p class="load">${esc(detErr[k])}</p>`;
     return `<p class="load">불러오는 중…</p>`;
   }
-  return `${detBusy[k]?`<p class="load">이 문장에서의 쓰임까지 보완하는 중… (10~30초)</p>`:''}${d.core?`<div><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
-   ${d.usage?`<div><h4>이 문장에서의 쓰임</h4><p>${esc(d.usage)}</p></div>`:''}
-   ${(d.examples||[]).length?`<div><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
-   ${(d.similar||[]).length?`<div><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
-   ${d.tip?`<div><h4>외우는 팁 · 주의할 점</h4><p>${esc(d.tip)}</p></div>`:''}
+  return `${detBusy[k]?`<p class="load">이 문장에서의 쓰임까지 보완하는 중… (10~30초)</p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
+   ${d.usage?`<div class="d-use"><h4>이 문장에서의 쓰임</h4><p>${esc(d.usage)}</p></div>`:''}
+   ${(d.examples||[]).length?`<div class="d-ex"><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
+   ${(d.similar||[]).length?`<div class="d-sim"><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
+   ${d.tip?`<div class="d-tip"><h4>외우는 팁 · 주의할 점</h4><p>${esc(d.tip)}</p></div>`:''}
    ${qaHtml(k)}`;
 }
 const DETAIL_EXAMPLE="{\"core\": \"문장 맨 앞의 'To + 동사원형'은 '~하기 위해서, ~하려면'이라는 목적을 나타내며, 뒤에 이어지는 주절이 그 목적을 이루기 위한 방법이나 단계임을 알려 줍니다. 요리법, 사용 설명서, 업무 절차처럼 '어떻게 하는지'를 설명하는 글에서 자주 쓰입니다.\", \"usage\": \"이 문장에서는 'To make rice in a pot'이 문장 앞에서 목적 부사구로 쓰여 '솥밥을 지으려면'이라는 뜻이고, 뒤의 명령문 'first measure out...'이 그 목적을 달성하는 첫 단계입니다. 목적 부사구가 문장 앞에 오면 쉼표(,)로 주절과 구분합니다.\", \"examples\": [{\"en\": \"To log in, click the button at the top right.\", \"ko\": \"로그인하려면 오른쪽 위의 버튼을 클릭하세요.\"}, {\"en\": \"To save time, I usually prepare my lunch the night before.\", \"ko\": \"시간을 아끼려고 저는 보통 점심을 전날 밤에 준비해 둡니다.\"}, {\"en\": \"To join the meeting, you need to use this link.\", \"ko\": \"회의에 참여하려면 이 링크를 사용해야 합니다.\"}], \"similar\": [{\"t\": \"In order to + 동사원형\", \"m\": \"'~하기 위해서'라는 뜻으로 To보다 목적이 더 분명하고 격식 있는 느낌입니다. 보고서나 공식 문서에서 자주 씁니다.\"}, {\"t\": \"So as to + 동사원형\", \"m\": \"In order to와 비슷하지만 주로 글에서 쓰며, 일상 회화에서는 드뭅니다.\"}, {\"t\": \"If you want to + 동사원형, ...\", \"m\": \"'~하고 싶다면'이라는 뜻으로 상대방에게 말하듯 더 구어적이고 부드럽습니다.\"}], \"tip\": \"'To + 동사원형'이 문장 맨 앞에 오면 '~하려면'으로 해석하고, 쉼표 뒤에 그 목적을 이루는 방법이 나온다고 생각하면 쉽게 외워집니다. 이때 to 뒤에는 항상 동사원형이 오며, 'To making'처럼 -ing 형태를 쓰지 않도록 주의하세요.\"}";
