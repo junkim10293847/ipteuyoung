@@ -393,7 +393,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v72</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v73</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1471,19 +1471,31 @@ function weakHtml(w){
 }
 document.addEventListener('input',e=>{if(e.target.id==='mockIn'&&mock)mock.ans[mock.pos]=e.target.value;if(e.target.id==='seqIn'&&curId!=null)seqAns[curId+'|'+seqPos]=e.target.value});
 /* 🎤 말하기: 브라우저 음성 인식(영어)으로 말한 내용을 입력칸에 넣음. 지원 안 하는 브라우저는 키보드 마이크 안내 */
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let micRec=null,micId=null;
-function micBtn(id){return `<button class="ghost mic${micId===id?' on':''}" data-mic="${id}">${micId===id?'● 듣는 중 · 멈추기':'🎤 말하기'}</button>`}
-function micUI(){document.querySelectorAll('[data-mic]').forEach(b=>{const on=b.dataset.mic===micId;b.classList.toggle('on',on);b.textContent=on?'● 듣는 중 · 멈추기':'🎤 말하기'})}
-function micStop(){if(micRec){try{micRec.stop()}catch(_){}}micRec=null;micId=null;micUI()}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let micRec=null,micId=null,micState='',micFail=0,micDog=null;
+const MIC_GUIDE='입력칸을 누른 뒤 키보드의 🎤(마이크) 버튼을 눌러 영어로 말하세요.\n※ 키보드를 영어로 바꾼 뒤(🌐) 마이크를 눌러야 영어로 받아 적어요.';
+function micLabel(id){return micId!==id?'🎤 말하기':micState==='wait'?'⏳ 마이크 켜는 중…':'● 말하세요 · 멈추기'}
+function micBtn(id){return `<button class="ghost mic${micId===id?' on':''}" data-mic="${id}">${micLabel(id)}</button>`}
+function micUI(){document.querySelectorAll('[data-mic]').forEach(b=>{b.classList.toggle('on',b.dataset.mic===micId);b.textContent=micLabel(b.dataset.mic)})}
+function micStop(){clearTimeout(micDog);const r=micRec;micRec=null;micId=null;micState='';if(r){try{r.abort()}catch(_){}}micUI()}
+function micGiveUp(ta,why){micStop();micFail++;
+  if(micFail>=2){alert('이 휴대폰 브라우저에서는 바로 말하기가 잘 안 돼요.\n\n'+MIC_GUIDE);if(ta)ta.focus()}
+  else toast(why+' 한 번 더 눌러 보세요')}
+/* 안드로이드에서도 잘 되도록: 한 번에 한 문장씩 듣고(말을 멈추면 자동 종료), 켜지지 않거나 못 알아들으면 키보드 마이크로 안내 */
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-mic]');if(!b)return;e.preventDefault();e.stopPropagation();
-  const id=b.dataset.mic;if(micId===id){micStop();return}micStop();
+  const id=b.dataset.mic;if(micId===id){if(micRec){try{micRec.stop()}catch(_){micStop()}}else micStop();return}micStop();
   const ta=$(id);if(!ta)return;
-  if(!SR){alert('이 브라우저는 바로 말하기를 지원하지 않아요.\n\n입력칸을 누른 뒤 키보드의 🎤(마이크) 버튼을 눌러 영어로 말하세요.\n※ 키보드를 영어로 바꾼 뒤(🌐) 마이크를 눌러야 영어로 받아 적어요.');ta.focus();return}
-  const base=ta.value.trim();const r=new SR();r.lang='en-US';r.interimResults=true;r.continuous=true;
-  r.onresult=ev=>{let txt='';for(let i=0;i<ev.results.length;i++)txt+=ev.results[i][0].transcript;txt=txt.trim();if(txt)txt=txt.charAt(0).toUpperCase()+txt.slice(1);ta.value=(base?base+' ':'')+txt;ta.dispatchEvent(new Event('input',{bubbles:true}))};
-  r.onerror=ev=>{const m=ev.error==='not-allowed'||ev.error==='service-not-allowed'?'마이크 사용을 허용해 주세요 (주소창 옆 설정)':ev.error==='no-speech'?'소리가 들리지 않았어요. 다시 눌러 말해 보세요':'';if(m)toast(m);micStop()};
-  r.onend=()=>{if(micRec===r){micRec=null;micId=null;micUI()}};
-  try{r.start();micRec=r;micId=id;micUI()}catch(_){micStop();toast('마이크를 켤 수 없어요. 키보드의 🎤를 써 주세요')}
+  if(!SR){alert('이 브라우저는 바로 말하기를 지원하지 않아요.\n\n'+MIC_GUIDE);ta.focus();return}
+  const base=ta.value.trim();let got=false;const r=new SR();r.lang='en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+  r.onstart=()=>{if(micRec!==r)return;micState='on';micUI();clearTimeout(micDog);micDog=setTimeout(()=>{if(micRec===r&&!got)micGiveUp(ta,'소리가 들리지 않았어요.')},9000)};
+  r.onresult=ev=>{if(micRec!==r)return;let txt='';for(let i=0;i<ev.results.length;i++)txt+=ev.results[i][0].transcript+' ';txt=txt.replace(/\s+/g,' ').trim();if(!txt)return;
+    got=true;micFail=0;txt=txt.charAt(0).toUpperCase()+txt.slice(1);ta.value=(base?base+' ':'')+txt;ta.dispatchEvent(new Event('input',{bubbles:true}))};
+  r.onerror=ev=>{if(micRec!==r)return;const e2=ev.error;
+    if(e2==='not-allowed'||e2==='service-not-allowed'){micStop();alert('마이크 사용이 막혀 있어요.\n\n주소창 옆 자물쇠(또는 ⋮ 메뉴) → 권한 → 마이크 허용 후 다시 눌러 주세요.\n\n또는 '+MIC_GUIDE);return}
+    if(e2==='aborted')return;micGiveUp(ta,e2==='no-speech'?'소리가 들리지 않았어요.':e2==='network'?'인터넷 연결이 약해요.':'잘 못 알아들었어요.')};
+  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop()};
+  micRec=r;micId=id;micState='wait';micUI();
+  micDog=setTimeout(()=>{if(micRec===r&&micState==='wait')micGiveUp(ta,'마이크가 켜지지 않았어요.')},4000);
+  try{r.start()}catch(_){micGiveUp(ta,'마이크가 켜지지 않았어요.')}
 },true);
 /* 같은 날짜 주차에 다른 지문을 새로 올리면, 예전 지문의 외움·써보기·형광펜·질문 기록이 따라오지 않게 정리 */
 function weekSig(w){const t=w.sentences.map(x=>x.en||'').join('\n');let h=5381;for(let k=0;k<t.length;k++)h=((h*33)^t.charCodeAt(k))>>>0;return h.toString(36)+'.'+w.sentences.length}
