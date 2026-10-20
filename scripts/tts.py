@@ -24,16 +24,40 @@ def _ipa(chunk, lang):
     return ' '.join(out.split())
 
 
+# 점(.)이 들어간 약어는 문장 끝으로 잘못 끊겨 "에이. 엠." 처럼 이상하게 읽히므로 미리 바꿔 읽음
+LETTER = {'a': 'ˈeɪ', 'b': 'bˈiː', 'c': 'sˈiː', 'd': 'dˈiː', 'e': 'ˈiː', 'f': 'ˈɛf', 'g': 'dʒˈiː', 'h': 'ˈeɪtʃ',
+          'i': 'ˈaɪ', 'j': 'dʒˈeɪ', 'k': 'kˈeɪ', 'l': 'ˈɛl', 'm': 'ˈɛm', 'n': 'ˈɛn', 'o': 'ˈoʊ', 'p': 'pˈiː',
+          'q': 'kjˈuː', 'r': 'ˈɑːɹ', 's': 'ˈɛs', 't': 'tˈiː', 'u': 'jˈuː', 'v': 'vˈiː', 'w': 'dˈʌbəljuː',
+          'x': 'ˈɛks', 'y': 'wˈaɪ', 'z': 'zˈiː'}
+WORDS = [(r'\bMrs\.', 'Missus'), (r'\bMr\.', 'Mister'), (r'\bMs\.', 'Miz'), (r'\bDr\.', 'Doctor'),
+         (r'\bSt\.(?= [A-Z])', 'Saint'), (r'\bvs\.', 'versus'), (r'\betc\.(?=\s+[a-z])', 'et cetera'), (r'\betc\.', 'et cetera.'),
+         (r'\be\.g\.', 'for example'), (r'\bi\.e\.', 'that is'), (r'\bNo\.(?= ?\d)', 'number')]
+ACR = re.compile(r'\b((?:[A-Za-z]\.){2,})')
+
+
+def spoken(text):
+    """읽기 전에 약어를 소리 나는 말로 바꿈 (바뀐 게 없으면 그대로)"""
+    t = text.replace('’', "'").replace('‘', "'").replace('“', '"').replace('”', '"')
+    for a, b in WORDS:
+        t = re.sub(a, b, t)
+    return t
+
+
 def phonemize(text, lang='en-us'):
-    text = text.replace('’', "'").replace('‘', "'").replace('“', '"').replace('”', '"')
+    text = spoken(text)
     res = ''
-    for p in re.split(r'([,.!?;:])', text):
-        if not p.strip():
+    for k, part in enumerate(ACR.split(text)):
+        if k % 2:  # a.m. / p.m. / U.S. 같은 약어: 글자 이름으로 바로 읽음 (뒤에 문장이 끝나면 마침표 유지)
+            letters = re.sub(r'[^A-Za-z]', '', part).lower()
+            res += ' '.join(LETTER[c] for c in letters) + ' '
             continue
-        if re.fullmatch(r'[,.!?;:]', p):
-            res = res.rstrip() + p + ' '
-        else:
-            res += _ipa(p, lang) + ' '
+        for p in re.split(r'([,.!?;:])', part):
+            if not p.strip():
+                continue
+            if re.fullmatch(r'[,.!?;:]', p):
+                res = res.rstrip() + p + ' '
+            else:
+                res += _ipa(p, lang) + ' '
     return ''.join(c for c in res.strip() if c in VOCAB)
 
 

@@ -88,12 +88,26 @@ def save_texts(t):
     return False
 
 
+ACR = re.compile(r'\b(?:[A-Za-z]\.){2,}|\b(?:Mrs?|Ms|Dr|St|vs|etc|No)\.|\be\.g\.|\bi\.e\.')
+SAY_V = ' ⟨say1⟩'  # 약어 읽기 방식을 고친 판: 이 표시가 없는 예전 음성은 다시 만듦
+
+
+def tkey(t):
+    """texts.json 에 남길 값: 약어가 들어간 문장은 읽기 방식 판 번호를 붙여, 읽기 규칙이 바뀌면 다시 만들게 함"""
+    return t + SAY_V if ACR.search(t or '') else t
+
+
 def plan(weeks, have, texts=None):
     """화면이 찾을 음성 파일 중 없거나, 같은 이름인데 문장이 바뀐 것(같은 날짜에 새 지문을 올린 경우)을 고름.
     texts.json 에 파일별로 어떤 문장을 읽었는지 기록해 두고 비교함"""
     texts = {} if texts is None else texts
     jobs, longs = {}, []
-    stale = lambda n, text: n in have and texts.get(n) not in (None, text)
+    def stale(n, text):
+        if n not in have:
+            return False
+        if ACR.search(text or ''):  # 약어 문장: 새 읽기 방식으로 만든 기록이 없으면 다시 만듦
+            return texts.get(n) != tkey(text)
+        return texts.get(n) not in (None, text)
     name = lambda path, default: os.path.basename(path) if path else default
     for wid, w in sorted(weeks.items()):
         if not isinstance(w, dict) or not w.get('sentences'):
@@ -112,14 +126,14 @@ def plan(weeks, have, texts=None):
                 if n not in have or stale(n, en):
                     jobs[n] = (en, v)
                 elif n not in texts:
-                    texts[n] = en
+                    texts[n] = tkey(en)
             for vc in s.get('vocab') or []:
                 n = name(vc.get('audio'), f'v-{vkey(vc.get("t"))}.mp3')
                 t = clean(vc.get('t'))
                 if n not in have or stale(n, t):
                     jobs[n] = (t, 'af')
                 elif n not in texts:
-                    texts[n] = t
+                    texts[n] = tkey(t)
         ln = name(w.get('longAudio'), f'{wk}-long2.mp3')
         sig = '|'.join(src)
         if src and (ln not in have or any(n in jobs for n in src) or stale(ln, sig)):
@@ -172,7 +186,7 @@ def main():
     for k, (name, (text, v)) in enumerate(sorted(jobs.items()), 1):
         print(f'[{k}/{len(jobs)}] {name}: {text[:60]}')
         save_mp3(synth(text, VOICE[v]), os.path.join(AUDIO, name))
-        texts[name] = text
+        texts[name] = tkey(text)
     for ln, src in longs:
         files = [os.path.join(AUDIO, n) for n in src if os.path.exists(os.path.join(AUDIO, n))]
         if len(files) != len(src):
