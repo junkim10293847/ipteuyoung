@@ -393,7 +393,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v73</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v74</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1531,8 +1531,32 @@ function applyWeeks(list){
     view=curId?todayView(weeks.find(w=>w.id===curId)):null;
   }
   if(!view&&curId)view=todayView(weeks.find(w=>w.id===curId));
-  full();
+  const first=!applyWeeks.done;applyWeeks.done=true;
+  if(first&&restoreUi()){full();scrollToAnchor(uiSaved.a);return}
+  if(first){full();return}
+  keepScroll(full);   // 다른 창에 갔다 오는 사이 내용이 바뀌어도 보던 자리 그대로
 }
+/* ===== 창을 나갔다 들어와도 보던 화면 그대로 =====
+   휴대폰은 다른 앱을 쓰는 동안 메모리가 모자라면 이 페이지를 지웠다가 돌아올 때 처음부터 다시 엶.
+   그래서 화면을 떠날 때 보던 주차·일차·위치·쓰던 글·열어 둔 연습을 저장해 두고, 다시 열리면 그대로 되살림 (3시간 안) */
+const UI_KEY='uiState';let uiSaved=null;
+function topAnchor(){const els=[...document.querySelectorAll('#main li.card,#main details.tool')];
+  for(const e of els){const r=e.getBoundingClientRect();if(r.bottom>60)return{id:e.id,off:Math.round(r.top)}}return{y:Math.round(scrollY)}}
+function scrollToAnchor(a){if(!a)return;try{history.scrollRestoration='manual'}catch(_){}
+  const go=()=>{const e=a.id&&$(a.id);if(e)window.scrollBy(0,e.getBoundingClientRect().top-a.off);else if(a.y!=null)window.scrollTo(0,a.y)};
+  go();requestAnimationFrame(go);setTimeout(go,250);setTimeout(go,800)}
+function keepScroll(fn){const a=topAnchor();fn();scrollToAnchor(a)}
+function saveUi(){if(!loaded||!curId)return;try{
+  if(mock){const ta=$('mockIn');if(ta&&!mock.res)mock.ans[mock.pos]=ta.value}
+  localStorage.setItem(UI_KEY,JSON.stringify({at:Date.now(),curId,view,a:topAnchor(),wo:[...writeOpen],wd:writeDraft,to:toolOpen,mock,seqPos,seqAns,vo:[...openVoc]}))}catch(_){}}
+function restoreUi(){try{const u=JSON.parse(localStorage.getItem(UI_KEY)||'null');
+  if(!u||Date.now()-u.at>3*3600e3||new Date(u.at).toDateString()!==new Date().toDateString()||!weeks.find(w=>w.id===u.curId))return false;
+  uiSaved=u;curId=u.curId;view=u.view||view;
+  (u.wo||[]).forEach(i=>writeOpen.add(i));Object.assign(writeDraft,u.wd||{});Object.assign(toolOpen,u.to||{});
+  if(u.mock&&u.mock.wid===curId)mock=u.mock;seqPos=u.seqPos||0;Object.assign(seqAns,u.seqAns||{});(u.vo||[]).forEach(i=>openVoc.add(i));
+  return true}catch(_){return false}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveUi()});
+window.addEventListener('pagehide',saveUi);
 /* 로그인 없이 여는 사람용: 주차 내용을 함께 실어 둔 공개 사본(data/weeks.json) */
 async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;full()}}
 (async()=>{
