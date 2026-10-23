@@ -413,7 +413,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v81</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v82</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -965,7 +965,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    </div></details>`:''}`;
 }
 function stay(i,fn,after){const id=typeof i==='string'?i:'c'+i;const c=$(id);const top=c?c.getBoundingClientRect().top:null;const a=document.activeElement;if(a&&a.blur&&a!==document.body)a.blur();fn();const fix=()=>{const n=$(id);if(n&&top!=null){const d=n.getBoundingClientRect().top-top;if(Math.abs(d)>1)window.scrollBy(0,d)}};fix();requestAnimationFrame(fix);setTimeout(()=>{fix();if(after)after()},350);setTimeout(fix,700)}
-function full(){renderWeeks();render()}
+function full(){renderWeeks();render();if(typeof prefetchDetails==='function')prefetchDetails()}
 const missing0=w=>w.sentences.some(x=>!x.ko);
 /* 단어·숙어 '자세히': Claude가 핵심 의미·쓰임·예문·비슷한 표현·팁을 만들고 주차 데이터에 저장 */
 const openVoc=new Set(), openDet=new Set(), detBusy={}, detErr={};
@@ -1087,10 +1087,11 @@ function renderCard(i){
   const nc=tmp.querySelector('#c'+i),oc=real.querySelector('#c'+i);
   if(nc&&oc)oc.replaceWith(nc);tmp.remove();
 }
-async function loadDetail(w,i,j,k){
+async function loadDetail(w,i,j,k,quiet){
+  const rc=()=>{if(!quiet||openDet.has(k))renderCard(i)};
   const s=w.sentences[i],v=s.vocab[j];
-  if(!sample||readOnly){detErr[k]='아직 만들어진 설명이 없습니다. 관리자가 AI 기능을 켜면 자세한 설명을 만들 수 있습니다.';renderCard(i);return}
-  detBusy[k]=Date.now();delete detErr[k];renderCard(i);
+  if(!sample||readOnly){if(quiet)return;detErr[k]='아직 만들어진 설명이 없습니다. 관리자가 AI 기능을 켜면 자세한 설명을 만들 수 있습니다.';renderCard(i);return}
+  detBusy[k]=Date.now();delete detErr[k];rc();
   const basePrompt=`너는 한국 성인 학습자(중급)의 영어 암기를 돕는 노련한 강사다. 학습자가 아래 지문 문장을 통째로 외우고 있다. 문장 속 표현 하나를 깊이 이해하도록 설명한다.
 
 [지문 문장] ${s.en}
@@ -1135,17 +1136,40 @@ ${DETAIL_EXAMPLE}
     const pr=probs(det);
     /* 먼저 받은 설명을 바로 보여 주고, 빠진 항목이 있으면 뒤에서 한 번 더 받아 보완 */
     if(det.core||det.usage||det.examples.length){
-      if(pr.length){detBusy[k]=Date.now();[w,weeks.find(x=>x.id===w.id)].forEach(x=>{const vv=x&&x.sentences[i]&&x.sentences[i].vocab[j];if(vv&&vv.t===v.t)vv.detail=det});renderCard(i);
+      if(pr.length){detBusy[k]=Date.now();[w,weeks.find(x=>x.id===w.id)].forEach(x=>{const vv=x&&x.sentences[i]&&x.sentences[i].vocab[j];if(vv&&vv.t===v.t)vv.detail=det});rc();
         const d2=normDet(await sample.json(basePrompt+`\n\n[주의] 직전 답에서 다음이 부족했다: ${pr.join(', ')}. 이 점을 고쳐 모든 항목을 채워 다시 답한다.`,{modelTier:'default'}).catch(()=>({})));
         if(probs(d2).length<pr.length)det=d2}
     }else throw{code:'invalid_json'};
-    delete detBusy[k];[w,weeks.find(x=>x.id===w.id)].forEach(x=>{const vv=x&&x.sentences[i]&&x.sentences[i].vocab[j];if(vv&&vv.t===v.t)vv.detail=det});renderCard(i);put(det);
+    delete detBusy[k];[w,weeks.find(x=>x.id===w.id)].forEach(x=>{const vv=x&&x.sentences[i]&&x.sentences[i].vocab[j];if(vv&&vv.t===v.t)vv.detail=det});rc();if(quiet)await put(det);else put(det);return true;
   }catch(e){
     delete detBusy[k];
     detErr[k]=e&&e.code==='not_granted'?'AI 기능이 꺼져 있어 설명을 만들 수 없습니다.':e&&e.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':e&&e.code==='network'?'답이 너무 늦어 멈췄습니다. 접었다가 다시 눌러 주세요.':'설명을 만들지 못했습니다. 접었다가 다시 눌러 주세요.';
-    renderCard(i);
+    if(quiet&&!openDet.has(k)){delete detErr[k];return false}
+    rc();return false;
   }
 }
+/* 설명 미리 만들기: 주차를 열면 오늘 문장부터 단어·숙어 설명을 뒤에서 하나씩 만들어 저장 → 누르면 바로 보임 (한 번 만들면 모든 멤버가 같이 씀) */
+let preRun=false;
+function needDet(v){return !(v.detail&&v.detail.core&&v.detail.usage)}
+async function prefetchDetails(){
+  if(preRun)return;preRun=true;
+  try{
+    for(let n=0;n<60;n++){
+      await new Promise(z=>setTimeout(z,n?1500:4000));
+      if(document.visibilityState!=='visible'||!sample||readOnly||!(window.__features||{}).ai)break;
+      const w=weeks.find(x=>x.id===curId);if(!w)break;
+      const today=(()=>{try{const d=plan(w),v=todayView(w);return v&&v[0]==='d'?(d[+v.slice(1)]||[]):[]}catch(_){return []}})();
+      const order=[...new Set([...today,...w.sentences.map((_,i)=>i)])];
+      let job=null;
+      for(const i of order){const vs=(w.sentences[i]&&w.sentences[i].vocab)||[];const j=vs.findIndex((v,jj)=>needDet(v)&&!detBusy[i+'-'+jj]&&!preFail[i+'-'+jj]);if(j>=0){job=[i,j];break}}
+      if(!job)break;
+      const [i,j]=job,k=i+'-'+j;
+      const ok=await loadDetail(w,i,j,k,true);
+      if(!ok){preFail[k]=1;if(Object.keys(preFail).length>=3)break}
+    }
+  }finally{preRun=false}
+}
+const preFail={};
 setInterval(()=>{document.querySelectorAll('.det-t').forEach(el=>{const t0=+el.dataset.t0;if(t0>1e12)el.textContent=Math.round((Date.now()-t0)/1000)+'초'})},1000);
 /* 한 주 연속 듣기: 전체 지문 줄의 버튼 하나로 재생/멈춤, 재생하면 지문을 펼쳐 지금 읽는 문장을 표시 */
 const LONG_RATES=[0.75,0.85,1,1.1,1.25];
