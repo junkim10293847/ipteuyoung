@@ -16,3 +16,4 @@ core, usage, examples(en,ko 3개), similar(t,m 3개), tip 키를 가진 JSON으�
 for k in range(2):
     out.append(f'aiJson detail #{k+1}: ' + call('aiJson', p))
 open('diag/qa_result.txt', 'w').write('\n'.join(out))
+# run 1792764063
