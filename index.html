@@ -413,7 +413,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v84</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v85</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -843,6 +843,15 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
   const kick=()=>{if(Date.now()>until)return;clearTimeout(tmr);tmr=setTimeout(fit,140)};
   vv.addEventListener('resize',kick);vv.addEventListener('scroll',kick);
   document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;el=t;until=Date.now()+1500;kick();setTimeout(fit,500);setTimeout(fit,900)});
+  /* 처음 누를 때 한 번에: 키보드가 올라오기 전에, 지난번 잰 키보드 높이를 기준으로 쓰기 칸 아래 끝이 키보드 바로 위에 오게 미리 맞춰 둠
+     → 브라우저가 따로 더 올리지 않아 '올라갔다 내려오는' 움직임이 없어짐 */
+  vv.addEventListener('resize',()=>{if(el&&document.activeElement===el&&vv.height<window.innerHeight*0.85)ls.set('kbVis',Math.round(vv.height/window.innerHeight*1000)/1000)});
+  let pd=null;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY}},true);
+  document.addEventListener('pointerup',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea'))||document.activeElement===t)return;
+    if(!pd||Math.abs(e.clientX-pd.x)>10||Math.abs(e.clientY-pd.y)>10)return;   // 끌어서 스크롤한 경우는 제외
+    if(!(matchMedia('(pointer:coarse)').matches))return;
+    const ratio=+ls.get('kbVis',0.5)||0.5,visBottom=window.innerHeight*ratio,r=t.getBoundingClientRect(),d=r.bottom-(visBottom-12);
+    if(Math.abs(d)>8&&r.top-d>8)window.scrollBy(0,d)},true);
 })();
 document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))setTimeout(()=>{const a=document.activeElement;if(!(a&&a.matches&&a.matches('textarea,.qa-form input')))document.body.classList.remove('typing')},150)});
 document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWith('wr-'))writeDraft[curId+'|'+el.dataset.i]=el.value});
@@ -1690,8 +1699,10 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
   if(!db){loadPublic(true);return}
   userApi=await c.use('user').catch(()=>null);
   if(userApi){
-    try{isOwner=!!(await userApi.isOwner())}catch(e){}
     try{me=await userApi.id()}catch(e){}
+    /* 관리자 확인은 서버에 물어봐야 해서 느림 → 기다리지 않고 지난번 결과로 바로 시작, 확인되면 조용히 반영 */
+    isOwner=ls.get('isOwner',false)===true;
+    userApi.isOwner().then(v=>{v=!!v;ls.set('isOwner',v);if(v!==isOwner){isOwner=v;if(loaded)keepScroll(full)}}).catch(()=>{});
   }
   attachProgRef();
   db.collection('weeks').orderBy('monday','desc').onSnapshot(snap=>{
