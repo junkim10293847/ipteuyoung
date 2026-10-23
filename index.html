@@ -91,9 +91,12 @@ h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;
 .day.sat .d{color:var(--done)}
 .day.sat[aria-pressed="true"] .d{color:var(--bg)}
 .allbtn{font:inherit;font-size:.8rem;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}
-details.passage>summary{flex-wrap:nowrap;align-items:center}
+details.passage>summary{flex-wrap:nowrap;align-items:center;gap:4px 8px;min-width:0}
 .passage summary .ps-title,.passage summary .ps-sub{white-space:nowrap}
-.ps-long{margin-left:auto;flex:none;padding:5px 12px;font-size:.82rem;align-self:center}
+.ps-act{margin-left:auto;display:flex;gap:4px;flex:none}
+.ps-act .ghost{padding:2px 9px;font-size:.78rem;line-height:1.5;border-radius:999px;min-height:0}
+.ps-rate{font-variant-numeric:tabular-nums;min-width:3.2em}
+details.passage{margin-top:12px;padding:10px 14px}
 .ps-prog{height:6px;background:var(--line);border-radius:3px;margin:8px 0 2px;cursor:pointer;overflow:hidden}
 .ps-prog i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .3s linear}
 .passage{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 18px}
@@ -409,7 +412,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v78</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v79</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -882,7 +885,7 @@ function render(){
   const rng=d=>{const n=d.map(j=>numLabel(w,j)).filter(x=>x!=='T');return !n.length?'복습':n.length===1?n[0]:`${n[0]}–${n[n.length-1]}`};
   const missing=w.sentences.some(s=>!s.ko);
   const psHtml=`   <details class="passage" id="psBox"${psOpen?' open':''}>
-     <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장 ▾</span>${w.longAudio?`<button type="button" class="ghost ps-long" id="longBtn">${longPlaying()?'⏸ 멈춤':'▶ 연속 듣기'}</button>`:''}</summary>
+     <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장</span>${w.longAudio?`<span class="ps-act"><button type="button" class="ghost ps-rate" id="longRate" aria-label="연속 듣기 속도">${longRate()}×</button><button type="button" class="ghost ps-long" id="longBtn">${longPlaying()?'⏸ 멈춤':'▶ 연속 듣기'}</button></span>`:''}</summary>
      ${w.longAudio?`<div class="ps-prog" id="longProg"${longPlaying()?'':' hidden'}><i></i></div>`:''}
      <div class="ps-head"><span></span><button class="alllink" id="psKo">${psKo?'해석 숨기기':'해석 보기'}</button></div>
      ${w.sentences.filter(x=>x.isTitle).map(x=>`<h3>${esc(x.en)}</h3>`).join('')}
@@ -1139,6 +1142,8 @@ ${DETAIL_EXAMPLE}
   }
 }
 /* 한 주 연속 듣기: 전체 지문 줄의 버튼 하나로 재생/멈춤, 재생하면 지문을 펼쳐 지금 읽는 문장을 표시 */
+const LONG_RATES=[0.75,0.85,1,1.1,1.25];
+function longRate(){const r=+ls.get('longRate',1);const v=LONG_RATES.includes(r)?r:1;return v===1?'1.0':String(v)}
 function longPlaying(){const a=$('longAudio');return !!(a&&!a.paused&&!a.ended)}
 function longSync(){const a=$('longAudio'),b=$('longBtn'),pg=$('longProg');const on=longPlaying();
   if(b)b.textContent=on?'⏸ 멈춤':'▶ 연속 듣기';
@@ -1149,8 +1154,12 @@ document.addEventListener('click',e=>{
   if(b){e.preventDefault();e.stopPropagation();const w=weeks.find(x=>x.id===curId),a=$('longAudio');if(!w||!a)return;
     if(longPlaying()){a.pause();return}
     const src=new URL(w.longAudio,location.href).href;if(a.src!==src){a.src=src}
+    a.playbackRate=+longRate();a.defaultPlaybackRate=+longRate();
     const box=$('psBox');if(box&&!box.open){box.open=true;psOpen=true}
     a.play().catch(()=>toast('재생하지 못했어요. 다시 눌러 주세요'));return}
+  const rb=e.target.closest&&e.target.closest('#longRate');
+  if(rb){e.preventDefault();e.stopPropagation();const cur=+longRate(),n=LONG_RATES[(LONG_RATES.indexOf(cur)+1)%LONG_RATES.length];ls.set('longRate',n);
+    rb.textContent=longRate()+'×';const a=$('longAudio');if(a){a.playbackRate=n;a.defaultPlaybackRate=n}toast('연속 듣기 속도 '+longRate()+'×');return}
   const pg=e.target.closest&&e.target.closest('#longProg');
   if(pg){const a=$('longAudio');if(a&&a.duration){const r=pg.getBoundingClientRect();a.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*a.duration;longSync()}}
 },true);
