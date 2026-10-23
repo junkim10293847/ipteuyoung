@@ -1,0 +1,4 @@
+features: 1.3s {"res":{"ai":true,"tts":true}}
+aiText short: 13.9s {"res":"OK"}
+aiJson detail #1: 24.6s {"res":{"core":"'go on walks'는 '산책을 가다'라는 뜻으로, 규칙적이나 여유롭게 걷는 행위를 하러 나간다는 의미를 전달합니다. 'walk'가 명사로 쓰여 '산책'이라는 행동 자체를 강조합니다.","usage":"주로 야외 활동, 여가 시간, 건강 관리에 대해 이야기할 때 사용합니다. 'go on a walk(단수)' 형태로도 자주 쓰이며, 산책의 횟수나 종류에 따라 복수형 'walks'를 사용할 수 있습니다.","examples":[{"en":"I like to go on walks in the park ev
+aiJson detail #2: 25.4s {"res":{"core":"go on walks는 '산책을 가다'라는 의미로, 주로 자연이나 공원 등에서 규칙적이거나 여유롭게 걷는 활동을 할 때 사용하는 표현입니다.","usage":"일상 대화나 여행, 야외활동을 설명할 때 자주 쓰이며, 명사 walk에 복수형 '-s'를 붙여 여러 번의 산책이나 다양한 산책 코스를 즐긴다는 뉘앙스를 줍니다.","examples":[{"en":"We like to go on walks in the morning.","ko":"우리는 아침마다 산책 가는 것을 좋아합니다."},{"en":"You c
