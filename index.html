@@ -237,6 +237,11 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .vdet .sim span::before{content:'○';position:absolute;left:0;top:0;font-size:.7em;line-height:2.3;color:var(--muted)}
 .vdet .sim span b{font-weight:700}
 .qa{border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:8px}
+.askall{margin-top:12px;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.askall .qa{border-top:0;padding-top:0}
+.askall h4{margin:0;font-size:.95rem}
+.qa-old summary{font-size:.8rem;color:var(--muted);cursor:pointer}
+.qa-old[open]{display:grid;gap:8px}
 .qa-item{display:grid;gap:3px}
 .qa-q{font-weight:700;font-size:.82rem}
 .qa-a{white-space:pre-wrap;font-size:.84rem;background:var(--surface);border-radius:8px;padding:8px 10px}
@@ -393,7 +398,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div id="main"></div>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v75</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v76</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -895,6 +900,7 @@ function render(){
      <p class="meta"><b>${dLabel}</b> · ${total}문장${by?` · ${esc(by)} 님이 등록`:''}</p>
      ${todoHtml}
      ${w.longAudio?`<div class="long"><div class="long-h"><b>한 주 분량 연속 듣기</b><span>재생하면 아래 전체 지문에서 지금 읽는 문장이 표시돼요</span></div><audio id="longAudio" controls preload="none" src="${esc(w.longAudio)}"></audio>${psHtml}</div>`:psHtml}
+     ${askAllHtml()}
      <div class="pace">
        <span>하루 분량</span>
        ${[['auto','남은 기간 맞춤'],['1','1개'],['2','2개'],['3','3개'],['4','4개'],['5','5개']].map(([v,l])=>{const ok=v==='auto'||paceOk(w,+v);return `<button class="chip${ok?'':' off'}" data-pace="${v}" aria-pressed="${pace===v}"${ok?'':' disabled title="테스트 전까지 다 못 끝내는 분량이에요"'}>${l}</button>`}).join('')}
@@ -951,23 +957,29 @@ document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classL
 /* 단어·숙어 바로 질문: 답은 닉네임별 개인 기록에 저장 */
 const qaLive={}, qaDraft={};
 const qaKey=k=>curId+'|'+k;
-function qaHtml(k){
-  const key=qaKey(k), list=(prog.qa&&prog.qa[key])||[], live=qaLive[key];
-  const items=list.map(x=>`<div class="qa-item"><div class="qa-q">Q. ${esc(x.q)}</div><div class="qa-a">${esc(x.a)}</div></div>`).join('')
+function qaHtml(k,title,ph){
+  const key=qaKey(k), all=(prog.qa&&prog.qa[key])||[], live=qaLive[key];
+  const old=k==='all'?all.slice(0,-3):[], list=k==='all'?all.slice(-3):all;
+  const one=x=>`<div class="qa-item"><div class="qa-q">Q. ${esc(x.q)}</div><div class="qa-a">${esc(x.a)}</div></div>`;
+  const items=(old.length?`<details class="qa-old"><summary>이전 질문 ${old.length}개 보기</summary>${old.map(one).join('')}</details>`:'')+list.map(x=>`<div class="qa-item"><div class="qa-q">Q. ${esc(x.q)}</div><div class="qa-a">${esc(x.a)}</div></div>`).join('')
     +(detErr['qa'+key]?`<p class="load" style="color:var(--bad,#b3261e)">${esc(detErr['qa'+key])}</p>`:'')
     +(live?`<div class="qa-item"><div class="qa-q">Q. ${esc(live.q)}</div><div class="qa-a" id="qaLive-${esc(k)}">${esc(live.a||'생각하는 중…')}</div></div>`:'');
   const off=!sample||readOnly;
-  return `<div class="qa"><h4>궁금한 점 바로 묻기</h4>${items}
+  return `<div class="qa"><h4>${title||'궁금한 점 바로 묻기'}</h4>${items}
     ${off?`<p class="load">AI 질문 기능은 관리자가 Gemini 키를 넣으면 쓸 수 있습니다.</p>`:
-    `<form class="qa-form" data-k="${esc(k)}"><input id="qaIn-${esc(k)}" data-k="${esc(k)}" maxlength="300" placeholder="예: get stressed out과 be stressed는 뭐가 달라요?" value="${esc(qaDraft[key]||'')}"${live?' disabled':''}><button class="primary" type="submit"${live?' disabled':''}>질문</button></form>`}</div>`;
+    `<form class="qa-form" data-k="${esc(k)}"><input id="qaIn-${esc(k)}" data-k="${esc(k)}" maxlength="300" placeholder="${esc(ph||'예: get stressed out과 be stressed는 뭐가 달라요?')}" value="${esc(qaDraft[key]||'')}"${live?' disabled':''}><button class="primary" type="submit"${live?' disabled':''}>질문</button></form>`}</div>`;
 }
+/* 전체 지문 아래 '영어 무엇이든 묻기': 지문과 상관없는 영어 질문도 바로 답함 */
+function askAllHtml(){return `<div class="askall" id="qaAllBox">${qaHtml('all','💬 영어 무엇이든 묻기','예: fill up과 be full은 어떻게 달라요?')}</div>`}
+function patchAskAll(){const b=$('qaAllBox');if(b)b.outerHTML=askAllHtml()}
 document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWith('qaIn-'))qaDraft[qaKey(el.dataset.k)]=el.value});
 document.addEventListener('submit',async e=>{
   const f=e.target.closest&&e.target.closest('.qa-form');if(!f)return;e.preventDefault();
   const k=f.dataset.k,key=qaKey(k),inp=$('qaIn-'+k),q=(inp&&inp.value||'').trim();if(!q||qaLive[key])return;
   const w=weeks.find(x=>x.id===curId);if(!w)return;
-  const [i,j]=k.split('-').map(Number),s=w.sentences[i],v=s.vocab[j],d=v.detail||{};
   const prev=((prog.qa&&prog.qa[key])||[]).slice(-4);
+  if(k==='all'){askAll(w,k,key,q,prev);return}
+  const [i,j]=k.split('-').map(Number),s=w.sentences[i],v=s.vocab[j],d=v.detail||{};
   const prompt=`너는 한국 성인 학습자의 영어 암기를 20년 넘게 도와 온 노련한 영어 강사다. 학습자는 아래 지문 문장을 토요일 테스트 전까지 통째로 외워야 한다.
 
 [지문 문장] ${s.en}
@@ -1007,6 +1019,34 @@ Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.
   }
   delete qaLive[key];renderCard(i);
 });
+async function askAll(w,k,key,q,prev){
+  const body=w.sentences.filter(x=>!x.isTitle).map((x,n)=>`${n+1}. ${x.en}${x.ko?' ('+x.ko+')':''}`).join('\n');
+  const ttl=(w.sentences.find(x=>x.isTitle)||{}).en||w.title||'';
+  const prompt=`너는 한국 성인 학습자의 영어 공부를 20년 넘게 도와 온 노련한 영어 강사다. 학습자는 이번 주 아래 지문을 외우고 있다.
+
+[이번 주 지문] ${ttl}
+${body}
+${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):''}
+[새 질문] ${q}
+
+답하는 방법:
+1. 질문은 지문 속 표현일 수도, 지문과 상관없는 영어 질문(단어 뜻, 문법, 뉘앙스 차이, 발음, "이 말을 영어로 어떻게 해요?", 작문 첨삭, 공부 방법)일 수도 있다. 무엇이든 그 의도에 맞춰 정확히 답한다.
+2. 첫 줄에 핵심 답을 한 문장으로 말한다.
+3. 질문이 지문과 관련 있으면 해당 문장 번호와 덩어리 표현을 짚어 연결해 준다. 관련 없으면 억지로 연결하지 않는다.
+4. 영어 문장을 고쳐 달라는 질문이면: 고친 문장을 먼저 쓰고, 바뀐 부분과 이유를 짧게 설명한다.
+5. 영어 예문과 표현은 반드시 영어 알파벳으로 쓰고, 바로 뒤 괄호에 자연스러운 한국어 해석을 붙인다. 영어를 한글 발음으로 옮겨 적지 않는다(발음을 물었을 때만 발음 표기).
+6. 실제로 쓰는 자연스러운 예문 1~2개를 준다.
+7. 전체 4~8줄, 한 줄에 한 가지 내용. 마크다운 기호(#, *, -, **)와 번호 목록 없이 줄바꿈만 사용한다. 인사말 없이 존댓말로 쓴다.`;
+  delete detErr['qa'+key];qaLive[key]={q,a:''};qaDraft[key]='';patchAskAll();
+  try{
+    const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
+    const {text}=await sample(prompt,{cache:false,onText});
+    delete qaLive[key];prog.qa=prog.qa||{};prog.qa[key]=((prog.qa[key]||[]).concat([{q,a:text}])).slice(-20);saveProg();
+  }catch(err){
+    qaDraft[key]=q;detErr['qa'+key]=err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'인터넷 연결이 불안정합니다. 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요.';
+  }
+  delete qaLive[key];patchAskAll();
+}
 function detHtml(d,k){
   if(!d){
     if(detBusy[k])return `<p class="load">자세한 설명을 만드는 중… (10~30초)</p>`;
