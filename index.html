@@ -413,7 +413,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v85</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v86</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -836,21 +836,28 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
 /* 쓰기 칸을 누르면 휴대폰이 너무 많이 올려서 다음 문장까지 보이는 문제: 키보드가 다 올라온 뒤
    쓰기 칸 아래 끝이 키보드 바로 위에 오도록 덜 올라간 만큼만 되돌림 (칸 윗부분이 가려지지 않는 범위 안에서) */
 (function(){const vv=window.visualViewport;if(!vv)return;let el=null,tmr=null,until=0;
-  function fit(){if(!el||document.activeElement!==el)return;
-    const kb=vv.height<window.innerHeight*0.85||vv.height<screen.height*0.6;if(!kb)return;
-    const r=el.getBoundingClientRect(),top=vv.offsetTop,bottom=vv.offsetTop+vv.height,gap=bottom-12-r.bottom;
+  /* 키보드가 없을 때의 화면 높이(H0)를 기억: 삼성 인터넷은 키보드가 올라오면 화면 높이 자체가 줄어들어서, 줄어든 높이와 비교하면 키보드를 못 알아챔 */
+  let H0=window.innerHeight,ow=window.innerWidth;
+  const typingNow=()=>{const a=document.activeElement;return !!(a&&a.tagName==='TEXTAREA')};
+  window.addEventListener('resize',()=>{if(window.innerWidth!==ow){ow=window.innerWidth;H0=window.innerHeight;return}if(!typingNow())H0=Math.max(window.innerHeight,vv.height)});
+  const kbOpen=()=>vv.height<H0*0.85;
+  const rkey=()=>'kbVis:'+Math.round(window.innerWidth/50);   // 접은 화면·펼친 화면·가로 화면마다 따로 기억
+  function fit(){if(!el||document.activeElement!==el||!kbOpen())return;
+    ls.set(rkey(),Math.round((vv.offsetTop+vv.height)/H0*1000)/1000);
+    const r=el.getBoundingClientRect(),gap=vv.offsetTop+vv.height-12-r.bottom;
     if(gap>8)window.scrollBy(0,-gap)}
   const kick=()=>{if(Date.now()>until)return;clearTimeout(tmr);tmr=setTimeout(fit,140)};
   vv.addEventListener('resize',kick);vv.addEventListener('scroll',kick);
-  document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;el=t;until=Date.now()+1500;kick();setTimeout(fit,500);setTimeout(fit,900)});
-  /* 처음 누를 때 한 번에: 키보드가 올라오기 전에, 지난번 잰 키보드 높이를 기준으로 쓰기 칸 아래 끝이 키보드 바로 위에 오게 미리 맞춰 둠
-     → 브라우저가 따로 더 올리지 않아 '올라갔다 내려오는' 움직임이 없어짐 */
-  vv.addEventListener('resize',()=>{if(el&&document.activeElement===el&&vv.height<window.innerHeight*0.85)ls.set('kbVis',Math.round(vv.height/window.innerHeight*1000)/1000)});
-  let pd=null;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY}},true);
-  document.addEventListener('pointerup',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea'))||document.activeElement===t)return;
-    if(!pd||Math.abs(e.clientX-pd.x)>10||Math.abs(e.clientY-pd.y)>10)return;   // 끌어서 스크롤한 경우는 제외
-    if(!(matchMedia('(pointer:coarse)').matches))return;
-    const ratio=+ls.get('kbVis',0.5)||0.5,visBottom=window.innerHeight*ratio,r=t.getBoundingClientRect(),d=r.bottom-(visBottom-12);
+  document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;el=t;until=Date.now()+1800;kick();setTimeout(fit,500);setTimeout(fit,1000)});
+  /* 처음 누를 때 한 번에: 키보드가 올라오기 전에, 이 화면에서 실제로 잰 키보드 높이를 기준으로 쓰기 칸 아래 끝이 키보드 바로 위에 오게 미리 맞춰 둠.
+     아직 잰 적이 없으면 미리 움직이지 않고(엉뚱하게 올라가는 것 방지) 키보드가 올라온 뒤 한 번만 맞춤 */
+  let pd=null,pu=0;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY}},true);
+  document.addEventListener('pointerup',e=>{pu=pd&&Math.abs(e.clientX-pd.x)<=10&&Math.abs(e.clientY-pd.y)<=10?Date.now():0},true);
+  /* 손가락으로 눌러 쓰기 칸에 들어온 순간(키보드가 올라오기 전)에 미리 맞춤 — 누르는 도중에 움직이면 다른 곳이 눌리므로 들어온 뒤에 함 */
+  document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;
+    if(!pu||Date.now()-pu>700||!(matchMedia('(pointer:coarse)').matches)||kbOpen())return;pu=0;
+    const ratio=+ls.get(rkey(),0);if(!(ratio>0.2&&ratio<0.85))return;
+    const r=t.getBoundingClientRect(),d=r.bottom-(H0*ratio-12);
     if(Math.abs(d)>8&&r.top-d>8)window.scrollBy(0,d)},true);
 })();
 document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))setTimeout(()=>{const a=document.activeElement;if(!(a&&a.matches&&a.matches('textarea,.qa-form input')))document.body.classList.remove('typing')},150)});
