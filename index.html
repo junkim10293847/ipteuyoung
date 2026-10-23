@@ -413,7 +413,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v80</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v81</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -440,9 +440,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     let r;
     for(let t=0;;t++){
       /* 구글 서버가 가끔 멈춘 듯 응답이 없을 때가 있어 20초(AI는 60초) 넘으면 끊고 한 번 더 시도 */
-      const ac=typeof AbortController!=='undefined'?new AbortController():null,lim=/^ai/.test(fn)?60000:20000,tm=ac&&setTimeout(()=>ac.abort(),lim);
+      const ac=typeof AbortController!=='undefined'?new AbortController():null,lim=/^ai/.test(fn)?120000:20000,tm=ac&&setTimeout(()=>ac.abort(),lim);
       try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args}),redirect:'follow',signal:ac?ac.signal:undefined});clearTimeout(tm);break}
-      catch(e){clearTimeout(tm);if(t>=1)throw{code:'network',message:String(e)};await new Promise(z=>setTimeout(z,1200))}
+      catch(e){clearTimeout(tm);if(t>=1||/^ai/.test(fn))throw{code:'network',message:String(e)};await new Promise(z=>setTimeout(z,1200))}
     }
     let j;try{j=await r.json()}catch(e){throw{code:'upstream_error',message:'bad_response '+r.status}}
     if(j&&j.err)throw{code:errCode(j.err),message:j.err};
@@ -1065,11 +1065,11 @@ ${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):
 }
 function detHtml(d,k){
   if(!d){
-    if(detBusy[k])return `<p class="load">자세한 설명을 만드는 중… (10~30초)</p>`;
+    if(detBusy[k])return `<p class="load">자세한 설명을 만드는 중… <span class="det-t" data-t0="${detBusy[k]}"></span> (보통 20~60초)</p>`;
     if(detErr[k])return `<p class="load">${esc(detErr[k])}</p>`;
     return `<p class="load">불러오는 중…</p>`;
   }
-  return `${detBusy[k]?`<p class="load">이 문장에서의 쓰임까지 보완하는 중… (10~30초)</p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
+  return `${detBusy[k]?`<p class="load">설명을 더 보완하는 중… <span class="det-t" data-t0="${detBusy[k]}"></span></p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
    ${d.usage?`<div class="d-use"><h4>이 문장에서의 쓰임</h4><p>${esc(d.usage)}</p></div>`:''}
    ${(d.examples||[]).length?`<div class="d-ex"><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
    ${(d.similar||[]).length?`<div class="d-sim"><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
@@ -1090,7 +1090,7 @@ function renderCard(i){
 async function loadDetail(w,i,j,k){
   const s=w.sentences[i],v=s.vocab[j];
   if(!sample||readOnly){detErr[k]='아직 만들어진 설명이 없습니다. 관리자가 AI 기능을 켜면 자세한 설명을 만들 수 있습니다.';renderCard(i);return}
-  detBusy[k]=true;delete detErr[k];renderCard(i);
+  detBusy[k]=Date.now();delete detErr[k];renderCard(i);
   const basePrompt=`너는 한국 성인 학습자(중급)의 영어 암기를 돕는 노련한 강사다. 학습자가 아래 지문 문장을 통째로 외우고 있다. 문장 속 표현 하나를 깊이 이해하도록 설명한다.
 
 [지문 문장] ${s.en}
@@ -1128,20 +1128,25 @@ ${DETAIL_EXAMPLE}
     if(!det.tip)p.push('tip이 비었음');
     return p};
   try{
+    const put=async det=>{const cur=weeks.find(x=>x.id===w.id)||w;const sents=JSON.parse(JSON.stringify(cur.sentences));
+      if(sents[i]&&sents[i].vocab[j]&&sents[i].vocab[j].t===v.t){sents[i].vocab[j].detail=det;w.sentences[i].vocab[j].detail=det;if(cur!==w&&cur.sentences[i]&&cur.sentences[i].vocab[j])cur.sentences[i].vocab[j].detail=det}
+      try{await db.doc('weeks/'+w.id).update({sentences:sents})}catch(e){}};
     let det=normDet(await sample.json(basePrompt,{modelTier:'default'}));
-    let pr=probs(det);
-    if(pr.length){const d2=normDet(await sample.json(basePrompt+`\n\n[주의] 직전 답에서 다음이 부족했다: ${pr.join(', ')}. 이 점을 고쳐 모든 항목을 채워 다시 답한다.`,{modelTier:'default'}).catch(()=>({})));if(probs(d2).length<pr.length)det=d2}
-    const cur=weeks.find(x=>x.id===w.id)||w;
-    const sents=JSON.parse(JSON.stringify(cur.sentences));
-    if(sents[i]&&sents[i].vocab[j]&&sents[i].vocab[j].t===v.t){sents[i].vocab[j].detail=det;w.sentences[i].vocab[j].detail=det}
-    delete detBusy[k];renderCard(i);
-    try{await db.doc('weeks/'+w.id).update({sentences:sents})}catch(e){}
+    const pr=probs(det);
+    /* 먼저 받은 설명을 바로 보여 주고, 빠진 항목이 있으면 뒤에서 한 번 더 받아 보완 */
+    if(det.core||det.usage||det.examples.length){
+      if(pr.length){detBusy[k]=Date.now();[w,weeks.find(x=>x.id===w.id)].forEach(x=>{const vv=x&&x.sentences[i]&&x.sentences[i].vocab[j];if(vv&&vv.t===v.t)vv.detail=det});renderCard(i);
+        const d2=normDet(await sample.json(basePrompt+`\n\n[주의] 직전 답에서 다음이 부족했다: ${pr.join(', ')}. 이 점을 고쳐 모든 항목을 채워 다시 답한다.`,{modelTier:'default'}).catch(()=>({})));
+        if(probs(d2).length<pr.length)det=d2}
+    }else throw{code:'invalid_json'};
+    delete detBusy[k];[w,weeks.find(x=>x.id===w.id)].forEach(x=>{const vv=x&&x.sentences[i]&&x.sentences[i].vocab[j];if(vv&&vv.t===v.t)vv.detail=det});renderCard(i);put(det);
   }catch(e){
     delete detBusy[k];
-    detErr[k]=e&&e.code==='not_granted'?'AI 기능이 꺼져 있어 설명을 만들 수 없습니다.':e&&e.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':'설명을 만들지 못했습니다. 접었다가 다시 눌러 주세요.';
+    detErr[k]=e&&e.code==='not_granted'?'AI 기능이 꺼져 있어 설명을 만들 수 없습니다.':e&&e.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':e&&e.code==='network'?'답이 너무 늦어 멈췄습니다. 접었다가 다시 눌러 주세요.':'설명을 만들지 못했습니다. 접었다가 다시 눌러 주세요.';
     renderCard(i);
   }
 }
+setInterval(()=>{document.querySelectorAll('.det-t').forEach(el=>{const t0=+el.dataset.t0;if(t0>1e12)el.textContent=Math.round((Date.now()-t0)/1000)+'초'})},1000);
 /* 한 주 연속 듣기: 전체 지문 줄의 버튼 하나로 재생/멈춤, 재생하면 지문을 펼쳐 지금 읽는 문장을 표시 */
 const LONG_RATES=[0.75,0.85,1,1.1,1.25];
 function longRate(){const r=+ls.get('longRate',1);const v=LONG_RATES.includes(r)?r:1;return v===1?'1.0':String(v)}
