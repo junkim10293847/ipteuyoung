@@ -7,7 +7,7 @@
   python scripts/gen_details.py          # 실제 생성
   python scripts/gen_details.py --plan   # 만들 개수만 확인
 """
-import datetime, json, os, re, sys, time, urllib.request
+import datetime, json, os, re, sys, time, urllib.error, urllib.request
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 MAX_PER_RUN = int(os.environ.get('MAX_DETAILS', '40'))   # 한 번에 최대 개수 (AI 하루 한도 보호)
@@ -20,13 +20,25 @@ def api_url():
 
 
 def call(url, fn, *args, timeout=150):
-    body = json.dumps({'fn': fn, 'args': list(args)}).encode()
-    req = urllib.request.Request(url, data=body, headers={'Content-Type': 'text/plain;charset=utf-8'})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        j = json.loads(r.read().decode('utf-8'))
-    if j.get('err'):
+    """서버 호출. 주차 목록은 GET(앱 음성 생성과 같은 방식), 나머지는 POST. 구글 서버가 잠깐 오류를 내면 다시 시도"""
+    last = None
+    for t in range(3):
+        try:
+            if fn == 'getWeeks' and not args:
+                req = urllib.request.Request(url + ('&' if '?' in url else '?') + 'fn=getWeeks', headers={'User-Agent': 'ipteuyoung-details'})
+            else:
+                body = json.dumps({'fn': fn, 'args': list(args)}).encode()
+                req = urllib.request.Request(url, data=body, headers={'Content-Type': 'text/plain;charset=utf-8'})
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                j = json.loads(r.read().decode('utf-8'))
+            break
+        except urllib.error.HTTPError as e:
+            last = e; print(f'  서버 응답 오류({fn}, {t + 1}/3): {e}'); time.sleep(5 * (t + 1))
+    else:
+        raise last
+    if isinstance(j, dict) and j.get('err'):
         raise RuntimeError(j['err'])
-    return j.get('res')
+    return j.get('res') if isinstance(j, dict) and 'res' in j else j
 
 
 def example():
