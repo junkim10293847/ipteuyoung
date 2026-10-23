@@ -195,6 +195,12 @@ function callAI_(prompt, json) {
 
 /* Gemini 무료: GEMINI_MODEL(쉼표로 여러 개 가능)을 먼저 쓰고, 그 모델이 혼잡·한도 초과·이름 오류면 다음 후보로 자동 전환 */
 const GEMINI_CANDIDATES = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-2.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
+function thinkCfg_(model) {
+  if (/pro/i.test(model)) return null;                       // pro 모델은 생각 단계를 끌 수 없음
+  if (/^gemini-2\.5/.test(model)) return { thinkingBudget: 0 };
+  if (/^gemini-[3-9]/.test(model)) return { thinkingLevel: 'low' };
+  return null;
+}
 function gemini_(prompt, json) {
   const key = PROPS.getProperty('GEMINI_API_KEY');
   const fixed = String(PROPS.getProperty('GEMINI_MODEL') || '').split(',').map(x => x.trim()).filter(Boolean);
@@ -202,16 +208,23 @@ function gemini_(prompt, json) {
   const list = fixed.concat([known], GEMINI_CANDIDATES).filter((x, i, a) => x && a.indexOf(x) === i);
   let lastErr = 'upstream_error';
   for (const model of list) {
-    let res;
-    try {
-      res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
-        method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-        payload: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: json ? { responseMimeType: 'application/json' } : {} })
-      });
-    } catch (e) { lastErr = 'upstream_error: ' + e; continue; }
-    const code = res.getResponseCode();
-    let body = {}; try { body = JSON.parse(res.getContentText() || '{}'); } catch (e) {}
-    const msg = JSON.stringify(body.error || '');
+    let res, code, body, msg;
+    /* 빠르게: 답하기 전 '오래 생각하기' 단계를 끄거나 줄임 (설명 40~70초 → 10~20초). 모델이 이 설정을 모르면 설정 없이 다시 요청 */
+    for (const think of [thinkCfg_(model), null]) {
+      const gc = json ? { responseMimeType: 'application/json' } : {};
+      if (think) gc.thinkingConfig = think;
+      try {
+        res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
+          method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+          payload: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: gc })
+        });
+      } catch (e) { res = null; lastErr = 'upstream_error: ' + e; break; }
+      code = res.getResponseCode();
+      body = {}; try { body = JSON.parse(res.getContentText() || '{}'); } catch (e) {}
+      msg = JSON.stringify(body.error || '');
+      if (!(think && code === 400 && /think/i.test(msg))) break;
+    }
+    if (!res) continue;
     if (code === 404 || (code === 400 && /model/i.test(msg))) { lastErr = 'model_not_found ' + model; continue; }
     if (code === 429) { lastErr = 'rate_limited'; continue; }                         // 이 모델 한도 초과 → 다른 모델
     if (code >= 500 || /high demand|overloaded|UNAVAILABLE/i.test(msg)) { lastErr = 'upstream_error: busy'; continue; } // 혼잡 → 다른 모델
