@@ -1,42 +1,50 @@
-Traceback (most recent call last):
-  File "/home/runner/work/ipteuyoung/ipteuyoung/scripts/gen_details.py", line 151, in <module>
-    main()
-  File "/home/runner/work/ipteuyoung/ipteuyoung/scripts/gen_details.py", line 120, in main
-    weeks = call(url, 'getWeeks') or {}
-            ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/ipteuyoung/ipteuyoung/scripts/gen_details.py", line 25, in call
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 216, in urlopen
-    return opener.open(url, data, timeout)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 525, in open
-    response = meth(req, response)
-               ^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 634, in http_response
-    response = self.parent.error(
-               ^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 557, in error
-    result = self._call_chain(*args)
-             ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 496, in _call_chain
-    result = func(*args)
-             ^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 749, in http_error_302
-    return self.parent.open(new, timeout=req.timeout)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 525, in open
-    response = meth(req, response)
-               ^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 634, in http_response
-    response = self.parent.error(
-               ^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 563, in error
-    return self._call_chain(*args)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 496, in _call_chain
-    result = func(*args)
-             ^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/urllib/request.py", line 643, in http_error_default
-    raise HTTPError(req.full_url, code, msg, hdrs, fp)
-urllib.error.HTTPError: HTTP Error 404: Not Found
+  서버 응답 오류(getWeeks, 1/3): HTTP Error 404: Not Found
+설명이 없는 단어·숙어 34개 (이번에 최대 40개)
+  2026-10-19 #0 Touring: 완료 (11초)
+  2026-10-19 #0 Natural Recreation Forests: 완료 (33초)
+  서버 응답 오류(aiJson, 1/3): HTTP Error 404: Not Found
+  2026-10-19 #3 open: 완료 (71초)
+  2026-10-19 #4 get lucky: 완료 (47초)
+  2026-10-19 #5 what makes each region special: 완료 (24초)
+  → 5개 저장
+  2026-10-19 #6 local specialties: 완료 (21초)
+  2026-10-19 #6 traditional markets: 완료 (10초)
+  2026-10-19 #7 local festival: 완료 (13초)
+  2026-10-19 #8 forest activities: 완료 (9초)
+  2026-10-19 #9 have: 완료 (32초)
+  서버 응답 오류(getWeeks, 1/3): HTTP Error 404: Not Found
+  → 2개 저장
+  2026-10-19 #10 grateful: 완료 (12초)
+  2026-10-19 #10 spend time together: 완료 (10초)
+  2026-10-19 #11 reasonable: 완료 (11초)
+  2026-10-19 #11 so many different things: 완료 (12초)
+  2026-10-12 #0 pot: 완료 (11초)
+  → 5개 저장
+  2026-10-12 #1 post: 완료 (10초)
+  2026-10-12 #3 a little: 완료 (11초)
+  2026-10-12 #4 feel happy: 완료 (10초)
+  2026-10-12 #5 gram: 완료 (10초)
+  2026-10-12 #6 without + 동명사: 완료 (20초)
+  → 5개 저장
+  2026-10-12 #8 add: 완료 (10초)
+  2026-10-12 #9 next: 완료 (22초)
+  2026-10-12 #10 boil down: 완료 (15초)
+  2026-10-12 #10 start to + 동사원형: 완료 (14초)
+  2026-10-12 #10 lower the heat: 완료 (17초)
+  → 5개 저장
+  2026-10-12 #10 another + 시간: 완료 (11초)
+  2026-10-12 #11 finally: 완료 (53초)
+  2026-10-12 with the lid on: 내용 부족, 건너뜀
+  서버 응답 오류(aiJson, 1/3): HTTP Error 302: The HTTP server returned a redirect error that would lead to an infinite loop.
+The last 30x error message was:
+Found
+  서버 응답 오류(aiJson, 2/3): HTTP Error 404: Not Found
+  2026-10-12 #11 lid: 완료 (175초)
+  2026-10-12 #11 be ready: 완료 (10초)
+  2026-10-12 #12 Using ... can make it easier: 완료 (25초)
+  → 5개 저장
+  2026-10-12 #12 timer: 완료 (7초)
+  2026-10-12 #12 induction cooktop: 완료 (9초)
+  2026-10-12 #12 make it + 형용사: 완료 (10초)
+  → 3개 저장
+설명 30개 저장
