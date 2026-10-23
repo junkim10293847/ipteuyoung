@@ -91,7 +91,11 @@ h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;
 .day.sat .d{color:var(--done)}
 .day.sat[aria-pressed="true"] .d{color:var(--bg)}
 .allbtn{font:inherit;font-size:.8rem;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}
-.long .passage{margin-top:4px;padding:10px 14px}
+details.passage>summary{flex-wrap:nowrap;align-items:center}
+.passage summary .ps-title,.passage summary .ps-sub{white-space:nowrap}
+.ps-long{margin-left:auto;flex:none;padding:5px 12px;font-size:.82rem;align-self:center}
+.ps-prog{height:6px;background:var(--line);border-radius:3px;margin:8px 0 2px;cursor:pointer;overflow:hidden}
+.ps-prog i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .3s linear}
 .passage{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 18px}
 .passage summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;list-style:none}
 .passage summary::-webkit-details-marker{display:none}
@@ -397,6 +401,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </section>
 
   <div id="main"></div>
+  <audio id="longAudio" preload="none" hidden></audio>
   <script>/* 다시 열릴 때: 떠나기 직전 화면을 그대로 먼저 그려 둠 (자료는 뒤에서 받아 조용히 바꿔 끼움) */
   (function(){try{const u=JSON.parse(localStorage.getItem('uiState')||'null'),sn=localStorage.getItem('uiSnap');
     if(!u||!sn||Date.now()-u.at>3*3600e3||new Date(u.at).toDateString()!==new Date().toDateString())return;
@@ -404,7 +409,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v77</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v78</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -877,7 +882,8 @@ function render(){
   const rng=d=>{const n=d.map(j=>numLabel(w,j)).filter(x=>x!=='T');return !n.length?'복습':n.length===1?n[0]:`${n[0]}–${n[n.length-1]}`};
   const missing=w.sentences.some(s=>!s.ko);
   const psHtml=`   <details class="passage" id="psBox"${psOpen?' open':''}>
-     <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장 · 눌러서 펼치기</span></summary>
+     <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장 ▾</span>${w.longAudio?`<button type="button" class="ghost ps-long" id="longBtn">${longPlaying()?'⏸ 멈춤':'▶ 연속 듣기'}</button>`:''}</summary>
+     ${w.longAudio?`<div class="ps-prog" id="longProg"${longPlaying()?'':' hidden'}><i></i></div>`:''}
      <div class="ps-head"><span></span><button class="alllink" id="psKo">${psKo?'해석 숨기기':'해석 보기'}</button></div>
      ${w.sentences.filter(x=>x.isTitle).map(x=>`<h3>${esc(x.en)}</h3>`).join('')}
      <p class="ps-text">${w.sentences.map((x,j)=>x.isTitle?'':`<span class="ps" data-ps="${j}">${(()=>{const m=marksOf(w.id,j);return x.en.split(' ').map((t,k)=>`<span class="pw${m[k]?' mk-y':''}" data-w="${k}">${esc(t)}</span>`).join(' ')})()}</span>${psKo&&x.ko?`<span class="ps-ko">${esc(x.ko)}</span>`:''}`).join(' ')}</p>
@@ -905,7 +911,7 @@ function render(){
      ${w.sentences.some(x=>!x.audio)?`<div class="pending"><span class="dot" aria-hidden="true"></span><div><b>${window.__features.tts?'🔊 원어민 음성 만드는 중':'🔊 기기 음성으로 재생 중'}</b><span>${window.__features.tts?'15~20분 안에 자동으로 원어민 음성이 붙습니다. 그동안은 휴대폰 기본 음성으로 읽어 줍니다.':'휴대폰 기본 음성으로 읽어 줍니다.'}</span></div></div>`:''}
      <p class="meta"><b>${dLabel}</b> · ${total}문장${by?` · ${esc(by)} 님이 등록`:''}</p>
      ${todoHtml}
-     ${w.longAudio?`<div class="long"><div class="long-h"><b>한 주 분량 연속 듣기</b><span>재생하면 아래 전체 지문에서 지금 읽는 문장이 표시돼요</span></div><audio id="longAudio" controls preload="none" src="${esc(w.longAudio)}"></audio>${psHtml}</div>`:psHtml}
+     ${psHtml}
      ${askAllHtml()}
      <div class="pace">
        <span>하루 분량</span>
@@ -1132,6 +1138,22 @@ ${DETAIL_EXAMPLE}
     renderCard(i);
   }
 }
+/* 한 주 연속 듣기: 전체 지문 줄의 버튼 하나로 재생/멈춤, 재생하면 지문을 펼쳐 지금 읽는 문장을 표시 */
+function longPlaying(){const a=$('longAudio');return !!(a&&!a.paused&&!a.ended)}
+function longSync(){const a=$('longAudio'),b=$('longBtn'),pg=$('longProg');const on=longPlaying();
+  if(b)b.textContent=on?'⏸ 멈춤':'▶ 연속 듣기';
+  if(pg){pg.hidden=!on&&!(a&&a.currentTime>0&&!a.ended);const i=pg.querySelector('i');if(i&&a&&a.duration)i.style.width=(a.currentTime/a.duration*100)+'%'}}
+['play','pause','ended','timeupdate'].forEach(ev=>document.addEventListener(ev,e=>{if(e.target.id==='longAudio')longSync()},true));
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('#longBtn');
+  if(b){e.preventDefault();e.stopPropagation();const w=weeks.find(x=>x.id===curId),a=$('longAudio');if(!w||!a)return;
+    if(longPlaying()){a.pause();return}
+    const src=new URL(w.longAudio,location.href).href;if(a.src!==src){a.src=src}
+    const box=$('psBox');if(box&&!box.open){box.open=true;psOpen=true}
+    a.play().catch(()=>toast('재생하지 못했어요. 다시 눌러 주세요'));return}
+  const pg=e.target.closest&&e.target.closest('#longProg');
+  if(pg){const a=$('longAudio');if(a&&a.duration){const r=pg.getBoundingClientRect();a.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*a.duration;longSync()}}
+},true);
 const hasAudio=w=>!!w.longAudio&&w.sentences.every(s=>s.audio&&s.alt&&s.alt.am&&s.alt.bf&&(s.vocab||[]).every(v=>v.audio));
 async function requestAudio(w,st){st.className='status';st.textContent=window.__features.tts?'저장했습니다. 원어민 음성을 자동으로 만들고 있어요(15~20분). 그동안은 기기 음성으로 재생됩니다.':'저장했습니다. 기기 음성으로 재생됩니다.';return false}
 
@@ -1199,7 +1221,7 @@ document.addEventListener('click',async e=>{
   if(ps){const w0=weeks.find(x=>x.id===curId);if(!w0)return;const sl=window.getSelection();if(sl&&!sl.isCollapsed)return;const j=+ps.dataset.ps;stop();const my=token;document.querySelectorAll('.ps.on').forEach(x=>x.classList.remove('on'));ps.classList.add('on');await playOne(w0.sentences[j],j,+$('rate').value,my,true);ps.classList.remove('on');if(my===token)hl(null);return}
   const t=e.target.closest('button,.en'); if(!t)return;
   const w=weeks.find(x=>x.id===curId);
-  if(t.dataset.week){stop();revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
+  if(t.dataset.week){stop();{const la=$('longAudio');if(la)la.pause()}revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
   if(t.id==='addBtn'){openAdd();return}
   if(t.dataset.view){stop();view=view===t.dataset.view&&t.dataset.view==='all'?todayView(w):t.dataset.view;render();return}
   if(t.dataset.pace){stop();prog.pace[w.id]=t.dataset.pace;saveProg();view=todayView(w);render();return}
