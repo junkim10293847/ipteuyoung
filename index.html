@@ -13,7 +13,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <script src="config.js"></script>
 <title>입트영 주간 암기</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<!-- 글꼴은 화면을 막지 않게 뒤에서 받음 (다시 열 때 바로 보이도록) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Noto+Sans+KR:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
 <style>
 [hidden]{display:none!important}
 /* Layout: week chips → week header with Mon–Sat plan → day tabs → sentence cards; sticky audio dock at bottom */
@@ -396,9 +397,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </section>
 
   <div id="main"></div>
+  <script>/* 다시 열릴 때: 떠나기 직전 화면을 그대로 먼저 그려 둠 (자료는 뒤에서 받아 조용히 바꿔 끼움) */
+  (function(){try{const u=JSON.parse(localStorage.getItem('uiState')||'null'),sn=localStorage.getItem('uiSnap');
+    if(!u||!sn||Date.now()-u.at>3*3600e3||new Date(u.at).toDateString()!==new Date().toDateString())return;
+    const x=JSON.parse(sn);document.getElementById('main').innerHTML=x.main;const wr=document.getElementById('weekRow');if(wr&&x.week)wr.innerHTML=x.week;
+    try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v76</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v77</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -839,7 +845,7 @@ function wordsHtml(t,i){
 }
 function render(){
   const main=$('main');
-  if(!loaded){main.innerHTML=`<div class="empty-state"><b>주차 목록을 불러오는 중</b>잠시만 기다려 주세요.</div>`;return}
+  if(!loaded){if(window.__snap)return;main.innerHTML=`<div class="empty-state"><b>주차 목록을 불러오는 중</b>잠시만 기다려 주세요.</div>`;return}
   if(dbFailed){main.innerHTML=`<div class="empty-state"><b>저장된 주차를 불러올 수 없습니다</b>잠시 후 다시 열어 주세요. 계속 안 되면 관리자에게 알려 주세요.</div>`;return}
   const w=weeks.find(x=>x.id===curId);
   if(!w){main.innerHTML=`<div class="empty-state"><b>아직 등록된 주차가 없습니다</b>위의 '+ 새 주차'를 눌러 지문을 붙여 넣으면 월~금 분량이 자동으로 나뉩니다.</div>`;return}
@@ -1588,6 +1594,7 @@ function scrollToAnchor(a){if(!a)return;try{history.scrollRestoration='manual'}c
 function keepScroll(fn){const a=topAnchor();fn();scrollToAnchor(a)}
 function saveUi(){if(!loaded||!curId)return;try{
   if(mock){const ta=$('mockIn');if(ta&&!mock.res)mock.ans[mock.pos]=ta.value}
+  try{const mn=$('main');if(mn&&mn.querySelector('li.card'))localStorage.setItem('uiSnap',JSON.stringify({main:mn.innerHTML,week:($('weekRow')||{}).innerHTML||'',y:Math.round(scrollY)}))}catch(_){}
   localStorage.setItem(UI_KEY,JSON.stringify({at:Date.now(),curId,view,a:topAnchor(),wo:[...writeOpen],wd:writeDraft,to:toolOpen,mock,seqPos,seqAns,vo:[...openVoc]}))}catch(_){}}
 function restoreUi(){try{const u=JSON.parse(localStorage.getItem(UI_KEY)||'null');
   if(!u||Date.now()-u.at>3*3600e3||new Date(u.at).toDateString()!==new Date().toDateString()||!weeks.find(w=>w.id===u.curId))return false;
