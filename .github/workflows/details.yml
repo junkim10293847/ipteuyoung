@@ -1,0 +1,20 @@
+name: 단어 설명 미리 만들기
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'      # 30분마다: 설명이 없는 단어·숙어가 있으면 미리 만들어 둠 (없으면 몇 초 만에 끝남)
+  workflow_dispatch: {}
+
+concurrency:
+  group: details
+  cancel-in-progress: false
+
+jobs:
+  details:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: python scripts/gen_details.py
