@@ -413,7 +413,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v83</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v84</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -833,6 +833,17 @@ function writeHtml(w,i){
   </div>`;
 }
 document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))document.body.classList.add('typing')});
+/* 쓰기 칸을 누르면 휴대폰이 너무 많이 올려서 다음 문장까지 보이는 문제: 키보드가 다 올라온 뒤
+   쓰기 칸 아래 끝이 키보드 바로 위에 오도록 덜 올라간 만큼만 되돌림 (칸 윗부분이 가려지지 않는 범위 안에서) */
+(function(){const vv=window.visualViewport;if(!vv)return;let el=null,tmr=null,until=0;
+  function fit(){if(!el||document.activeElement!==el)return;
+    const kb=vv.height<window.innerHeight*0.85||vv.height<screen.height*0.6;if(!kb)return;
+    const r=el.getBoundingClientRect(),top=vv.offsetTop,bottom=vv.offsetTop+vv.height,gap=bottom-12-r.bottom;
+    if(gap>8)window.scrollBy(0,-gap)}
+  const kick=()=>{if(Date.now()>until)return;clearTimeout(tmr);tmr=setTimeout(fit,140)};
+  vv.addEventListener('resize',kick);vv.addEventListener('scroll',kick);
+  document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;el=t;until=Date.now()+1500;kick();setTimeout(fit,500);setTimeout(fit,900)});
+})();
 document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))setTimeout(()=>{const a=document.activeElement;if(!(a&&a.matches&&a.matches('textarea,.qa-form input')))document.body.classList.remove('typing')},150)});
 document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWith('wr-'))writeDraft[curId+'|'+el.dataset.i]=el.value});
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
