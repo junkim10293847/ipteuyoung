@@ -413,7 +413,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v82</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v83</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1264,7 +1264,7 @@ document.addEventListener('click',async e=>{
   if(ps){const w0=weeks.find(x=>x.id===curId);if(!w0)return;const sl=window.getSelection();if(sl&&!sl.isCollapsed)return;const j=+ps.dataset.ps;stop();const my=token;document.querySelectorAll('.ps.on').forEach(x=>x.classList.remove('on'));ps.classList.add('on');await playOne(w0.sentences[j],j,+$('rate').value,my,true);ps.classList.remove('on');if(my===token)hl(null);return}
   const t=e.target.closest('button,.en'); if(!t)return;
   const w=weeks.find(x=>x.id===curId);
-  if(t.dataset.week){stop();{const la=$('longAudio');if(la)la.pause()}revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
+  if(t.dataset.week){stop();writeOpen.clear();{const la=$('longAudio');if(la)la.pause()}revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
   if(t.id==='addBtn'){openAdd();return}
   if(t.dataset.view){stop();view=view===t.dataset.view&&t.dataset.view==='all'?todayView(w):t.dataset.view;render();return}
   if(t.dataset.pace){stop();prog.pace[w.id]=t.dataset.pace;saveProg();view=todayView(w);render();return}
@@ -1660,11 +1660,11 @@ function keepScroll(fn){const a=topAnchor();fn();scrollToAnchor(a)}
 function saveUi(){if(!loaded||!curId)return;try{
   if(mock){const ta=$('mockIn');if(ta&&!mock.res)mock.ans[mock.pos]=ta.value}
   try{const mn=$('main');if(mn&&mn.querySelector('li.card'))localStorage.setItem('uiSnap',JSON.stringify({main:mn.innerHTML,week:($('weekRow')||{}).innerHTML||'',y:Math.round(scrollY)}))}catch(_){}
-  localStorage.setItem(UI_KEY,JSON.stringify({at:Date.now(),curId,view,a:topAnchor(),wo:[...writeOpen],wd:writeDraft,to:toolOpen,mock,seqPos,seqAns,vo:[...openVoc]}))}catch(_){}}
+  localStorage.setItem(UI_KEY,JSON.stringify({at:Date.now(),curId,view,a:topAnchor(),wo:[...writeOpen].filter(i=>{const d=writeDraft[curId+'|'+i];return d&&d.trim()&&!(writeRes[curId+'|'+i]||{}).perfect}),wd:writeDraft,to:toolOpen,mock,seqPos,seqAns,vo:[...openVoc]}))}catch(_){}}
 function restoreUi(){try{const u=JSON.parse(localStorage.getItem(UI_KEY)||'null');
   if(!u||Date.now()-u.at>3*3600e3||new Date(u.at).toDateString()!==new Date().toDateString()||!weeks.find(w=>w.id===u.curId))return false;
   uiSaved=u;curId=u.curId;view=u.view||view;
-  (u.wo||[]).forEach(i=>writeOpen.add(i));Object.assign(writeDraft,u.wd||{});Object.assign(toolOpen,u.to||{});
+  Object.assign(writeDraft,u.wd||{});(u.wo||[]).forEach(i=>{const d=writeDraft[u.curId+'|'+i];if(d&&d.trim())writeOpen.add(i)});Object.assign(toolOpen,u.to||{});
   if(u.mock&&u.mock.wid===curId)mock=u.mock;seqPos=u.seqPos||0;Object.assign(seqAns,u.seqAns||{});(u.vo||[]).forEach(i=>openVoc.add(i));
   return true}catch(_){return false}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveUi()});
