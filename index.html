@@ -229,6 +229,17 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .vi{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px;font-size:.84rem;align-items:baseline}
 .vi dt{font-weight:600;display:flex;gap:4px;align-items:baseline;min-width:0}
 .vi dd{margin:0;color:var(--muted);min-width:0}
+.wbstar{border:0;background:none;padding:0 4px;margin-left:2px;cursor:pointer;font-size:1rem;line-height:1;color:var(--muted)}
+.wbstar.on{color:#e5a100}
+.wb{display:grid;gap:8px;margin-top:10px}
+.wb-top{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--muted)}
+.wb-top .ghost{padding:4px 12px;font-size:.8rem}
+.wb-list{display:grid;gap:8px;list-style:none;padding:0;margin:0}
+.wb-list li{background:var(--bg);border-radius:10px;padding:9px 12px;display:grid;gap:3px}
+.wb-h{display:flex;align-items:center;gap:4px}.wb-h b{flex:1;font-size:.95rem}
+.wb-m{font-size:.86rem}
+.wb-m.hid{color:var(--muted);background:var(--line);border-radius:6px;cursor:pointer;user-select:none;font-size:.78rem;padding:2px 8px;justify-self:start}
+.wb-s{font-size:.76rem;color:var(--muted)}.wb-s span{opacity:.8}
 .vplay{border:0;background:none;padding:0 2px;cursor:pointer;font-size:.8rem;line-height:1;color:var(--fg)}
 @media (max-width:420px){.vi{grid-template-columns:1fr}.vi dd{padding-left:22px;margin-top:-2px}}
 .vmore{border:0;background:none;padding:0 0 0 4px;cursor:pointer;font:inherit;font-size:.76rem;font-weight:700;color:var(--accent);white-space:nowrap}
@@ -413,7 +424,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v87</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v88</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -591,7 +602,7 @@ function loadLocalProg(){
       else{p={done:{},pace:{}};for(let n=0;n<localStorage.length;n++){const k=localStorage.key(n);if(k.startsWith('done:'))p.done[k.slice(5)]=JSON.parse(localStorage.getItem(k)||'{}');if(k.startsWith('pace:'))p.pace[k.slice(5)]=JSON.parse(localStorage.getItem(k)||'"auto"')}}
       localStorage.setItem('progMigrated','1');
     }
-    if(p&&p.done)prog={done:p.done||{},pace:p.pace||{},qa:p.qa||{},marks:p.marks||{},weak:p.weak||{},tests:p.tests||{}};
+    if(p&&p.done)prog={done:p.done||{},pace:p.pace||{},qa:p.qa||{},marks:p.marks||{},weak:p.weak||{},tests:p.tests||{},wb:p.wb||{}};
   }catch(e){}
 }
 async function attachProgRef(){
@@ -599,17 +610,22 @@ async function attachProgRef(){
   try{
     const ref=db.collection('data/users/'+me).doc('progress-'+hashNick(nick));
     const snap=await ref.get();
-    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})}}}
+    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb)}}
     progRef=ref;reconcileProg();render();
     if(snap.exists||Object.keys(prog.done||{}).length)saveProg();   /* 오프라인·다른 기기에서 쌓인 기록을 합친 결과를 서버에 다시 저장 */
   }catch(e){progRef=null}
 }
 window.addEventListener('online',()=>{if(!progRef&&nick)attachProgRef()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!progRef&&nick&&db)attachProgRef()});
+/* ===== 내 단어장: 단어·숙어 옆 ☆를 누르면 담김 (닉네임별 저장, 모든 주차를 한곳에서 관리) ===== */
+const wbKey=t=>String(t||'').trim().toLowerCase().replace(/\s+/g,' ');
+function mergeWb(a,b){const o={...(a||{})};Object.entries(b||{}).forEach(([k,v])=>{if(!o[k]||(v&&v.at||0)>=(o[k].at||0))o[k]=v});return o}
+const wbHas=t=>{const e=(prog.wb||{})[wbKey(t)];return !!(e&&!e.off)};
+const wbList=()=>Object.values(prog.wb||{}).filter(e=>e&&!e.off).sort((a,b)=>b.at-a.at);
 function saveProg(){
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
+  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
 }
 const doneOf=id=>prog.done[id]||{};
 /* 공부 가능한 날: 배정 다음 날(일) ~ 테스트 전날(금) = 6일 */
@@ -865,7 +881,7 @@ document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWi
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
 let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null, seqAns={};
 const toolOpen={};
-document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox')toolOpen[id]=e.target.open},true);
+document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox')toolOpen[id]=e.target.open},true);
 let psKo=false, psOpen=false;
 document.addEventListener('toggle',e=>{if(e.target.id==='psBox')psOpen=e.target.open},true);
 /* 내 표시(노랑·빨강): 문장에서 드래그해 고른 단어를 닉네임별로 저장 */
@@ -966,7 +982,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
        <div class="ko${s.ko?'':' empty'}">${s.ko?esc(s.ko):'해석 없음'}</div>
        ${(()=>{const e=weakOf(w.id,i);return e?`<div class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</div>`:''})()}
 
-       ${v.length?`<details class="voc" data-i="${i}"${vocOpen||openVoc.has(i)?' open':''}><summary>단어·숙어 ${v.length}</summary><dl>${v.map((x,j)=>{const k=i+'-'+j,op=openDet.has(k);return `<div class="vi"><dt><button class="vplay${x.audio?'':' waiting'}" data-t="${esc(x.t)}" data-a="${esc(x.audio||'')}" aria-label="${esc(x.t)} 듣기">${x.audio?'🔊':'⏳'}</button>${esc(x.t)}</dt><dd>${esc(x.m)} <button class="vmore" data-k="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button></dd>${op?`<div class="vdet">${detHtml(x.detail,k)}</div>`:''}</div>`}).join('')}</dl></details>`:''}
+       ${v.length?`<details class="voc" data-i="${i}"${vocOpen||openVoc.has(i)?' open':''}><summary>단어·숙어 ${v.length}</summary><dl>${v.map((x,j)=>{const k=i+'-'+j,op=openDet.has(k);return `<div class="vi"><dt><button class="vplay${x.audio?'':' waiting'}" data-t="${esc(x.t)}" data-a="${esc(x.audio||'')}" aria-label="${esc(x.t)} 듣기">${x.audio?'🔊':'⏳'}</button>${esc(x.t)}<button class="wbstar${wbHas(x.t)?' on':''}" data-wb="${i}-${j}" aria-pressed="${wbHas(x.t)}" aria-label="내 단어장에 담기">${wbHas(x.t)?'★':'☆'}</button></dt><dd>${esc(x.m)} <button class="vmore" data-k="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button></dd>${op?`<div class="vdet">${detHtml(x.detail,k)}</div>`:''}</div>`}).join('')}</dl></details>`:''}
        <div class="acts">
          ${s.audio?`<button class="play" data-i="${i}">▶ 듣기</button>`:`<button class="play" data-i="${i}">▶ 듣기</button>`}
          <button class="slow" data-i="${i}">▶ 천천히</button>
@@ -979,6 +995,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    </ol>
    <details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
    <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">한글만 보고 처음부터 끝까지 써 보고 총점 받기</span></summary>${mockHtml(w)}</details>
+   <details class="tool" id="wbBox"${toolOpen.wbBox?' open':''}><summary><span class="t-title">⭐ 내 단어장 <b class="wb-n">${wbList().length||''}</b></span><span class="t-sub">☆로 담은 단어·숙어를 모든 주차에서 모아 보기</span></summary><div id="wbBody">${wbHtml()}</div></details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
    <p class="note">외움 표시와 하루 분량은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
@@ -1595,6 +1612,27 @@ function mockHtml(w){
     <button class="ghost" id="mockClose">끝내기</button></div></div>`;
 }
 /* 4. 내 약점 */
+let wbHide=false;
+function wbHtml(){const L=wbList();
+  if(!L.length)return `<p class="hint" style="margin-top:10px">단어·숙어 목록에서 표현 옆 <b>☆</b>를 누르면 여기에 모입니다. 주차가 바뀌어도 계속 남아요.</p>`;
+  return `<div class="wb"><div class="wb-top"><span>${L.length}개</span><button class="ghost" id="wbHideBtn">${wbHide?'뜻 보기':'뜻 가리기'}</button></div>
+    <ul class="wb-list">${L.map(e=>{const k=esc(wbKey(e.t));return `<li><div class="wb-h"><button class="vplay" data-t="${esc(e.t)}" data-a="${esc(e.a||'')}" aria-label="듣기">🔊</button><b>${esc(e.t)}</b><button class="wbstar on" data-wbk="${k}" aria-label="단어장에서 빼기">★</button></div>
+      <div class="wb-m${wbHide?' hid':''}" data-m="${esc(e.m||'')}">${wbHide?'눌러서 뜻 보기':esc(e.m||'')}</div>${e.en?`<div class="wb-s">${esc(e.en)}${e.wt?` <span>· ${esc(e.wt)}</span>`:''}</div>`:''}</li>`}).join('')}</ul></div>`}
+function wbPatch(){const b=$('wbBody');if(b)b.innerHTML=wbHtml();const n=document.querySelector('#wbBox .wb-n');if(n)n.textContent=wbList().length||''}
+function wbStars(t){const on=wbHas(t);document.querySelectorAll('.wbstar[data-wb]').forEach(b=>{const w=weeks.find(x=>x.id===curId);if(!w)return;const [i,j]=b.dataset.wb.split('-').map(Number);const v=w.sentences[i]&&w.sentences[i].vocab[j];if(v&&wbKey(v.t)===wbKey(t)){b.classList.toggle('on',on);b.textContent=on?'★':'☆';b.setAttribute('aria-pressed',on)}})}
+document.addEventListener('click',e=>{
+  const s=e.target.closest&&e.target.closest('.wbstar');
+  if(s){e.preventDefault();e.stopPropagation();prog.wb=prog.wb||{};
+    if(s.dataset.wb){const w=weeks.find(x=>x.id===curId);if(!w)return;const [i,j]=s.dataset.wb.split('-').map(Number),sn=w.sentences[i],v=sn&&sn.vocab[j];if(!v)return;
+      const k=wbKey(v.t);
+      if(wbHas(v.t)){prog.wb[k]={...prog.wb[k],off:true,at:Date.now()};toast('내 단어장에서 뺐어요')}
+      else{prog.wb[k]={t:v.t,m:v.m||'',a:v.audio||'',en:sn.en,wid:w.id,wt:w.title||'',at:Date.now()};toast('⭐ 내 단어장에 담았어요')}
+      saveProg();wbStars(v.t);wbPatch();return}
+    if(s.dataset.wbk){const k=s.dataset.wbk,e0=prog.wb[k];if(!e0)return;prog.wb[k]={...e0,off:true,at:Date.now()};saveProg();wbStars(e0.t);wbPatch();toast('내 단어장에서 뺐어요');return}
+  }
+  if(e.target.id==='wbHideBtn'){wbHide=!wbHide;wbPatch();return}
+  const m=e.target.closest&&e.target.closest('.wb-m.hid');if(m){m.classList.remove('hid');m.textContent=m.dataset.m;return}
+},true);
 function weakHtml(w){
   const W=(prog.weak||{})[w.id]||{}, b=bodyOf(w);
   const rows=b.filter(j=>W[j]&&W[j].last<100).sort((x,y)=>W[x].last-W[y].last);
