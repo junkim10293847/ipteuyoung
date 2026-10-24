@@ -269,6 +269,8 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .vdet .sim span::before{content:'○';position:absolute;left:0;top:0;font-size:.7em;line-height:2.3;color:var(--muted)}
 .vdet .sim span b{font-weight:700}
 .qa{border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:8px}
+.qa-hd{display:flex;align-items:baseline;gap:8px}.qa-hd h4{flex:1;margin:0}.qa-hd .qa-tg{flex:none}
+.qa-old{display:grid;gap:8px}
 .askall{margin-top:12px;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .askall .qa{border-top:0;padding-top:0}
 .askall h4{margin:0;font-size:.95rem}
@@ -438,7 +440,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v103</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v104</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1030,7 +1032,8 @@ const openVoc=new Set(), openDet=new Set(), detBusy={}, detErr={};
 document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('voc')){const i=+d.dataset.i;d.open?openVoc.add(i):openVoc.delete(i)}},true);
 /* 단어·숙어 바로 질문: 답은 닉네임별 개인 기록에 저장 */
 const qaLive={}, qaDraft={}, qaJust={}, qaOpen=new Set();
-document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('qa-old')&&d.dataset.qk){d.open?qaOpen.add(d.dataset.qk):qaOpen.delete(d.dataset.qk)}},true);
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.qa-tg');if(!b)return;e.preventDefault();e.stopPropagation();
+  const k=b.dataset.qk;qaOpen.has(k)?qaOpen.delete(k):qaOpen.add(k);const q=b.closest('.qa');if(q)q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)},true);
 const qaKey=k=>{const p=String(k).split('~');return p.length>1?p[0]+'|'+p[1]:curId+'|'+k};
 const qaSplit=k=>{const p=String(k).split('~');return p.length>1?{wid:p[0],k:p[1]}:{wid:curId,k}};
 function qaHtml(k,title,ph){
@@ -1038,11 +1041,13 @@ function qaHtml(k,title,ph){
   /* 질문 기록은 접어 두고, 방금 받은 답만 펼쳐 보여 줌 (기록이 계속 늘어나 화면이 길어지는 것 방지) */
   const just=qaJust[key]&&all.length?[all[all.length-1]]:[], old=just.length?all.slice(0,-1):all;
   const one=x=>`<div class="qa-item"><div class="qa-q">Q. ${esc(x.q)}</div><div class="qa-a">${esc(x.a)}</div></div>`;
-  const items=(old.length?`<details class="qa-old" data-qk="${esc(key)}"${qaOpen.has(key)?' open':''}><summary>💬 ${just.length?'이전 ':''}질문 기록 ${old.length}개</summary>${old.map(one).join('')}</details>`:'')+just.map(one).join('')
+  const op=qaOpen.has(key);
+  const tg=old.length?`<button type="button" class="vmore qa-tg" data-qk="${esc(key)}">${op?'기록 접기 ▴':`${just.length?'이전 ':''}질문 기록 ${old.length} ▾`}</button>`:'';
+  const items=(old.length&&op?`<div class="qa-old">${old.map(one).join('')}</div>`:'')+just.map(one).join('')
     +(detErr['qa'+key]?`<p class="load" style="color:var(--bad,#b3261e)">${esc(detErr['qa'+key])}</p>`:'')
     +(live?`<div class="qa-item"><div class="qa-q">Q. ${esc(live.q)}</div><div class="qa-a" id="qaLive-${esc(k)}">${esc(live.a||'생각하는 중…')}</div></div>`:'');
   const off=!sample||readOnly;
-  return `<div class="qa"><h4>${title||'궁금한 점 바로 묻기'}</h4>${items}
+  return `<div class="qa" data-k="${esc(k)}" data-t="${esc(title||'')}" data-p="${esc(ph||'')}"><div class="qa-hd"><h4>${title||'궁금한 점 바로 묻기'}</h4>${tg}</div>${items}
     ${off?`<p class="load">AI 질문 기능은 관리자가 Gemini 키를 넣으면 쓸 수 있습니다.</p>`:
     `<form class="qa-form" data-k="${esc(k)}"><input id="qaIn-${esc(k)}" data-k="${esc(k)}" maxlength="300" placeholder="${esc(ph||'예: get stressed out과 be stressed는 뭐가 달라요?')}" value="${esc(qaDraft[key]||'')}"${live?' disabled':''}><button class="primary" type="submit"${live?' disabled':''}>질문</button></form>`}</div>`;
 }
