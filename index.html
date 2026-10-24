@@ -112,6 +112,8 @@ details.passage{margin-top:12px;padding:10px 14px}
 .passage h2{font-family:var(--display);font-size:1.2rem;margin:0}
 .passage h3{font-family:var(--display);font-size:1.05rem;margin:10px 0 4px;color:var(--accent)}
 .ps-text{font-size:1.02rem;line-height:1.85;margin:6px 0 8px}
+.ps-text+.ps-text{margin-top:14px;text-indent:1.2em}
+.ps-text:first-of-type{text-indent:1.2em}
 .ps{cursor:pointer;border-radius:4px;padding:1px 0;transition:background .2s}
 .ps:hover{background:var(--accent-soft)}
 .ps.on{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent-soft)}
@@ -436,7 +438,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v100</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v101</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -946,7 +948,7 @@ function render(){
      ${w.longAudio?`<div class="ps-prog" id="longProg"${longPlaying()?'':' hidden'}><i></i></div>`:''}
      <div class="ps-head"><span></span><button class="alllink" id="psKo">${psKo?'해석 숨기기':'해석 보기'}</button></div>
      ${w.sentences.filter(x=>x.isTitle).map(x=>`<h3>${esc(x.en)}</h3>`).join('')}
-     <p class="ps-text">${w.sentences.map((x,j)=>x.isTitle?'':`<span class="ps" data-ps="${j}">${(()=>{const m=marksOf(w.id,j);return x.en.split(' ').map((t,k)=>`<span class="pw${m[k]?' mk-y':''}" data-w="${k}">${esc(t)}</span>`).join(' ')})()}</span>${psKo&&x.ko?`<span class="ps-ko">${esc(x.ko)}</span>`:''}`).join(' ')}</p>
+     ${parasOf(w).map(g=>`<p class="ps-text">${g.map(j=>{const x=w.sentences[j];return `<span class="ps" data-ps="${j}">${(()=>{const m=marksOf(w.id,j);return x.en.split(' ').map((t,k)=>`<span class="pw${m[k]?' mk-y':''}" data-w="${k}">${esc(t)}</span>`).join(' ')})()}</span>${psKo&&x.ko?`<span class="ps-ko">${esc(x.ko)}</span>`:''}`}).join(' ')}</p>`).join('')}
      <p class="hint">문장을 누르면 그 문장을 들을 수 있습니다.</p>
    </details>`;
   /* 오늘 할 일: 처음 온 사람도 무엇을 하면 되는지 한눈에 — 버튼 하나로 오늘 첫 문장부터 시작 */
@@ -1446,10 +1448,12 @@ function splitText(raw,title){
   const lines=raw.replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);
   let t=title.trim(), out=[];
   if(lines.length&&!/[.!?"”]$/.test(lines[0])&&lines[0].split(' ').length<=10){if(!t)t=lines[0];lines.shift()}
-  for(const l of lines){out.push(...l.split(/(?<=[.!?]["”]?)\s+(?=[A-Z"“])/).map(x=>x.trim()).filter(Boolean))}
+  const starts=new Set();
+  for(const l of lines){starts.add(out.length);out.push(...l.split(/(?<=[.!?]["”]?)\s+(?=[A-Z"“])/).map(x=>x.trim()).filter(Boolean))}
   const sentences=[];
   if(t)sentences.push({en:t,ko:'',vocab:[],isTitle:true});
-  out.forEach(en=>sentences.push({en,ko:'',vocab:[]}));
+  /* 붙여 넣은 글의 줄바꿈(문단)을 기억해 전체 지문을 문단으로 나눠 보여 줌 */
+  out.forEach((en,n)=>sentences.push(n>0&&starts.has(n)&&lines.length>1?{en,ko:'',vocab:[],pStart:true}:{en,ko:'',vocab:[]}));
   return {title:t||'제목 없음',sentences};
 }
 async function enrich(sentences,onStatus){
@@ -1561,6 +1565,15 @@ $('mkbar').addEventListener('click',e=>{
 });
 function toast(m){let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}t.textContent=m;t.classList.add('on');clearTimeout(window.__tT);window.__tT=setTimeout(()=>t.classList.remove('on'),1800)}
 /* 2. 순서 연결 연습 */
+/* 전체 지문 문단 나누기: 붙여 넣을 때의 문단(pStart)을 쓰고, 없으면 글자 수가 비슷하게 3문단으로 나눔 */
+function parasOf(w){
+  const b=w.sentences.map((_,i)=>i).filter(i=>!w.sentences[i].isTitle);if(!b.length)return [];
+  if(b.some((i,n)=>n>0&&w.sentences[i].pStart)){const g=[];b.forEach((i,n)=>{if(!g.length||(n>0&&w.sentences[i].pStart))g.push([]);g[g.length-1].push(i)});return g}
+  const k=Math.min(3,Math.max(1,Math.floor(b.length/2)));if(k<2)return [b];
+  const len=b.map(i=>w.sentences[i].en.length),tot=len.reduce((a,c)=>a+c,0);
+  const g=[[]];let acc=0;
+  b.forEach((i,n)=>{const target=tot*g.length/k;if(g.length<k&&g[g.length-1].length&&acc+len[n]/2>target&&b.length-n>=k-g.length)g.push([]);g[g.length-1].push(i);acc+=len[n]});
+  return g}
 const bodyOf=w=>w.sentences.map((_,i)=>i).filter(i=>!w.sentences[i].isTitle);
 function seqHtml(w){
   const b=bodyOf(w);if(!b.length)return '';
