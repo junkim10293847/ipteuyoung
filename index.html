@@ -111,7 +111,7 @@ details.passage{margin-top:12px;padding:10px 14px}
 .ps-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:6px}
 .passage h2{font-family:var(--display);font-size:1.2rem;margin:0}
 .passage h3{font-family:var(--display);font-size:1.05rem;margin:10px 0 4px;color:var(--accent)}
-.ttl{font-size:1rem;font-weight:700;margin-bottom:4px;line-height:1.7}
+.ttl{font-size:1.02rem;font-weight:700;margin-bottom:4px;line-height:1.7}
 .ttl-tag{display:inline-block;font-size:.68rem;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:0 7px;vertical-align:2px}
 .ttl-ko{display:block;font-weight:400;font-size:.82rem;color:var(--muted)}
 .ps-text{font-size:1.02rem;line-height:1.85;margin:6px 0 8px}
@@ -207,7 +207,7 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
 .card.playing{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
 .card.done{background:#c9eef0;background:color-mix(in srgb,#22b5bc 24%,var(--surface));border-color:color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:inset 5px 0 0 var(--done)}
-.card.done .en .hid{background:rgba(255,255,255,.72)}
+.card.done .en .hid,.card.done .ttl .hid{background:rgba(255,255,255,.72)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card.done .en .hid{background:rgba(255,255,255,.14)}}
 .card.done .ko{color:color-mix(in srgb,var(--fg) 80%,var(--accent))}
 .card.done.playing{box-shadow:inset 4px 0 0 var(--done),0 0 0 2px var(--accent-soft)}
@@ -223,7 +223,7 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .mkb{font:inherit;font-weight:700;border:0;border-radius:999px;padding:6px 12px;cursor:pointer;color:#1f2620}
 .mkb.y{background:#ffe066}.mkb.r{background:#ff9e8f}.mkb.x{background:var(--bg);color:var(--fg)}
 .en{font-size:1.02rem;font-weight:500;cursor:pointer}
-.en .hid{color:transparent;background:var(--line);border-radius:3px}
+.en .hid,.ttl .hid{color:transparent;background:var(--line);border-radius:3px}
 .ko{color:var(--muted);font-size:.85rem}
 .ko.empty{font-style:italic;opacity:.7}
 .voc summary{cursor:pointer;font-size:.8rem;font-weight:700;color:var(--accent);padding:2px 0;list-style:none;display:inline-flex;align-items:baseline;gap:6px;user-select:none}
@@ -446,7 +446,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v107</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v108</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -916,6 +916,11 @@ function markPhrases(t,m){
 }
 /* 제목은 1번 문장 카드에 합쳐서 함께 외움: 카드 위쪽에 제목 줄, 듣기·써보기도 제목부터 */
 function ttlOf(w,i){const t=w.sentences.findIndex(x=>x.isTitle);if(t<0)return null;const f=w.sentences.findIndex(x=>!x.isTitle);return i===f?w.sentences[t]:null}
+/* 카드의 단어·숙어 목록: 1번 카드는 제목의 단어·숙어를 앞에 함께 (같은 표현은 한 번만) */
+function vocItems(w,i){const s=w.sentences[i],out=[],seen=new Set();const T=ttlOf(w,i),ti=T?w.sentences.indexOf(T):-1;
+  if(T)(T.vocab||[]).forEach((x,j)=>{const k=cleanTerm(x.t).toLowerCase();if(!seen.has(k)){seen.add(k);out.push({x,ii:ti,j})}});
+  (s.vocab||[]).forEach((x,j)=>{const k=cleanTerm(x.t).toLowerCase();if(!seen.has(k)){seen.add(k);out.push({x,ii:i,j})}});
+  return out}
 function ttlHtml(T,i){const hid=hiddenEn.has(i);return `<div class="ttl"><span class="ttl-tag">제목</span> ${T.en.split(' ').map(x=>`<span class="w${hid?' hid':''}">${esc(x)}</span>`).join(' ')}${T.ko?`<span class="ttl-ko">${esc(T.ko)}</span>`:''}</div>`}
 function wordsHtml(t,i){
   const hid=hiddenEn.has(i), m=marksOf(curId,i);
@@ -1009,7 +1014,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
        <div class="ko${s.ko?'':' empty'}">${s.ko?esc(s.ko):'해석 없음'}</div>
        ${(()=>{const e=weakOf(w.id,i);return e?`<div class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</div>`:''})()}
 
-       ${v.length?`<details class="voc" data-i="${i}"${vocOpen||openVoc.has(i)?' open':''}><summary>단어·숙어 ${v.length}</summary><dl>${v.map((x,j)=>{const k=i+'-'+j,op=openDet.has(k);return `<div class="vi"><dt><button class="vplay${x.audio?'':' waiting'}" data-t="${esc(x.t)}" data-a="${esc(x.audio||'')}" aria-label="${esc(x.t)} 듣기">${x.audio?'🔊':'⏳'}</button>${esc(x.t)}<button class="wbstar${wbHas(x.t)?' on':''}" data-wb="${i}-${j}" aria-pressed="${wbHas(x.t)}" aria-label="내 단어장에 담기">${wbHas(x.t)?'★':'☆'}</button></dt><dd>${esc(x.m)} <button class="vmore" data-k="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button></dd>${op?`<div class="vdet">${detHtml(x.detail,k)}</div>`:''}</div>`}).join('')}</dl></details>`:''}
+       ${(()=>{const vl=vocItems(w,i);return vl.length?`<details class="voc" data-i="${i}"${vocOpen||openVoc.has(i)?' open':''}><summary>단어·숙어 ${vl.length}</summary><dl>${vl.map(({x,ii,j})=>{const k=ii+'-'+j,op=openDet.has(k);return `<div class="vi"><dt><button class="vplay${x.audio?'':' waiting'}" data-t="${esc(x.t)}" data-a="${esc(x.audio||'')}" aria-label="${esc(x.t)} 듣기">${x.audio?'🔊':'⏳'}</button>${esc(x.t)}<button class="wbstar${wbHas(x.t)?' on':''}" data-wb="${ii}-${j}" aria-pressed="${wbHas(x.t)}" aria-label="내 단어장에 담기">${wbHas(x.t)?'★':'☆'}</button></dt><dd>${esc(x.m)} <button class="vmore" data-k="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button></dd>${op?`<div class="vdet">${detHtml(x.detail,k)}</div>`:''}</div>`}).join('')}</dl></details>`:''})()}
        <div class="acts">
          ${s.audio?`<button class="play" data-i="${i}">▶ 듣기</button>`:`<button class="play" data-i="${i}">▶ 듣기</button>`}
          <button class="slow" data-i="${i}">▶ 천천히</button>
@@ -1170,6 +1175,7 @@ function detHtml(d,k,wb,wbQ){
 const DETAIL_EXAMPLE="{\"core\": \"문장 맨 앞의 'To + 동사원형'은 '~하기 위해서, ~하려면'이라는 목적을 나타내며, 뒤에 이어지는 주절이 그 목적을 이루기 위한 방법이나 단계임을 알려 줍니다. 요리법, 사용 설명서, 업무 절차처럼 '어떻게 하는지'를 설명하는 글에서 자주 쓰입니다.\", \"usage\": \"이 문장에서는 'To make rice in a pot'이 문장 앞에서 목적 부사구로 쓰여 '솥밥을 지으려면'이라는 뜻이고, 뒤의 명령문 'first measure out...'이 그 목적을 달성하는 첫 단계입니다. 목적 부사구가 문장 앞에 오면 쉼표(,)로 주절과 구분합니다.\", \"examples\": [{\"en\": \"To log in, click the button at the top right.\", \"ko\": \"로그인하려면 오른쪽 위의 버튼을 클릭하세요.\"}, {\"en\": \"To save time, I usually prepare my lunch the night before.\", \"ko\": \"시간을 아끼려고 저는 보통 점심을 전날 밤에 준비해 둡니다.\"}, {\"en\": \"To join the meeting, you need to use this link.\", \"ko\": \"회의에 참여하려면 이 링크를 사용해야 합니다.\"}], \"similar\": [{\"t\": \"In order to + 동사원형\", \"m\": \"'~하기 위해서'라는 뜻으로 To보다 목적이 더 분명하고 격식 있는 느낌입니다. 보고서나 공식 문서에서 자주 씁니다.\"}, {\"t\": \"So as to + 동사원형\", \"m\": \"In order to와 비슷하지만 주로 글에서 쓰며, 일상 회화에서는 드뭅니다.\"}, {\"t\": \"If you want to + 동사원형, ...\", \"m\": \"'~하고 싶다면'이라는 뜻으로 상대방에게 말하듯 더 구어적이고 부드럽습니다.\"}], \"tip\": \"'To + 동사원형'이 문장 맨 앞에 오면 '~하려면'으로 해석하고, 쉼표 뒤에 그 목적을 이루는 방법이 나온다고 생각하면 쉽게 외워집니다. 이때 to 뒤에는 항상 동사원형이 오며, 'To making'처럼 -ing 형태를 쓰지 않도록 주의하세요.\"}";
 /* 카드 하나만 다시 그리기: 전체를 다시 그리면 아이패드에서 화면이 튀므로 해당 카드만 교체 */
 function renderCard(i){
+  {const w=weeks.find(x=>x.id===curId);if(w&&w.sentences[i]&&w.sentences[i].isTitle){const f=w.sentences.findIndex(x=>!x.isTitle);if(f>=0)i=f}}
   const real=$('main');if(!real||!real.querySelector('#c'+i)){render();return}
   const tmp=document.createElement('div');tmp.style.display='none';
   real.id='main__real';tmp.id='main';document.body.appendChild(tmp);
