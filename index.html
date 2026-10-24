@@ -239,11 +239,13 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .wb-top .ghost{padding:4px 12px;font-size:.8rem}
 .wb-list{display:grid;gap:8px;list-style:none;padding:0;margin:0}
 .wb-list li{background:var(--bg);border-radius:10px;padding:9px 12px;display:grid;gap:3px}
-.wb-h{display:flex;align-items:center;gap:4px}.wb-h b{flex:1;font-size:.95rem}
-.wb-m{font-size:.86rem}
-.wb-mrow{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.wb-h{display:flex;align-items:baseline;gap:6px}
+.wb-t{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}.wb-t b{font-size:.95rem}
+.wb-h .wbmore{flex:none}
+.wb-m{font-size:.86rem;color:var(--fg)}
+.wb-list li.hid .wb-m{color:var(--muted);background:var(--line);border-radius:6px;padding:0 8px;font-size:.76rem;cursor:pointer;user-select:none}
+.wb-list li.hid .wb-s{display:none}
 .wb-list .vdet{margin-top:6px}
-.wb-m.hid{color:var(--muted);background:var(--line);border-radius:6px;cursor:pointer;user-select:none;font-size:.78rem;padding:2px 8px;justify-self:start}
 .wb-s{font-size:.76rem;color:var(--muted)}.wb-s span{opacity:.8}
 .vplay{border:0;background:none;padding:0 2px;cursor:pointer;font-size:.8rem;line-height:1;color:var(--fg)}
 @media (max-width:420px){.vi{grid-template-columns:1fr}.vi dd{padding-left:22px;margin-top:-2px}}
@@ -429,7 +431,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v90</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v91</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1624,10 +1626,13 @@ function wbLoc(e){const k=wbKey(e.t),ws=[weeks.find(x=>x.id===e.wid),...weeks].f
   return null}
 function wbHtml(){const L=wbList();
   if(!L.length)return `<p class="hint" style="margin-top:10px">단어·숙어 목록에서 표현 옆 <b>☆</b>를 누르면 여기에 모입니다. 주차가 바뀌어도 계속 남아요.</p>`;
-  return `<div class="wb"><div class="wb-top"><span>${L.length}개</span><button class="ghost" id="wbHideBtn">${wbHide?'뜻 보기':'뜻 가리기'}</button></div>
-    <ul class="wb-list">${L.map(e=>{const k=esc(wbKey(e.t));return `<li><div class="wb-h"><button class="vplay" data-t="${esc(e.t)}" data-a="${esc(e.a||'')}" aria-label="듣기">🔊</button><b>${esc(e.t)}</b><button class="wbstar on" data-wbk="${k}" aria-label="단어장에서 빼기">★</button></div>
-      <div class="wb-mrow"><div class="wb-m${wbHide?' hid':''}" data-m="${esc(e.m||'')}">${wbHide?'눌러서 뜻 보기':esc(e.m||'')}</div>${(()=>{const L=wbLoc(e);if(!L)return '';const op=wbOpen.has(wbKey(e.t));return `<button class="vmore wbmore" data-wbk="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button>`})()}</div>
-      ${(()=>{if(!wbOpen.has(wbKey(e.t)))return '';const L=wbLoc(e);if(!L)return '';return `<div class="vdet">${detHtml(L.v.detail&&(L.v.detail.core||L.v.detail.usage)?L.v.detail:null,L.dk,wbKey(e.t))}</div>`})()}${e.en?`<div class="wb-s">${esc(e.en)}${e.wt?` <span>· ${esc(e.wt)}</span>`:''}</div>`:''}</li>`}).join('')}</ul></div>`}
+  return `<div class="wb"><div class="wb-top"><span>${L.length}개</span><button class="ghost" id="wbHideBtn">${wbHide?'뜻·문장 보기':'뜻·문장 가리기'}</button></div>
+    <ul class="wb-list">${L.map(e=>{const k=esc(wbKey(e.t)),loc=wbLoc(e),op=wbOpen.has(wbKey(e.t));
+      return `<li class="${wbHide?'hid':''}"><div class="wb-h"><button class="vplay" data-t="${esc(e.t)}" data-a="${esc(e.a||'')}" aria-label="듣기">🔊</button>
+        <span class="wb-t"><b>${esc(e.t)}</b><span class="wb-m" data-m="${esc(e.m||'')}">${wbHide?'뜻 보기':esc(e.m||'')}</span></span>
+        ${loc?`<button class="vmore wbmore" data-wbk="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button>`:''}<button class="wbstar on" data-wbk="${k}" aria-label="단어장에서 빼기">★</button></div>
+      ${op&&loc?`<div class="vdet">${detHtml(loc.v.detail&&(loc.v.detail.core||loc.v.detail.usage)?loc.v.detail:null,loc.dk,wbKey(e.t))}</div>`:''}
+      ${e.en?`<div class="wb-s">${esc(e.en)}${e.wt?` <span>· ${esc(e.wt)}</span>`:''}</div>`:''}</li>`}).join('')}</ul></div>`}
 function wbPatch(){const b=$('wbBody');if(b)b.innerHTML=wbHtml();const c=$('wbChip');if(c)c.innerHTML='⭐ 내 단어장'+(wbList().length?` <b>${wbList().length}</b>`:'')}
 function wbStars(t){const on=wbHas(t);document.querySelectorAll('.wbstar[data-wb]').forEach(b=>{const w=weeks.find(x=>x.id===curId);if(!w)return;const [i,j]=b.dataset.wb.split('-').map(Number);const v=w.sentences[i]&&w.sentences[i].vocab[j];if(v&&wbKey(v.t)===wbKey(t)){b.classList.toggle('on',on);b.textContent=on?'★':'☆';b.setAttribute('aria-pressed',on)}})}
 document.addEventListener('click',e=>{
@@ -1650,7 +1655,7 @@ document.addEventListener('click',e=>{
     if(L&&!(L.v.detail&&L.v.detail.core&&L.v.detail.usage)&&!detBusy[L.dk]){const pr=loadDetail(L.w,L.i,L.j,L.dk,true);wbPatch();pr.then(ok=>{if(!ok)detErr[L.dk]=sample?'설명을 만들지 못했습니다. 접었다가 다시 눌러 주세요.':'AI 기능이 꺼져 있어 설명을 만들 수 없습니다.';wbPatch()})}else wbPatch();
     return}
   if(e.target.id==='wbHideBtn'){wbHide=!wbHide;wbPatch();return}
-  const m=e.target.closest&&e.target.closest('.wb-m.hid');if(m){m.classList.remove('hid');m.textContent=m.dataset.m;return}
+  const m=e.target.closest&&e.target.closest('.wb-list li.hid .wb-m');if(m){m.closest('li').classList.remove('hid');m.textContent=m.dataset.m;return}
 },true);
 function weakHtml(w){
   const W=(prog.weak||{})[w.id]||{}, b=bodyOf(w);
