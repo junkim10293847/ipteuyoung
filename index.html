@@ -413,7 +413,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v86</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v87</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1728,6 +1728,20 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
    · 아이폰·아이패드: 그림으로 2단계 안내 */
 (function(){
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+  /* 새 버전 확인: version.txt(작은 파일)를 인터넷에서 확인해, 지금 화면보다 새 버전이 있으면 저장된 화면을 바꿔 두고
+     쓰는 중이 아니면 바로 새로 열어 적용 (아이패드처럼 예전 화면이 오래 남는 기기 대비) */
+  async function chkVer(){try{
+    const cur=+((document.querySelector('.ver')||{}).textContent||'').replace(/\D/g,'');
+    const r=await fetch('version.txt?fresh='+Date.now(),{cache:'no-store'});if(!r.ok)return;const nv=+(await r.text()).trim();
+    if(!(nv>cur))return;
+    try{if(+sessionStorage.getItem('verTried')>=nv)return;sessionStorage.setItem('verTried',nv)}catch(_){}   // 같은 버전으로 계속 새로 여는 것 방지
+    const base=new URL('./',location.href).href,res=await fetch(base+'?fresh='+Date.now(),{cache:'no-store'});
+    if(res.ok&&'caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.open(k).then(c=>c.put(base,res.clone()))))}
+    const busy=()=>{const a=document.activeElement;return (a&&a.closest&&a.closest('#main')&&(a.tagName==='TEXTAREA'||a.tagName==='INPUT')&&a.value)||(typeof mock!=='undefined'&&mock&&!mock.res&&mock.ans.some(x=>x))};
+    const go=()=>{if(busy()){setTimeout(go,5000);return}try{saveUi()}catch(_){}location.reload()};
+    setTimeout(go,800);
+  }catch(_){}}
+  chkVer();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chkVer()});
   const ua=navigator.userAgent||'',standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   if(standalone)return;
   const isKakao=/KAKAOTALK/i.test(ua),isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),isAndroid=/Android/i.test(ua);
