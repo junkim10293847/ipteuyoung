@@ -245,6 +245,7 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .wb-m{font-size:.86rem;color:var(--fg)}
 .wb-list li.hid .wb-m{color:var(--muted);background:var(--line);border-radius:6px;padding:0 8px;font-size:.76rem;cursor:pointer;user-select:none}
 .wb-list li.hid .wb-s{display:none}
+.wb-re{border:1px solid var(--line);background:none;border-radius:999px;padding:0 8px;font-size:.72rem;color:var(--muted);cursor:pointer;line-height:1.6}
 .wb-list .vdet{margin-top:6px}
 .wb-s{font-size:.76rem;color:var(--muted)}.wb-s span{opacity:.8}
 .vplay{border:0;background:none;padding:0 2px;cursor:pointer;font-size:.8rem;line-height:1;color:var(--fg)}
@@ -431,7 +432,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v93</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v94</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1621,7 +1622,7 @@ function mockHtml(w){
     <button class="ghost" id="mockClose">끝내기</button></div></div>`;
 }
 /* 4. 내 약점 */
-let wbHide=true,wbView=false;const wbOpen=new Set();
+let wbHide=true,wbView=false;const wbShown=new Set();const wbOpen=new Set();
 /* 단어장 표현이 들어 있는 주차·문장·단어 위치 찾기 (자세히 설명을 같이 쓰려고) */
 function wbLoc(e){const k=wbKey(e.t),ws=[weeks.find(x=>x.id===e.wid),...weeks].filter(Boolean);
   for(const w of ws)for(let i=0;i<w.sentences.length;i++){const vs=w.sentences[i].vocab||[];const j=vs.findIndex(v=>wbKey(v.t)===k);if(j>=0)return {w,i,j,v:vs[j],dk:'wb:'+w.id+':'+i+'-'+j}}
@@ -1630,8 +1631,9 @@ function wbHtml(){const L=wbList();
   if(!L.length)return `<p class="hint" style="margin-top:10px">단어·숙어 목록에서 표현 옆 <b>☆</b>를 누르면 여기에 모입니다. 주차가 바뀌어도 계속 남아요.</p>`;
   return `<div class="wb"><div class="wb-top"><span>${L.length}개</span><button class="ghost" id="wbHideBtn">${wbHide?'뜻·문장 보기':'뜻·문장 가리기'}</button></div>
     <ul class="wb-list">${L.map(e=>{const k=esc(wbKey(e.t)),loc=wbLoc(e),op=wbOpen.has(wbKey(e.t));
-      return `<li class="${wbHide?'hid':''}"><div class="wb-h"><button class="vplay" data-t="${esc(e.t)}" data-a="${esc(e.a||'')}" aria-label="듣기">🔊</button>
-        <span class="wb-t"><b>${esc(e.t)}</b><span class="wb-m" data-m="${esc(e.m||'')}">${wbHide?'뜻 보기':esc(e.m||'')}</span></span>
+      const hid=wbHide&&!wbShown.has(wbKey(e.t));
+      return `<li class="${hid?'hid':''}"><div class="wb-h"><button class="vplay" data-t="${esc(e.t)}" data-a="${esc(e.a||'')}" aria-label="듣기">🔊</button>
+        <span class="wb-t"><b>${esc(e.t)}</b><span class="wb-m" data-m="${esc(e.m||'')}" data-k="${k}">${hid?'뜻 보기':esc(e.m||'')}</span>${wbHide&&!hid?`<button class="wb-re" data-k="${k}" aria-label="다시 가리기">가리기</button>`:''}</span>
         ${loc?`<button class="vmore wbmore" data-wbk="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button>`:''}<button class="wbstar on" data-wbk="${k}" aria-label="단어장에서 빼기">★</button></div>
       ${op&&loc?`<div class="vdet">${detHtml(loc.v.detail&&(loc.v.detail.core||loc.v.detail.usage)?loc.v.detail:null,loc.dk,wbKey(e.t),loc.w.id+'~'+loc.i+'-'+loc.j)}</div>`:''}
       ${e.en?`<div class="wb-s">${esc(e.en)}${e.wt?` <span>· ${esc(e.wt)}</span>`:''}</div>`:''}</li>`}).join('')}</ul></div>`}
@@ -1656,8 +1658,9 @@ document.addEventListener('click',e=>{
     wbOpen.add(k);const L=wbLoc(ent);
     if(L&&!(L.v.detail&&L.v.detail.core&&L.v.detail.usage)&&!detBusy[L.dk]){const pr=loadDetail(L.w,L.i,L.j,L.dk,true);wbPatch();pr.then(ok=>{if(!ok)detErr[L.dk]=sample?'설명을 만들지 못했습니다. 접었다가 다시 눌러 주세요.':'AI 기능이 꺼져 있어 설명을 만들 수 없습니다.';wbPatch()})}else wbPatch();
     return}
-  if(e.target.id==='wbHideBtn'){wbHide=!wbHide;wbPatch();return}
-  const m=e.target.closest&&e.target.closest('.wb-list li.hid .wb-m');if(m){m.closest('li').classList.remove('hid');m.textContent=m.dataset.m;return}
+  if(e.target.id==='wbHideBtn'){wbHide=!wbHide;wbShown.clear();wbPatch();return}
+  const m=e.target.closest&&e.target.closest('.wb-list li.hid .wb-m');if(m){wbShown.add(m.dataset.k);wbPatch();return}
+  const re=e.target.closest&&e.target.closest('.wb-re');if(re){wbShown.delete(re.dataset.k);wbPatch();return}
 },true);
 function weakHtml(w){
   const W=(prog.weak||{})[w.id]||{}, b=bodyOf(w);
