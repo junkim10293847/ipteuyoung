@@ -438,7 +438,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v101</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v102</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1218,6 +1218,7 @@ async function prefetchDetails(){
       await new Promise(z=>setTimeout(z,n?1500:4000));
       if(document.visibilityState!=='visible'||!sample||readOnly||!(window.__features||{}).ai)break;
       const w=weeks.find(x=>x.id===curId);if(!w)break;
+      if(missing0(w)){if(!autoTried[w.id])await autoEnrich(w);break}
       const today=(()=>{try{const d=plan(w),v=todayView(w);return v&&v[0]==='d'?(d[+v.slice(1)]||[]):[]}catch(_){return []}})();
       const order=[...new Set([...today,...w.sentences.map((_,i)=>i)])];
       let job=null;
@@ -1500,20 +1501,31 @@ $('fSave').onclick=async()=>{
   }catch(e){st.textContent=e.code==='quota_exceeded'?'저장 공간이 가득 찼습니다. 오래된 주차를 삭제해 주세요.':'저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';st.className='status err'}
   finally{btn.disabled=false}
 };
-async function regen(w){
-  const st=$('wStatus'),btn=$('regen');btn.disabled=true;st.className='status';
-  try{
-    const s=await enrich(w.sentences.map(x=>({en:x.en,isTitle:!!x.isTitle})),m=>st.textContent=m);
+async function regenCore(w,onStatus){
+    const s=await enrich(w.sentences.map(x=>({en:x.en,isTitle:!!x.isTitle})),onStatus);
     const known={};w.sentences.forEach(x=>(x.vocab||[]).forEach(v=>{if(v.audio)known[cleanTerm(v.t).toLowerCase()]=v.audio}));
     const clean=s.map((x,i)=>{const old=w.sentences[i];
       const o={en:x.en,ko:x.ko,vocab:x.vocab.map(v=>{const a=known[cleanTerm(v.t).toLowerCase()];return a?{...v,audio:a}:v})};
-      if(x.isTitle)o.isTitle=true;if(old.audio)o.audio=old.audio;if(old.alt)o.alt=old.alt;return o});
+      if(x.isTitle)o.isTitle=true;if(old.audio)o.audio=old.audio;if(old.alt)o.alt=old.alt;if(old.pStart)o.pStart=true;return o});
+    if(!clean.some(x=>x.ko))throw{code:'invalid_json'};
     await db.doc('weeks/'+w.id).update({sentences:clean,updated:Date.now()});
+    return clean;
+}
+/* 새 주차 저장 때 AI 정리가 실패해 해석·단어가 비어 있으면, 그 주차를 여는 멤버 기기에서 한 번 자동으로 다시 정리 */
+const autoTried={};
+async function autoEnrich(w){
+  if(!w||!missing0(w)||autoTried[w.id]||!sample||readOnly||!canWrite||!(window.__features||{}).ai)return;
+  autoTried[w.id]=1;
+  try{await regenCore(w,()=>{});toast('해석과 단어·숙어를 자동으로 정리했어요')}catch(e){}
+}
+async function regen(w){
+  const st=$('wStatus'),btn=$('regen');btn.disabled=true;st.className='status';
+  try{
+    const clean=await regenCore(w,m=>st.textContent=m);
     st.textContent='해석과 단어·숙어를 다시 정리했습니다.';
     if(clean.some(x=>x.vocab.some(v=>!v.audio)))requestAudio(w,st);
   }catch(e){st.textContent=errCopy(e.code);st.className='status err';btn.disabled=false}
 }
-
 /* ---------- boot ---------- */
 render();
 /* 닉네임 첫 화면 */
