@@ -443,7 +443,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v105</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v106</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -927,6 +927,9 @@ function render(){
   const by=(w.addedBy&&names[w.addedBy])||w.addedByName||'';
   const bodyIdx=w.sentences.map((_,i)=>i).filter(i=>!w.sentences[i].isTitle);
   let idx = view==='all'||view==='sat' ? bodyIdx : days[+view.slice(1)];
+  /* 제목도 외우는 문장: 1번 문장이 나오는 화면에는 제목 카드를 맨 앞에 함께 보여 줌 */
+  const tIdx=w.sentences.findIndex(x=>x.isTitle);
+  if(tIdx>=0&&idx&&bodyIdx.length&&idx.includes(bodyIdx[0])&&!idx.includes(tIdx))idx=[tIdx,...idx];
   /* 1. 어제 분량 자동 복습: 일차 화면에서 전날 문장을 영어 가린 채 위에 붙임 */
   const dn=view&&view[0]==='d'?+view.slice(1):-1, rev=dn>0?(days[dn-1]||[]):[];
   {const dn=doneOf(curId);Object.keys(dn).forEach(k=>{if(dn[k]&&!doneSeen.has(+k)){doneSeen.add(+k);hiddenEn.add(+k)}})}
@@ -937,7 +940,8 @@ function render(){
   /* 일차 화면은 번호가 끊기지 않게: 어제 복습·오늘 문장·이미 외운 문장을 번호 순서대로 한 줄로 이어서 보여 줌 */
   const prevMax=rev.length?Math.max(...rev):-1;
   const dayAll=[...new Set([...rev,...idx])];
-  const seq=(view&&view[0]==='d'&&dayAll.length)?bodyIdx.filter(j=>j>=Math.min(...dayAll)&&j<=Math.max(...dayAll)):idx;
+  const seq0=(view&&view[0]==='d'&&dayAll.length)?bodyIdx.filter(j=>j>=Math.min(...dayAll.filter(j=>j!==tIdx))&&j<=Math.max(...dayAll)):idx;
+  const seq=idx.includes(tIdx)&&!seq0.includes(tIdx)?[tIdx,...seq0]:seq0;
   const roleOf=j=>idx.includes(j)?'today':rev.includes(j)?'rev':'skip';
   const nRev=seq.filter(j=>roleOf(j)==='rev').length,nSkip=seq.filter(j=>roleOf(j)==='skip').length,behind=idx.filter(j=>j<prevMax).length;
   const listIdx=(view&&view[0]==='d'&&(rev.length||nSkip))?['__H',...seq]:seq;
