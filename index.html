@@ -271,6 +271,9 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .qa{border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:8px}
 .qa-hd{display:flex;align-items:baseline;gap:8px}.qa-hd h4{flex:1;margin:0}.qa-hd .qa-tg{flex:none}
 .qa-old{display:grid;gap:8px}
+.qa-q{display:flex;align-items:baseline;gap:8px}.qa-q span{flex:1;min-width:0}
+.qa-q .qa-it{flex:none}
+.qa-del{flex:none;border:0;background:none;padding:0 2px;font:inherit;font-size:.74rem;color:var(--muted);cursor:pointer;text-decoration:underline}
 .askall{margin-top:12px;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .askall .qa{border-top:0;padding-top:0}
 .askall h4{margin:0;font-size:.95rem}
@@ -440,7 +443,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v104</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v105</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1031,16 +1034,29 @@ const missing0=w=>w.sentences.some(x=>!x.ko);
 const openVoc=new Set(), openDet=new Set(), detBusy={}, detErr={};
 document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('voc')){const i=+d.dataset.i;d.open?openVoc.add(i):openVoc.delete(i)}},true);
 /* 단어·숙어 바로 질문: 답은 닉네임별 개인 기록에 저장 */
-const qaLive={}, qaDraft={}, qaJust={}, qaOpen=new Set();
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.qa-tg');if(!b)return;e.preventDefault();e.stopPropagation();
-  const k=b.dataset.qk;qaOpen.has(k)?qaOpen.delete(k):qaOpen.add(k);const q=b.closest('.qa');if(q)q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)},true);
+const qaLive={}, qaDraft={}, qaJust={}, qaOpen=new Set(), qaItem={};
+const qaRe=el=>{const q=el.closest('.qa');if(q)q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)};
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('.qa-tg,.qa-it,.qa-del');if(!b)return;e.preventDefault();e.stopPropagation();
+  const k=b.dataset.qk;
+  if(b.classList.contains('qa-tg')){qaOpen.has(k)?qaOpen.delete(k):qaOpen.add(k);qaRe(b);return}
+  const i=+b.dataset.i;
+  if(b.classList.contains('qa-it')){qaItem[k+'#'+i]=b.dataset.o!=='1';qaRe(b);return}
+  const arr=(prog.qa&&prog.qa[k])||[];if(!arr[i])return;
+  if(!confirm('이 질문과 답을 지울까요?\n\nQ. '+arr[i].q.slice(0,60)))return;
+  arr.splice(i,1);prog.qa[k]=arr;Object.keys(qaItem).forEach(x=>{if(x.startsWith(k+'#'))delete qaItem[x]});
+  if(qaJust[k]&&i===arr.length)delete qaJust[k];
+  saveProg();qaRe(b);toast('질문을 지웠어요');
+},true);
 const qaKey=k=>{const p=String(k).split('~');return p.length>1?p[0]+'|'+p[1]:curId+'|'+k};
 const qaSplit=k=>{const p=String(k).split('~');return p.length>1?{wid:p[0],k:p[1]}:{wid:curId,k}};
 function qaHtml(k,title,ph){
   const key=qaKey(k), all=(prog.qa&&prog.qa[key])||[], live=qaLive[key];
   /* 질문 기록은 접어 두고, 방금 받은 답만 펼쳐 보여 줌 (기록이 계속 늘어나 화면이 길어지는 것 방지) */
   const just=qaJust[key]&&all.length?[all[all.length-1]]:[], old=just.length?all.slice(0,-1):all;
-  const one=x=>`<div class="qa-item"><div class="qa-q">Q. ${esc(x.q)}</div><div class="qa-a">${esc(x.a)}</div></div>`;
+  /* 질문 하나하나 펼치기·접기·삭제 (방금 받은 답은 펼친 채로) */
+  const one=x=>{const i=all.indexOf(x),ik=key+'#'+i,isJ=just.includes(x),o=ik in qaItem?qaItem[ik]:isJ;
+    return `<div class="qa-item"><div class="qa-q"><span>Q. ${esc(x.q)}</span><button type="button" class="vmore qa-it" data-qk="${esc(key)}" data-i="${i}" data-o="${o?1:0}">${o?'접기 ▴':'펼치기 ▾'}</button><button type="button" class="qa-del" data-qk="${esc(key)}" data-i="${i}" aria-label="이 질문 삭제">삭제</button></div>${o?`<div class="qa-a">${esc(x.a)}</div>`:''}</div>`};
   const op=qaOpen.has(key);
   const tg=old.length?`<button type="button" class="vmore qa-tg" data-qk="${esc(key)}">${op?'기록 접기 ▴':`${just.length?'이전 ':''}질문 기록 ${old.length} ▾`}</button>`:'';
   const items=(old.length&&op?`<div class="qa-old">${old.map(one).join('')}</div>`:'')+just.map(one).join('')
