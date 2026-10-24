@@ -241,6 +241,8 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .wb-list li{background:var(--bg);border-radius:10px;padding:9px 12px;display:grid;gap:3px}
 .wb-h{display:flex;align-items:center;gap:4px}.wb-h b{flex:1;font-size:.95rem}
 .wb-m{font-size:.86rem}
+.wb-mrow{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.wb-list .vdet{margin-top:6px}
 .wb-m.hid{color:var(--muted);background:var(--line);border-radius:6px;cursor:pointer;user-select:none;font-size:.78rem;padding:2px 8px;justify-self:start}
 .wb-s{font-size:.76rem;color:var(--muted)}.wb-s span{opacity:.8}
 .vplay{border:0;background:none;padding:0 2px;cursor:pointer;font-size:.8rem;line-height:1;color:var(--fg)}
@@ -427,7 +429,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v89</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v90</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1110,7 +1112,7 @@ ${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):
   }
   delete qaLive[key];patchAskAll();
 }
-function detHtml(d,k){
+function detHtml(d,k,wb){
   if(!d){
     if(detBusy[k])return `<p class="load">자세한 설명을 만드는 중… <span class="det-t" data-t0="${detBusy[k]}"></span> (보통 20~60초)</p>`;
     if(detErr[k])return `<p class="load">${esc(detErr[k])}</p>`;
@@ -1121,8 +1123,8 @@ function detHtml(d,k){
    ${(d.examples||[]).length?`<div class="d-ex"><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
    ${(d.similar||[]).length?`<div class="d-sim"><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
    ${d.tip?`<div class="d-tip"><h4>외우는 팁 · 주의할 점</h4><p>${esc(d.tip)}</p></div>`:''}
-   ${qaHtml(k)}
-   <button class="vmore vfold" data-k="${k}" aria-expanded="true">▲ 접기</button>`;
+   ${wb?`<button class="vmore vfold wbmore" data-wbk="${esc(wb)}" aria-expanded="true">▲ 접기</button>`:`${qaHtml(k)}
+   <button class="vmore vfold" data-k="${k}" aria-expanded="true">▲ 접기</button>`}`;
 }
 const DETAIL_EXAMPLE="{\"core\": \"문장 맨 앞의 'To + 동사원형'은 '~하기 위해서, ~하려면'이라는 목적을 나타내며, 뒤에 이어지는 주절이 그 목적을 이루기 위한 방법이나 단계임을 알려 줍니다. 요리법, 사용 설명서, 업무 절차처럼 '어떻게 하는지'를 설명하는 글에서 자주 쓰입니다.\", \"usage\": \"이 문장에서는 'To make rice in a pot'이 문장 앞에서 목적 부사구로 쓰여 '솥밥을 지으려면'이라는 뜻이고, 뒤의 명령문 'first measure out...'이 그 목적을 달성하는 첫 단계입니다. 목적 부사구가 문장 앞에 오면 쉼표(,)로 주절과 구분합니다.\", \"examples\": [{\"en\": \"To log in, click the button at the top right.\", \"ko\": \"로그인하려면 오른쪽 위의 버튼을 클릭하세요.\"}, {\"en\": \"To save time, I usually prepare my lunch the night before.\", \"ko\": \"시간을 아끼려고 저는 보통 점심을 전날 밤에 준비해 둡니다.\"}, {\"en\": \"To join the meeting, you need to use this link.\", \"ko\": \"회의에 참여하려면 이 링크를 사용해야 합니다.\"}], \"similar\": [{\"t\": \"In order to + 동사원형\", \"m\": \"'~하기 위해서'라는 뜻으로 To보다 목적이 더 분명하고 격식 있는 느낌입니다. 보고서나 공식 문서에서 자주 씁니다.\"}, {\"t\": \"So as to + 동사원형\", \"m\": \"In order to와 비슷하지만 주로 글에서 쓰며, 일상 회화에서는 드뭅니다.\"}, {\"t\": \"If you want to + 동사원형, ...\", \"m\": \"'~하고 싶다면'이라는 뜻으로 상대방에게 말하듯 더 구어적이고 부드럽습니다.\"}], \"tip\": \"'To + 동사원형'이 문장 맨 앞에 오면 '~하려면'으로 해석하고, 쉼표 뒤에 그 목적을 이루는 방법이 나온다고 생각하면 쉽게 외워집니다. 이때 to 뒤에는 항상 동사원형이 오며, 'To making'처럼 -ing 형태를 쓰지 않도록 주의하세요.\"}";
 /* 카드 하나만 다시 그리기: 전체를 다시 그리면 아이패드에서 화면이 튀므로 해당 카드만 교체 */
@@ -1615,12 +1617,17 @@ function mockHtml(w){
     <button class="ghost" id="mockClose">끝내기</button></div></div>`;
 }
 /* 4. 내 약점 */
-let wbHide=false,wbView=false;
+let wbHide=false,wbView=false;const wbOpen=new Set();
+/* 단어장 표현이 들어 있는 주차·문장·단어 위치 찾기 (자세히 설명을 같이 쓰려고) */
+function wbLoc(e){const k=wbKey(e.t),ws=[weeks.find(x=>x.id===e.wid),...weeks].filter(Boolean);
+  for(const w of ws)for(let i=0;i<w.sentences.length;i++){const vs=w.sentences[i].vocab||[];const j=vs.findIndex(v=>wbKey(v.t)===k);if(j>=0)return {w,i,j,v:vs[j],dk:'wb:'+w.id+':'+i+'-'+j}}
+  return null}
 function wbHtml(){const L=wbList();
   if(!L.length)return `<p class="hint" style="margin-top:10px">단어·숙어 목록에서 표현 옆 <b>☆</b>를 누르면 여기에 모입니다. 주차가 바뀌어도 계속 남아요.</p>`;
   return `<div class="wb"><div class="wb-top"><span>${L.length}개</span><button class="ghost" id="wbHideBtn">${wbHide?'뜻 보기':'뜻 가리기'}</button></div>
     <ul class="wb-list">${L.map(e=>{const k=esc(wbKey(e.t));return `<li><div class="wb-h"><button class="vplay" data-t="${esc(e.t)}" data-a="${esc(e.a||'')}" aria-label="듣기">🔊</button><b>${esc(e.t)}</b><button class="wbstar on" data-wbk="${k}" aria-label="단어장에서 빼기">★</button></div>
-      <div class="wb-m${wbHide?' hid':''}" data-m="${esc(e.m||'')}">${wbHide?'눌러서 뜻 보기':esc(e.m||'')}</div>${e.en?`<div class="wb-s">${esc(e.en)}${e.wt?` <span>· ${esc(e.wt)}</span>`:''}</div>`:''}</li>`}).join('')}</ul></div>`}
+      <div class="wb-mrow"><div class="wb-m${wbHide?' hid':''}" data-m="${esc(e.m||'')}">${wbHide?'눌러서 뜻 보기':esc(e.m||'')}</div>${(()=>{const L=wbLoc(e);if(!L)return '';const op=wbOpen.has(wbKey(e.t));return `<button class="vmore wbmore" data-wbk="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button>`})()}</div>
+      ${(()=>{if(!wbOpen.has(wbKey(e.t)))return '';const L=wbLoc(e);if(!L)return '';return `<div class="vdet">${detHtml(L.v.detail&&(L.v.detail.core||L.v.detail.usage)?L.v.detail:null,L.dk,wbKey(e.t))}</div>`})()}${e.en?`<div class="wb-s">${esc(e.en)}${e.wt?` <span>· ${esc(e.wt)}</span>`:''}</div>`:''}</li>`}).join('')}</ul></div>`}
 function wbPatch(){const b=$('wbBody');if(b)b.innerHTML=wbHtml();const c=$('wbChip');if(c)c.innerHTML='⭐ 내 단어장'+(wbList().length?` <b>${wbList().length}</b>`:'')}
 function wbStars(t){const on=wbHas(t);document.querySelectorAll('.wbstar[data-wb]').forEach(b=>{const w=weeks.find(x=>x.id===curId);if(!w)return;const [i,j]=b.dataset.wb.split('-').map(Number);const v=w.sentences[i]&&w.sentences[i].vocab[j];if(v&&wbKey(v.t)===wbKey(t)){b.classList.toggle('on',on);b.textContent=on?'★':'☆';b.setAttribute('aria-pressed',on)}})}
 document.addEventListener('click',e=>{
@@ -1634,6 +1641,14 @@ document.addEventListener('click',e=>{
     if(s.dataset.wbk){const k=s.dataset.wbk,e0=prog.wb[k];if(!e0)return;prog.wb[k]={...e0,off:true,at:Date.now()};saveProg();wbStars(e0.t);wbPatch();toast('내 단어장에서 뺐어요');return}
   }
   if(e.target.closest&&e.target.closest('#wbChip')){e.preventDefault();e.stopPropagation();stop();wbView=!wbView;renderWeeks();render();window.scrollTo(0,0);return}
+  const mo=e.target.closest&&e.target.closest('.wbmore');
+  if(mo){e.preventDefault();e.stopPropagation();const k=mo.dataset.wbk,ent=(prog.wb||{})[k];if(!ent)return;
+    if(wbOpen.has(k)){wbOpen.delete(k);wbPatch();
+      if(mo.classList.contains('vfold')){const el=document.querySelector(`.wbmore[data-wbk="${CSS.escape(k)}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<60||r.bottom>innerHeight-140)el.scrollIntoView({block:'center'})}}
+      return}
+    wbOpen.add(k);const L=wbLoc(ent);
+    if(L&&!(L.v.detail&&L.v.detail.core&&L.v.detail.usage)&&!detBusy[L.dk]){const pr=loadDetail(L.w,L.i,L.j,L.dk,true);wbPatch();pr.then(ok=>{if(!ok)detErr[L.dk]=sample?'설명을 만들지 못했습니다. 접었다가 다시 눌러 주세요.':'AI 기능이 꺼져 있어 설명을 만들 수 없습니다.';wbPatch()})}else wbPatch();
+    return}
   if(e.target.id==='wbHideBtn'){wbHide=!wbHide;wbPatch();return}
   const m=e.target.closest&&e.target.closest('.wb-m.hid');if(m){m.classList.remove('hid');m.textContent=m.dataset.m;return}
 },true);
