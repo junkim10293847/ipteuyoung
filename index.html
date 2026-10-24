@@ -245,7 +245,10 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .wb-m{font-size:.86rem;color:var(--fg)}
 .wb-list li.hid .wb-s{display:none}
 .wb-h .wb-tg{flex:none}
-.wb-list .vdet{margin-top:6px}
+.wb-h .vmore[aria-expanded="true"]{padding:2px 9px;margin-left:2px}
+.wb-list .vdet{margin-top:6px;min-width:0;overflow-wrap:anywhere}
+.wb,.wb-list,.wb-list li,.wbpage{min-width:0}
+.wb-list{grid-template-columns:minmax(0,1fr)}
 .wb-s{font-size:.76rem;color:var(--muted)}.wb-s span{opacity:.8}
 .vplay{border:0;background:none;padding:0 2px;cursor:pointer;font-size:.8rem;line-height:1;color:var(--fg)}
 @media (max-width:420px){.vi{grid-template-columns:1fr}.vi dd{padding-left:22px;margin-top:-2px}}
@@ -431,7 +434,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v96</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v97</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1633,7 +1636,7 @@ function wbHtml(){const L=wbList();
       const hid=wbHide&&!wbShown.has(wbKey(e.t));
       return `<li class="${hid?'hid':''}"><div class="wb-h"><button class="vplay" data-t="${esc(e.t)}" data-a="${esc(e.a||'')}" aria-label="듣기">🔊</button>
         <span class="wb-t"><b>${esc(e.t)}</b>${hid?'':`<span class="wb-m">${esc(e.m||'')}</span>`}</span>
-        ${wbHide?`<button class="vmore wb-tg" data-k="${k}">${hid?'뜻 보기 ▾':'가리기 ▴'}</button>`:''}${loc?`<button class="vmore wbmore" data-wbk="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button>`:''}<button class="wbstar on" data-wbk="${k}" aria-label="단어장에서 빼기">★</button></div>
+        ${wbHide?`<button class="vmore wb-tg" data-k="${k}" aria-expanded="${!hid}">${hid?'뜻 보기 ▾':'가리기 ▴'}</button>`:''}${loc?`<button class="vmore wbmore" data-wbk="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button>`:''}<button class="wbstar on" data-wbk="${k}" aria-label="단어장에서 빼기">★</button></div>
       ${op&&loc?`<div class="vdet">${detHtml(loc.v.detail&&(loc.v.detail.core||loc.v.detail.usage)?loc.v.detail:null,loc.dk,wbKey(e.t),loc.w.id+'~'+loc.i+'-'+loc.j)}</div>`:''}
       ${e.en?`<div class="wb-s">${esc(e.en)}${e.wt?` <span>· ${esc(e.wt)}</span>`:''}</div>`:''}</li>`}).join('')}</ul></div>`}
 function wbPatch(){const b=$('wbBody');if(b)b.innerHTML=wbHtml();const c=$('wbChip');if(c)c.innerHTML='⭐ 내 단어장'+(wbList().length?` <b>${wbList().length}</b>`:'')}
