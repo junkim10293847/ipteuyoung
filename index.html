@@ -111,6 +111,9 @@ details.passage{margin-top:12px;padding:10px 14px}
 .ps-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:6px}
 .passage h2{font-family:var(--display);font-size:1.2rem;margin:0}
 .passage h3{font-family:var(--display);font-size:1.05rem;margin:10px 0 4px;color:var(--accent)}
+.ttl{font-size:1rem;font-weight:700;margin-bottom:4px;line-height:1.7}
+.ttl-tag{display:inline-block;font-size:.68rem;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:0 7px;vertical-align:2px}
+.ttl-ko{display:block;font-weight:400;font-size:.82rem;color:var(--muted)}
 .ps-text{font-size:1.02rem;line-height:1.85;margin:6px 0 8px}
 .ps-text+.ps-text{margin-top:14px;text-indent:1.2em}
 .ps-text:first-of-type{text-indent:1.2em}
@@ -443,7 +446,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v106</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v107</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -780,7 +783,7 @@ function gradeText(ansT,usrT){
   const almost=!perfect&&!sub&&!spell&&!miss&&!bad&&(cmiss+cbad)>0;
   return {d,score,sub,spell,miss,bad,cmiss,cbad,perfect,almost};
 }
-function grade(w,i){return gradeText(w.sentences[i].en,writeDraft[curId+'|'+i]||'')}
+function grade(w,i){const T=ttlOf(w,i);return gradeText((T?T.en+' ':'')+w.sentences[i].en,writeDraft[curId+'|'+i]||'')}
 /* 쉼표는 앞 단어에 붙여서 표시, 빠진 쉼표는 눈에 띄게 */
 const diffHtml=r=>`<div class="wr-diff">${r.d.map(([t,x,y,s,k],n)=>{const sp=n&&k!==','?' ':'';
   if(k===','&&t!=='ok')return `<span class="${t} pun" title="${t==='miss'?'쉼표 빠짐':'쉼표 더 씀'}">,</span>`;
@@ -801,6 +804,7 @@ function patchCardState(w,i){
   const dn=doneOf(w.id),hid=hiddenEn.has(i);
   c.classList.toggle('done',!!dn[i]);
   const en=c.querySelector('.en');if(en)en.innerHTML=wordsHtml(w.sentences[i].en,i);
+  const tl=c.querySelector('.ttl'),T=ttlOf(w,i);if(tl&&T)tl.outerHTML=ttlHtml(T,i);
   const hb=c.querySelector('.hideen');if(hb){hb.setAttribute('aria-pressed',hid);hb.textContent=hid?'영어 보기':'영어 가리기'}
   const mb=c.querySelector('.mark');if(mb){mb.setAttribute('aria-pressed',!!dn[i]);mb.textContent=dn[i]?'✓ 외움':'☐ 외움'}
   const e=weakOf(w.id,i),ob=c.querySelector('.wbadge');
@@ -910,6 +914,9 @@ function markPhrases(t,m){
   ws.forEach((w,k)=>{const c=m[k];if(c&&cur&&cur.c===c&&cur.end===k-1){cur.words.push(w);cur.end=k}else if(c){cur={c,words:[w],end:k};out.push(cur)}else cur=null});
   return out.map(x=>({c:x.c,t:x.words.join(' ').replace(/[.,!?;:"“”]+$/,'').replace(/^["“]/,'')}));
 }
+/* 제목은 1번 문장 카드에 합쳐서 함께 외움: 카드 위쪽에 제목 줄, 듣기·써보기도 제목부터 */
+function ttlOf(w,i){const t=w.sentences.findIndex(x=>x.isTitle);if(t<0)return null;const f=w.sentences.findIndex(x=>!x.isTitle);return i===f?w.sentences[t]:null}
+function ttlHtml(T,i){const hid=hiddenEn.has(i);return `<div class="ttl"><span class="ttl-tag">제목</span> ${T.en.split(' ').map(x=>`<span class="w${hid?' hid':''}">${esc(x)}</span>`).join(' ')}${T.ko?`<span class="ttl-ko">${esc(T.ko)}</span>`:''}</div>`}
 function wordsHtml(t,i){
   const hid=hiddenEn.has(i), m=marksOf(curId,i);
   return t.split(' ').map((w,k)=>`<span class="w${hid?' hid':''}" data-w="${k}">${esc(w)}</span>`).join(' ');
@@ -927,9 +934,6 @@ function render(){
   const by=(w.addedBy&&names[w.addedBy])||w.addedByName||'';
   const bodyIdx=w.sentences.map((_,i)=>i).filter(i=>!w.sentences[i].isTitle);
   let idx = view==='all'||view==='sat' ? bodyIdx : days[+view.slice(1)];
-  /* 제목도 외우는 문장: 1번 문장이 나오는 화면에는 제목 카드를 맨 앞에 함께 보여 줌 */
-  const tIdx=w.sentences.findIndex(x=>x.isTitle);
-  if(tIdx>=0&&idx&&bodyIdx.length&&idx.includes(bodyIdx[0])&&!idx.includes(tIdx))idx=[tIdx,...idx];
   /* 1. 어제 분량 자동 복습: 일차 화면에서 전날 문장을 영어 가린 채 위에 붙임 */
   const dn=view&&view[0]==='d'?+view.slice(1):-1, rev=dn>0?(days[dn-1]||[]):[];
   {const dn=doneOf(curId);Object.keys(dn).forEach(k=>{if(dn[k]&&!doneSeen.has(+k)){doneSeen.add(+k);hiddenEn.add(+k)}})}
@@ -940,8 +944,7 @@ function render(){
   /* 일차 화면은 번호가 끊기지 않게: 어제 복습·오늘 문장·이미 외운 문장을 번호 순서대로 한 줄로 이어서 보여 줌 */
   const prevMax=rev.length?Math.max(...rev):-1;
   const dayAll=[...new Set([...rev,...idx])];
-  const seq0=(view&&view[0]==='d'&&dayAll.length)?bodyIdx.filter(j=>j>=Math.min(...dayAll.filter(j=>j!==tIdx))&&j<=Math.max(...dayAll)):idx;
-  const seq=idx.includes(tIdx)&&!seq0.includes(tIdx)?[tIdx,...seq0]:seq0;
+  const seq=(view&&view[0]==='d'&&dayAll.length)?bodyIdx.filter(j=>j>=Math.min(...dayAll)&&j<=Math.max(...dayAll)):idx;
   const roleOf=j=>idx.includes(j)?'today':rev.includes(j)?'rev':'skip';
   const nRev=seq.filter(j=>roleOf(j)==='rev').length,nSkip=seq.filter(j=>roleOf(j)==='skip').length,behind=idx.filter(j=>j<prevMax).length;
   const listIdx=(view&&view[0]==='d'&&(rev.length||nSkip))?['__H',...seq]:seq;
@@ -1002,7 +1005,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
     ${listIdx.map(i=>{if(i==='__H')return `<li class="revhead"><b>📖 오늘 ${idx.length}문장${nRev?` · 🔁 어제 복습 ${nRev}`:''}${nSkip?` · ✓ 이미 외움 ${nSkip}`:''}</b><span>번호 순서대로 이어서 보여 줘요.${nRev?' 어제 복습 문장은 영어를 가려 두었어요.':''}${behind?` 앞에서 아직 못 외운 ${behind}문장도 오늘 분량에 넣었어요.`:''}</span></li>`;if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__S')return skipHtml;if(i==='__T'){const behind=idx.filter(j=>j<prevMax).length;return `<li class="revhead today"><b>📖 오늘 문장 · ${idx.length}문장</b>${behind?`<span>앞에서 아직 못 외운 ${behind}문장을 먼저 넣었어요.</span>`:''}</li>`+skipHtml};const s=w.sentences[i];const v=s.vocab||[];return `
      <li class="card${done[i]?' done':''}" id="c${i}">
        <span class="num">${numLabel(w,i)}</span>
-       ${(view&&view[0]==='d'&&listIdx[0]==='__H')?(r=>r==='rev'?'<span class="ctag rev">🔁 어제 복습</span>':r==='skip'?'<span class="ctag skip">✓ 이미 외움</span>':'<span class="ctag today">📖 오늘</span>')(roleOf(i)):''}<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div>
+       ${(view&&view[0]==='d'&&listIdx[0]==='__H')?(r=>r==='rev'?'<span class="ctag rev">🔁 어제 복습</span>':r==='skip'?'<span class="ctag skip">✓ 이미 외움</span>':'<span class="ctag today">📖 오늘</span>')(roleOf(i)):''}${(T=>T?ttlHtml(T,i):'')(ttlOf(w,i))}<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div>
        <div class="ko${s.ko?'':' empty'}">${s.ko?esc(s.ko):'해석 없음'}</div>
        ${(()=>{const e=weakOf(w.id,i);return e?`<div class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</div>`:''})()}
 
@@ -1342,7 +1345,8 @@ async function playOne(s,i,rate,my,noScroll){
   const rep=+$('rep').value,gap=+$('gap').value; hl(i,noScroll);
   const la=$('longAudio');if(la&&!la.paused)la.pause();
   const vs=$('voiceSel').value, url=(vs!=='af'&&s.alt&&s.alt[vs])||s.audio;
-  for(let r=0;r<rep;r++){if(my!==token)return;await speak(s.en,rate,url);if(my!==token)return;await wait(gap)}
+  const wk=weeks.find(x=>x.id===curId),T=wk&&wk.sentences[i]===s?ttlOf(wk,i):null,tu=T&&((vs!=='af'&&T.alt&&T.alt[vs])||T.audio);
+  for(let r=0;r<rep;r++){if(my!==token)return;if(T){await speak(T.en,rate,tu);if(my!==token)return;await wait(0.4)}await speak(s.en,rate,url);if(my!==token)return;await wait(gap)}
 }
 const cleanTerm=t=>t.replace(/\(.*?\)/g,'').replace(/[가-힣~]+/g,'').replace(/\+.*$/,'').trim();
 
