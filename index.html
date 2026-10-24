@@ -232,6 +232,9 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .wbstar{border:0;background:none;padding:0 4px;margin-left:2px;cursor:pointer;font-size:1rem;line-height:1;color:var(--muted)}
 .wbstar.on{color:#e5a100}
 .wb{display:grid;gap:8px;margin-top:10px}
+.wbpage{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:12px}
+.wbpage h2{margin:0 0 4px;font-size:1.2rem}
+.chip.wbchip b{color:#e5a100;margin-left:2px}
 .wb-top{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--muted)}
 .wb-top .ghost{padding:4px 12px;font-size:.8rem}
 .wb-list{display:grid;gap:8px;list-style:none;padding:0;margin:0}
@@ -424,7 +427,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v88</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v89</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -667,7 +670,7 @@ function numLabel(w,i){const s=w.sentences;if(s[i].isTitle)return 'T';return s[0
 
 /* ---------- render ---------- */
 function renderWeeks(){
-  $('weekRow').innerHTML=weeks.map(w=>`<button class="chip" data-week="${esc(w.id)}" aria-pressed="${w.id===curId}" title="${md(studyOf(w))} 테스트">${esc(w.title)}</button>`).join('')+(canWrite?`<button class="chip add" id="addBtn">+ 새 주차</button>`:'');
+  $('weekRow').innerHTML=`<button class="chip wbchip" id="wbChip" aria-pressed="${wbView}">⭐ 내 단어장${wbList().length?` <b>${wbList().length}</b>`:''}</button>`+weeks.map(w=>`<button class="chip" data-week="${esc(w.id)}" aria-pressed="${!wbView&&w.id===curId}" title="${md(studyOf(w))} 테스트">${esc(w.title)}</button>`).join('')+(canWrite?`<button class="chip add" id="addBtn">+ 새 주차</button>`:'');
 }
 /* ✍ 써보기: 외운 문장을 직접 입력하고 원문과 단어 단위로 비교 (로그인 없이도 사용 가능) */
 const writeOpen=new Set(), writeDraft={}, writeRes={};
@@ -899,6 +902,7 @@ function render(){
   const main=$('main');
   if(!loaded){if(window.__snap)return;main.innerHTML=`<div class="empty-state"><b>주차 목록을 불러오는 중</b>잠시만 기다려 주세요.</div>`;return}
   if(dbFailed){main.innerHTML=`<div class="empty-state"><b>저장된 주차를 불러올 수 없습니다</b>잠시 후 다시 열어 주세요. 계속 안 되면 관리자에게 알려 주세요.</div>`;return}
+  if(wbView){main.innerHTML=`<section class="wbpage"><h2>⭐ 내 단어장</h2><p class="meta">모든 주차에서 ☆로 담은 단어·숙어를 한곳에 모았어요. 최근에 담은 것부터 보여요.</p><div id="wbBody">${wbHtml()}</div></section>`;return}
   const w=weeks.find(x=>x.id===curId);
   if(!w){main.innerHTML=`<div class="empty-state"><b>아직 등록된 주차가 없습니다</b>위의 '+ 새 주차'를 눌러 지문을 붙여 넣으면 월~금 분량이 자동으로 나뉩니다.</div>`;return}
   const days=plan(w), start=startOf(w), sat=studyOf(w), prev=prevStudyOf(w), tv=todayView(w), pace=paceOf(w), per=perDay(w);
@@ -995,7 +999,6 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    </ol>
    <details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
    <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">한글만 보고 처음부터 끝까지 써 보고 총점 받기</span></summary>${mockHtml(w)}</details>
-   <details class="tool" id="wbBox"${toolOpen.wbBox?' open':''}><summary><span class="t-title">⭐ 내 단어장 <b class="wb-n">${wbList().length||''}</b></span><span class="t-sub">☆로 담은 단어·숙어를 모든 주차에서 모아 보기</span></summary><div id="wbBody">${wbHtml()}</div></details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
    <p class="note">외움 표시와 하루 분량은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
@@ -1308,7 +1311,7 @@ document.addEventListener('click',async e=>{
   if(ps){const w0=weeks.find(x=>x.id===curId);if(!w0)return;const sl=window.getSelection();if(sl&&!sl.isCollapsed)return;const j=+ps.dataset.ps;stop();const my=token;document.querySelectorAll('.ps.on').forEach(x=>x.classList.remove('on'));ps.classList.add('on');await playOne(w0.sentences[j],j,+$('rate').value,my,true);ps.classList.remove('on');if(my===token)hl(null);return}
   const t=e.target.closest('button,.en'); if(!t)return;
   const w=weeks.find(x=>x.id===curId);
-  if(t.dataset.week){stop();writeOpen.clear();{const la=$('longAudio');if(la)la.pause()}revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
+  if(t.dataset.week){stop();wbView=false;writeOpen.clear();{const la=$('longAudio');if(la)la.pause()}revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
   if(t.id==='addBtn'){openAdd();return}
   if(t.dataset.view){stop();view=view===t.dataset.view&&t.dataset.view==='all'?todayView(w):t.dataset.view;render();return}
   if(t.dataset.pace){stop();prog.pace[w.id]=t.dataset.pace;saveProg();view=todayView(w);render();return}
@@ -1612,13 +1615,13 @@ function mockHtml(w){
     <button class="ghost" id="mockClose">끝내기</button></div></div>`;
 }
 /* 4. 내 약점 */
-let wbHide=false;
+let wbHide=false,wbView=false;
 function wbHtml(){const L=wbList();
   if(!L.length)return `<p class="hint" style="margin-top:10px">단어·숙어 목록에서 표현 옆 <b>☆</b>를 누르면 여기에 모입니다. 주차가 바뀌어도 계속 남아요.</p>`;
   return `<div class="wb"><div class="wb-top"><span>${L.length}개</span><button class="ghost" id="wbHideBtn">${wbHide?'뜻 보기':'뜻 가리기'}</button></div>
     <ul class="wb-list">${L.map(e=>{const k=esc(wbKey(e.t));return `<li><div class="wb-h"><button class="vplay" data-t="${esc(e.t)}" data-a="${esc(e.a||'')}" aria-label="듣기">🔊</button><b>${esc(e.t)}</b><button class="wbstar on" data-wbk="${k}" aria-label="단어장에서 빼기">★</button></div>
       <div class="wb-m${wbHide?' hid':''}" data-m="${esc(e.m||'')}">${wbHide?'눌러서 뜻 보기':esc(e.m||'')}</div>${e.en?`<div class="wb-s">${esc(e.en)}${e.wt?` <span>· ${esc(e.wt)}</span>`:''}</div>`:''}</li>`}).join('')}</ul></div>`}
-function wbPatch(){const b=$('wbBody');if(b)b.innerHTML=wbHtml();const n=document.querySelector('#wbBox .wb-n');if(n)n.textContent=wbList().length||''}
+function wbPatch(){const b=$('wbBody');if(b)b.innerHTML=wbHtml();const c=$('wbChip');if(c)c.innerHTML='⭐ 내 단어장'+(wbList().length?` <b>${wbList().length}</b>`:'')}
 function wbStars(t){const on=wbHas(t);document.querySelectorAll('.wbstar[data-wb]').forEach(b=>{const w=weeks.find(x=>x.id===curId);if(!w)return;const [i,j]=b.dataset.wb.split('-').map(Number);const v=w.sentences[i]&&w.sentences[i].vocab[j];if(v&&wbKey(v.t)===wbKey(t)){b.classList.toggle('on',on);b.textContent=on?'★':'☆';b.setAttribute('aria-pressed',on)}})}
 document.addEventListener('click',e=>{
   const s=e.target.closest&&e.target.closest('.wbstar');
@@ -1626,10 +1629,11 @@ document.addEventListener('click',e=>{
     if(s.dataset.wb){const w=weeks.find(x=>x.id===curId);if(!w)return;const [i,j]=s.dataset.wb.split('-').map(Number),sn=w.sentences[i],v=sn&&sn.vocab[j];if(!v)return;
       const k=wbKey(v.t);
       if(wbHas(v.t)){prog.wb[k]={...prog.wb[k],off:true,at:Date.now()};toast('내 단어장에서 뺐어요')}
-      else{prog.wb[k]={t:v.t,m:v.m||'',a:v.audio||'',en:sn.en,wid:w.id,wt:w.title||'',at:Date.now()};toast('⭐ 내 단어장에 담았어요')}
+      else{prog.wb[k]={t:v.t,m:v.m||'',a:v.audio||'',en:sn.en,wid:w.id,wt:w.title||'',at:Date.now()};toast('⭐ 담았어요 · 맨 위 [⭐ 내 단어장]에서 모아 봐요')}
       saveProg();wbStars(v.t);wbPatch();return}
     if(s.dataset.wbk){const k=s.dataset.wbk,e0=prog.wb[k];if(!e0)return;prog.wb[k]={...e0,off:true,at:Date.now()};saveProg();wbStars(e0.t);wbPatch();toast('내 단어장에서 뺐어요');return}
   }
+  if(e.target.closest&&e.target.closest('#wbChip')){e.preventDefault();e.stopPropagation();stop();wbView=!wbView;renderWeeks();render();window.scrollTo(0,0);return}
   if(e.target.id==='wbHideBtn'){wbHide=!wbHide;wbPatch();return}
   const m=e.target.closest&&e.target.closest('.wb-m.hid');if(m){m.classList.remove('hid');m.textContent=m.dataset.m;return}
 },true);
@@ -1725,10 +1729,10 @@ function keepScroll(fn){const a=topAnchor();fn();scrollToAnchor(a)}
 function saveUi(){if(!loaded||!curId)return;try{
   if(mock){const ta=$('mockIn');if(ta&&!mock.res)mock.ans[mock.pos]=ta.value}
   try{const mn=$('main');if(mn&&mn.querySelector('li.card'))localStorage.setItem('uiSnap',JSON.stringify({main:mn.innerHTML,week:($('weekRow')||{}).innerHTML||'',y:Math.round(scrollY)}))}catch(_){}
-  localStorage.setItem(UI_KEY,JSON.stringify({at:Date.now(),curId,view,a:topAnchor(),wo:[...writeOpen].filter(i=>{const d=writeDraft[curId+'|'+i];return d&&d.trim()&&!(writeRes[curId+'|'+i]||{}).perfect}),wd:writeDraft,to:toolOpen,mock,seqPos,seqAns,vo:[...openVoc]}))}catch(_){}}
+  localStorage.setItem(UI_KEY,JSON.stringify({at:Date.now(),curId,view,a:topAnchor(),wo:[...writeOpen].filter(i=>{const d=writeDraft[curId+'|'+i];return d&&d.trim()&&!(writeRes[curId+'|'+i]||{}).perfect}),wd:writeDraft,to:toolOpen,mock,seqPos,seqAns,vo:[...openVoc],wbv:wbView}))}catch(_){}}
 function restoreUi(){try{const u=JSON.parse(localStorage.getItem(UI_KEY)||'null');
   if(!u||Date.now()-u.at>3*3600e3||new Date(u.at).toDateString()!==new Date().toDateString()||!weeks.find(w=>w.id===u.curId))return false;
-  uiSaved=u;curId=u.curId;view=u.view||view;
+  uiSaved=u;curId=u.curId;view=u.view||view;wbView=!!u.wbv;
   Object.assign(writeDraft,u.wd||{});(u.wo||[]).forEach(i=>{const d=writeDraft[u.curId+'|'+i];if(d&&d.trim())writeOpen.add(i)});Object.assign(toolOpen,u.to||{});
   if(u.mock&&u.mock.wid===curId)mock=u.mock;seqPos=u.seqPos||0;Object.assign(seqAns,u.seqAns||{});(u.vo||[]).forEach(i=>openVoc.add(i));
   return true}catch(_){return false}}
