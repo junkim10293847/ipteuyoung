@@ -1,1 +1,39 @@
-설명이 없는 단어·숙어 0개 (이번에 최대 40개)
+설명이 없는 단어·숙어 31개 (이번에 최대 40개)
+  2026-10-19 #0 Natural Recreation Forests: 완료 (10초)
+  2026-10-19 #1 natural recreation forest: 완료 (7초)
+  2026-10-19 #1 about once a month: 완료 (8초)
+  2026-10-19 #2 make reservations: 완료 (7초)
+  2026-10-19 #2 enter a lottery: 완료 (8초)
+  → 5개 저장
+  2026-10-19 government-run: 실패 invalid_json
+  2026-10-19 #3 fill up: 완료 (29초)
+  2026-10-19 #3 as soon as: 완료 (8초)
+  2026-10-19 #3 open: 완료 (25초)
+  2026-10-19 #4 get lucky: 완료 (9초)
+  2026-10-19 #4 win a spot: 완료 (7초)
+  → 5개 저장
+  2026-10-19 #4 cancel: 완료 (8초)
+  2026-10-19 #5 tour: 완료 (8초)
+  2026-10-19 #5 experience: 완료 (7초)
+  2026-10-19 #5 what makes each region special: 완료 (6초)
+  2026-10-19 #6 local specialties: 완료 (7초)
+  → 5개 저장
+  2026-10-19 #6 traditional markets: 완료 (5초)
+  2026-10-19 #6 hospitality: 완료 (8초)
+  2026-10-19 #7 lucky enough to-v: 완료 (3초)
+  2026-10-19 #7 local festival: 완료 (19초)
+  2026-10-19 #8 forest activities: 완료 (4초)
+  → 5개 저장
+  2026-10-19 #8 go on walks: 완료 (6초)
+  2026-10-19 #9 water-play facilities: 완료 (6초)
+  2026-10-19 #9 have: 완료 (6초)
+  2026-10-19 #10 for the sake of: 완료 (8초)
+  2026-10-19 #10 grateful: 완료 (6초)
+  → 5개 저장
+  2026-10-19 #10 spend time together: 완료 (6초)
+  2026-10-19 #11 reasonable: 완료 (14초)
+  2026-10-19 #11 so many different things: 완료 (4초)
+  2026-10-19 #12 recommend: 완료 (3초)
+  2026-10-19 #12 anyone: 완료 (3초)
+  → 5개 저장
+설명 30개 저장
