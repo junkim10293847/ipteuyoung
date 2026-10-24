@@ -438,7 +438,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v102</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v103</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1029,14 +1029,16 @@ const missing0=w=>w.sentences.some(x=>!x.ko);
 const openVoc=new Set(), openDet=new Set(), detBusy={}, detErr={};
 document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('voc')){const i=+d.dataset.i;d.open?openVoc.add(i):openVoc.delete(i)}},true);
 /* 단어·숙어 바로 질문: 답은 닉네임별 개인 기록에 저장 */
-const qaLive={}, qaDraft={};
+const qaLive={}, qaDraft={}, qaJust={}, qaOpen=new Set();
+document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('qa-old')&&d.dataset.qk){d.open?qaOpen.add(d.dataset.qk):qaOpen.delete(d.dataset.qk)}},true);
 const qaKey=k=>{const p=String(k).split('~');return p.length>1?p[0]+'|'+p[1]:curId+'|'+k};
 const qaSplit=k=>{const p=String(k).split('~');return p.length>1?{wid:p[0],k:p[1]}:{wid:curId,k}};
 function qaHtml(k,title,ph){
   const key=qaKey(k), all=(prog.qa&&prog.qa[key])||[], live=qaLive[key];
-  const old=k==='all'?all.slice(0,-3):[], list=k==='all'?all.slice(-3):all;
+  /* 질문 기록은 접어 두고, 방금 받은 답만 펼쳐 보여 줌 (기록이 계속 늘어나 화면이 길어지는 것 방지) */
+  const just=qaJust[key]&&all.length?[all[all.length-1]]:[], old=just.length?all.slice(0,-1):all;
   const one=x=>`<div class="qa-item"><div class="qa-q">Q. ${esc(x.q)}</div><div class="qa-a">${esc(x.a)}</div></div>`;
-  const items=(old.length?`<details class="qa-old"><summary>이전 질문 ${old.length}개 보기</summary>${old.map(one).join('')}</details>`:'')+list.map(x=>`<div class="qa-item"><div class="qa-q">Q. ${esc(x.q)}</div><div class="qa-a">${esc(x.a)}</div></div>`).join('')
+  const items=(old.length?`<details class="qa-old" data-qk="${esc(key)}"${qaOpen.has(key)?' open':''}><summary>💬 ${just.length?'이전 ':''}질문 기록 ${old.length}개</summary>${old.map(one).join('')}</details>`:'')+just.map(one).join('')
     +(detErr['qa'+key]?`<p class="load" style="color:var(--bad,#b3261e)">${esc(detErr['qa'+key])}</p>`:'')
     +(live?`<div class="qa-item"><div class="qa-q">Q. ${esc(live.q)}</div><div class="qa-a" id="qaLive-${esc(k)}">${esc(live.a||'생각하는 중…')}</div></div>`:'');
   const off=!sample||readOnly;
@@ -1088,7 +1090,7 @@ Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.
     const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
     let {text}=await sample(prompt,{cache:false,onText});
     if(!/[A-Za-z]{3,}/.test(text)||text.length<60){const r2=await sample(prompt+'\n\n[주의] 직전 답에 영어 예문이 없거나 너무 짧았다. 규칙대로 다시 답한다.',{cache:false,onText}).catch(()=>null);if(r2&&r2.text)text=r2.text}
-    prog.qa=prog.qa||{};const arr=(prog.qa[key]||[]).concat([{q,a:text}]).slice(-8);prog.qa[key]=arr;saveProg();
+    prog.qa=prog.qa||{};const arr=(prog.qa[key]||[]).concat([{q,a:text}]).slice(-8);prog.qa[key]=arr;qaJust[key]=1;saveProg();
   }catch(err){
     const msg=err&&err.code==='not_granted'?'AI 키가 설정되지 않아 답할 수 없습니다. 관리자에게 알려 주세요.':err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'인터넷 연결이 불안정해 서버에 닿지 못했습니다. 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요. ('+String(err&&err.message||'').slice(0,60)+')';
     qaDraft[key]=q;detErr['qa'+key]=msg;
@@ -1117,7 +1119,7 @@ ${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):
   try{
     const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
     const {text}=await sample(prompt,{cache:false,onText});
-    delete qaLive[key];prog.qa=prog.qa||{};prog.qa[key]=((prog.qa[key]||[]).concat([{q,a:text}])).slice(-20);saveProg();
+    delete qaLive[key];prog.qa=prog.qa||{};prog.qa[key]=((prog.qa[key]||[]).concat([{q,a:text}])).slice(-20);qaJust[key]=1;saveProg();
   }catch(err){
     qaDraft[key]=q;detErr['qa'+key]=err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'인터넷 연결이 불안정합니다. 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요.';
   }
