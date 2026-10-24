@@ -446,7 +446,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v108</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v109</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -921,7 +921,7 @@ function vocItems(w,i){const s=w.sentences[i],out=[],seen=new Set();const T=ttlO
   if(T)(T.vocab||[]).forEach((x,j)=>{const k=cleanTerm(x.t).toLowerCase();if(!seen.has(k)){seen.add(k);out.push({x,ii:ti,j})}});
   (s.vocab||[]).forEach((x,j)=>{const k=cleanTerm(x.t).toLowerCase();if(!seen.has(k)){seen.add(k);out.push({x,ii:i,j})}});
   return out}
-function ttlHtml(T,i){const hid=hiddenEn.has(i);return `<div class="ttl"><span class="ttl-tag">제목</span> ${T.en.split(' ').map(x=>`<span class="w${hid?' hid':''}">${esc(x)}</span>`).join(' ')}${T.ko?`<span class="ttl-ko">${esc(T.ko)}</span>`:''}</div>`}
+function ttlHtml(T,i){const hid=hiddenEn.has(i);return `<div class="ttl">${T.en.split(' ').map(x=>`<span class="w${hid?' hid':''}">${esc(x)}</span>`).join(' ')}${T.ko?`<span class="ttl-ko">${esc(T.ko)}</span>`:''}</div>`}
 function wordsHtml(t,i){
   const hid=hiddenEn.has(i), m=marksOf(curId,i);
   return t.split(' ').map((w,k)=>`<span class="w${hid?' hid':''}" data-w="${k}">${esc(w)}</span>`).join(' ');
