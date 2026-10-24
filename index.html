@@ -431,7 +431,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v91</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v92</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1619,7 +1619,7 @@ function mockHtml(w){
     <button class="ghost" id="mockClose">끝내기</button></div></div>`;
 }
 /* 4. 내 약점 */
-let wbHide=false,wbView=false;const wbOpen=new Set();
+let wbHide=true,wbView=false;const wbOpen=new Set();
 /* 단어장 표현이 들어 있는 주차·문장·단어 위치 찾기 (자세히 설명을 같이 쓰려고) */
 function wbLoc(e){const k=wbKey(e.t),ws=[weeks.find(x=>x.id===e.wid),...weeks].filter(Boolean);
   for(const w of ws)for(let i=0;i<w.sentences.length;i++){const vs=w.sentences[i].vocab||[];const j=vs.findIndex(v=>wbKey(v.t)===k);if(j>=0)return {w,i,j,v:vs[j],dk:'wb:'+w.id+':'+i+'-'+j}}
