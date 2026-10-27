@@ -143,12 +143,12 @@ async function api(fn,...args){
 function mark(key,val){S[key]=val;LS.set('zr.progress',S);pending[key]=val;
   if(API&&KEY){clearTimeout(syncTimer);syncTimer=setTimeout(pushProgress,1500)}}
 async function pushProgress(){const d=pending;pending={};
-  try{await api('saveProgress',d)}catch(e){Object.assign(pending,d)}}
+  try{await api('zoom_saveProgress',d)}catch(e){Object.assign(pending,d)}}
 async function pullProgress(){
   if(!API||!KEY)return;
-  try{const srv=await api('getProgress');S=Object.assign({},srv,S);LS.set('zr.progress',S);
+  try{const srv=await api('zoom_getProgress');S=Object.assign({},srv,S);LS.set('zr.progress',S);
     const diff={};Object.keys(S).forEach(k=>{if(srv[k]!==S[k])diff[k]=S[k]});
-    if(Object.keys(diff).length)api('saveProgress',diff).catch(()=>{});syncState='ok'}
+    if(Object.keys(diff).length)api('zoom_saveProgress',diff).catch(()=>{});syncState='ok'}
   catch(e){syncState=e.message==='wrong_key'?'key':'off'}
 }
 const st=key=>S[key];
@@ -161,7 +161,7 @@ async function loadLesson(date){
   if(!cache[date]){const r=await fetch('data/lessons/'+date+'.json?v='+Date.now());if(!r.ok)throw 0;cache[date]=await r.json()}
   return cache[date];
 }
-async function loadJobs(){if(!API||!KEY){JOBS=[];return}try{JOBS=(await api('jobs')).filter(j=>j.status!=='done'||Date.now()-new Date(j.finished||0)<6e5)}catch(e){JOBS=[]}}
+async function loadJobs(){if(!API||!KEY){JOBS=[];return}try{JOBS=(await api('zoom_jobs')).filter(j=>j.status!=='done'||Date.now()-new Date(j.finished||0)<6e5)}catch(e){JOBS=[]}}
 
 /* ---------- 재생 ---------- */
 let rate=1, stopAt=null;
@@ -196,7 +196,7 @@ async function listView(){
     <p class="how"><b>매일 할 일</b> 수업이 끝나면 줌 녹화를 올립니다. 20~30분 뒤 이 목록에 그날 날짜로 복습 카드가 생깁니다.</p>
     ${API?`<p class="sync">${!KEY?'진도 동기화 꺼짐 · 수업 올리기에서 비밀번호를 넣으면 켜집니다':syncState==='key'?'비밀번호가 맞지 않습니다 · 수업 올리기에서 다시 넣어 주세요':syncState==='off'?'서버 연결 안 됨 · 이 기기에만 저장 중':'휴대폰·PC 진도 동기화 켜짐'}</p>`:''}`;
   app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>openLesson(b.dataset.d));
-  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await api('deleteJob',b.dataset.del)}catch(e){}listView()});
+  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await api('zoom_deleteJob',b.dataset.del)}catch(e){}listView()});
   const up=$('#up');if(up)up.onclick=uploadView;
 }
 
@@ -212,7 +212,7 @@ function uploadView(){
   mode='upload';let file=null;
   app.innerHTML=`<div class="head"><button class="back" id="back">← 목록</button><h2>수업 올리기</h2></div>
   <div class="card">
-    ${KEY?'':`<label class="field" for="key">앱 비밀번호 (처음 한 번만)<input type="password" id="key" autocomplete="current-password" placeholder="Apps Script setup 로그의 비밀번호"></label>`}
+    ${KEY?'':`<label class="field" for="key">비밀번호 (입트영 관리자 비밀번호, 처음 한 번만)<input type="password" id="key" autocomplete="current-password" placeholder="입트영 관리자 비밀번호"></label>`}
     <input type="file" id="file" accept="video/*,audio/*,.mp4,.m4a,.mp3" hidden>
     <button class="drop" id="pick"><b>줌 녹화 파일 고르기</b><br><span style="font-size:13px">mp4 또는 m4a · 오디오(m4a)가 훨씬 빨리 올라갑니다</span></button>
     <label class="field" for="date">수업 날짜<input type="date" id="date"></label>
@@ -231,15 +231,15 @@ function uploadView(){
     const date=$('#date').value;if(!file||!date)return;
     const go=$('#go');go.disabled=true;$('#st').hidden=false;const msg=$('#msg'),pg=$('#pg');
     try{
-      msg.textContent='비밀번호 확인 중…';await api('check');LS.set('zr.key',KEY);
+      msg.textContent='비밀번호 확인 중…';await api('zoom_check');LS.set('zr.key',KEY);
       const CH=4*1024*1024, n=Math.ceil(file.size/CH), id=date+'-'+Date.now().toString(36);
       for(let i=0;i<n;i++){
         const buf=await file.slice(i*CH,(i+1)*CH).arrayBuffer();
         let s='';const u=new Uint8Array(buf);for(let j=0;j<u.length;j+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(j,j+0x8000));
-        let tries=0;for(;;){try{await api('uploadPart',id,i,btoa(s));break}catch(e){if(++tries>=3)throw e;await new Promise(r=>setTimeout(r,3000))}}
+        let tries=0;for(;;){try{await api('zoom_uploadPart',id,i,btoa(s));break}catch(e){if(++tries>=3)throw e;await new Promise(r=>setTimeout(r,3000))}}
         pg.style.width=((i+1)/n*100)+'%';msg.textContent=`올리는 중 ${i+1} / ${n}`;
       }
-      await api('finishUpload',id,date,file.name,n,file.size);
+      await api('zoom_finishUpload',id,date,file.name,n,file.size);
       msg.textContent='올리기 완료. 20~30분 뒤 목록에 생깁니다.';
       setTimeout(listView,1500);pullProgress();
     }catch(e){

@@ -266,7 +266,7 @@ def main():
     if not api_url():
         print('config.js에 Apps Script 주소가 없습니다.'); out('todo', 0); return
     try:
-        jobs = api('pendingJobs') or []
+        jobs = api('zoom_pendingJobs') or []
     except Exception as e:
         print('작업 목록 확인 실패:', e); out('todo', 0); return
     out('todo', len(jobs))
@@ -274,19 +274,19 @@ def main():
         return
     job = jobs[0]
     print('처리 시작:', job)
-    api('setJob', job['id'], {'status': 'processing'})
+    api('zoom_setJob', job['id'], {'status': 'processing'})
     try:
         os.makedirs(WORK, exist_ok=True)
         ext = os.path.splitext(job.get('name') or 'x.mp4')[1] or '.mp4'
         src = os.path.join(WORK, 'input' + ext)
         with open(src, 'wb') as f:
             for i in range(int(job['parts'])):
-                f.write(base64.b64decode(api('getPart', job['id'], i)))
+                f.write(base64.b64decode(api('zoom_getPart', job['id'], i)))
         process_file(src, job['date'])
-        api('setJob', job['id'], {'status': 'done'})
+        api('zoom_setJob', job['id'], {'status': 'done'})
     except Exception as e:
         print('실패:', e)
-        api('setJob', job['id'], {'status': 'error', 'msg': str(e)[:300]})
+        api('zoom_setJob', job['id'], {'status': 'error', 'msg': str(e)[:300]})
         raise
 
 

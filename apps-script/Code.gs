@@ -32,6 +32,7 @@ function call_(fn, args) {
 function doPost(e) {
   let b = {};
   try { b = JSON.parse(e.postData.contents || '{}'); } catch (x) { return json_({ err: 'bad_request' }); }
+  if (/^zoom_/.test(String(b.fn))) return json_(zoomCall_(b.fn, b.args));   // 줌 수업 복습 앱 (Zoom.gs)
   return json_(call_(b.fn, b.args));
 }
 /* GitHub Actions·확인용: GET …/exec?fn=getWeeks */
