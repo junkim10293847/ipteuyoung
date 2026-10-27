@@ -11,6 +11,7 @@ const isShell=(r,u)=>r.mode==='navigate'||/\.(html|js|css|png|svg|webmanifest|wo
 self.addEventListener('fetch',e=>{
   const r=e.request,u=new URL(r.url);
   if(r.method!=='GET'||u.origin!==location.origin)return;   // 서버(Apps Script) 요청은 건드리지 않음
+  if(/\/zoom(\/|$)/.test(u.pathname))return;               // 줌 복습 앱(/zoom/)은 건드리지 않음
   if(/\.mp3$/.test(u.pathname))return;                       // 음성은 브라우저에 맡김
   if(u.searchParams.has('fresh'))return;                     // 새 버전 받기 요청은 그대로 인터넷으로
   if(isShell(r,u)){
