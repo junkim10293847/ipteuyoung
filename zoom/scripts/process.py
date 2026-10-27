@@ -134,10 +134,10 @@ def gemini(prompt):
         if model.startswith('gemini-2.5'):
             gc['thinkingConfig'] = {'thinkingBudget': 0}
         body = json.dumps({'contents': [{'role': 'user', 'parts': [{'text': prompt}]}], 'generationConfig': gc}).encode()
-        url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}'
+        url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent'
         for attempt in range(2):
             try:
-                req = urllib.request.Request(url, data=body, headers={'Content-Type': 'application/json'})
+                req = urllib.request.Request(url, data=body, headers={'Content-Type': 'application/json', 'x-goog-api-key': key})
                 with urllib.request.urlopen(req, timeout=300) as r:
                     j = json.loads(r.read().decode('utf-8'))
                 text = ''.join(p.get('text', '') for p in j['candidates'][0]['content']['parts'])
