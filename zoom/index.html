@@ -212,7 +212,7 @@ function uploadView(){
   mode='upload';let file=null;
   app.innerHTML=`<div class="head"><button class="back" id="back">← 목록</button><h2>수업 올리기</h2></div>
   <div class="card">
-    ${KEY?'':`<label class="field" for="key">비밀번호 (입트영 관리자 비밀번호, 처음 한 번만)<input type="password" id="key" autocomplete="current-password" placeholder="입트영 관리자 비밀번호"></label>`}
+    ${KEY?'':`<label class="field" for="key">앱 비밀번호 (처음 한 번만)<input type="password" id="key" autocomplete="current-password" placeholder="줌 복습 Apps Script setup 로그의 비밀번호"></label>`}
     <input type="file" id="file" accept="video/*,audio/*,.mp4,.m4a,.mp3" hidden>
     <button class="drop" id="pick"><b>줌 녹화 파일 고르기</b><br><span style="font-size:13px">mp4 또는 m4a · 오디오(m4a)가 훨씬 빨리 올라갑니다</span></button>
     <label class="field" for="date">수업 날짜<input type="date" id="date"></label>

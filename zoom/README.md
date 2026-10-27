@@ -3,19 +3,19 @@
 매일 필리핀 강사와 하는 줌 영어 수업 녹화를 올리면, 강사 목소리로 듣기·받아쓰기·말하기·표현 카드를 날짜별로 만들어 주는 복습 앱입니다.
 
 - **화면**: GitHub Pages → `https://junkim10293847.github.io/ipteuyoung/zoom/`
-- **녹화 보관·진도 저장**: 입트영 Apps Script 프로젝트 (`Code.gs` 아래쪽) (관리자 구글 드라이브 `줌 수업 복습` 폴더)
+- **녹화 보관·진도 저장**: 줌 복습 전용 Apps Script (관리자 구글 드라이브 `줌 수업 복습` 폴더) (관리자 구글 드라이브 `줌 수업 복습` 폴더)
 - **자동 정리**: GitHub Actions가 15분마다 새 녹화를 확인 → 강사/학습자 목소리 분리 → 영어 받아쓰기 → Gemini로 번역·끊어 읽기·표현 정리
 
 ## 처음 설정 (한 번만)
 
-입트영 앱과 같은 Apps Script 프로젝트를 씁니다. 새 프로젝트·새 주소가 필요 없습니다.
+입트영 앱과 완전히 별개인 **새 Apps Script 프로젝트**를 씁니다. 입트영 코드는 건드리지 않습니다.
 
-1. 입트영 Apps Script 프로젝트를 엽니다.
-2. `Code.gs` 내용을 모두 지우고 저장소의 `apps-script/Code.gs` 최신 내용을 통째로 붙여 넣은 뒤 저장합니다. (줌 기능이 맨 아래에 들어 있습니다)
-3. **배포 → 배포 관리 → 연필(수정) → 버전: 새 버전 → 배포**. 주소는 그대로입니다.
+1. [script.google.com](https://script.google.com) → **새 프로젝트** → 이름 `줌 수업 복습` → `zoom/apps-script/Code.gs` 내용을 통째로 붙여 넣고 저장합니다.
+2. 함수 목록에서 `setup` 선택 → 실행 → 권한 허용. 실행 로그에 나온 **앱 비밀번호(ZOOM_KEY)** 를 메모합니다.
+3. **배포 → 새 배포 → 유형: 웹 앱** (실행: 나 / 액세스: 모든 사용자) → 나온 웹 앱 URL(…/exec)을 `zoom/config.js`에 붙여 넣습니다.
 4. 저장소 **Settings → Secrets and variables → Actions → New repository secret** 에 두 개를 넣습니다.
-   - `ZOOM_KEY`: 입트영 관리자 비밀번호
-   - `GEMINI_API_KEY`: 입트영 Apps Script에 넣어 둔 것과 같은 Gemini 키
+   - `ZOOM_KEY`: 2번의 앱 비밀번호
+   - `GEMINI_API_KEY`: Google AI Studio 무료 키
 
 ## 매일 할 일
 
