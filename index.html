@@ -446,7 +446,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v111</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v112</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1392,7 +1392,7 @@ document.addEventListener('click',async e=>{
   if(t.id==='seqNext'){const n=bodyOf(w).length;micStop();seqPos=seqPos>=n-1?0:seqPos+1;seqShow=false;seqHint=false;stay('seqBox',render);return}
   if(t.id==='seqShow'){seqShow=!seqShow;stay('seqBox',render);return}
   if(t.id==='seqCheck'){const j=+t.dataset.j,ta=$('seqIn'),v=ta?ta.value:'';if(!v.trim()){toast('먼저 써 보거나 🎤로 말해 보세요');return}
-    micStop();const r=gradeText(w.sentences[j].en,v);recordWeak(w.id,j,r,false);if(r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true}}saveProg();
+    micStop();const r=gradeText(w.sentences[j].en,v);recordWeak(w.id,j,r,false);if(r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true};if(w.id===curId)doneSeen.add(j)}saveProg();
     const box=$('seqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;
     if(ta)ta.blur();return}
   if(t.id==='seqHint'){seqHint=!seqHint;render();return}
@@ -1424,7 +1424,7 @@ document.addEventListener('click',async e=>{
     if(suppressClick){suppressClick=false;return}
     if(loopIdx===i){stop();return}
   }
-  if(t.classList.contains('mark')){const d={...doneOf(w.id)};if(d[i]){delete d[i];hiddenEn.delete(i);doneSeen.delete(i)}else d[i]=true;prog.done[w.id]=d;saveProg();if(!patchCardState(w,i))stay(i,render);return}
+  if(t.classList.contains('mark')){const d={...doneOf(w.id)};if(d[i]){delete d[i];hiddenEn.delete(i);doneSeen.delete(i)}else{d[i]=true;doneSeen.add(i)}prog.done[w.id]=d;saveProg();if(!patchCardState(w,i))stay(i,render);return}
   if(t.classList.contains('write')){writeOpen.has(i)?writeOpen.delete(i):writeOpen.add(i);if(!patchWriteOpen(w,i))stay(i,render);return}
   if(t.classList.contains('wr-clear')){const key=curId+'|'+i;delete writeDraft[key];delete writeRes[key];
     /* 다시 쓰기: 글과 결과만 그 자리에서 지움 (화면 다시 그리지 않음) */
@@ -1433,7 +1433,7 @@ document.addEventListener('click',async e=>{
   if(t.classList.contains('wr-check')){
     const key=curId+'|'+i, r=grade(w,i);if(!r){const ta=$('wr-'+i);if(ta)ta.focus();return}
     writeRes[key]=r;recordWeak(w.id,i,r,false);saveProg();
-    if(r.perfect&&!doneOf(w.id)[i]){prog.done[w.id]={...doneOf(w.id),[i]:true};saveProg()}
+    if(r.perfect&&!doneOf(w.id)[i]){prog.done[w.id]={...doneOf(w.id),[i]:true};doneSeen.add(i);saveProg()}
     if(r.perfect)hiddenEn.add(i);
     /* 채점 결과만 그 자리 아래에 끼워 넣음 (화면 전체를 다시 그리지 않아 흔들림 없음) */
     const showRes=()=>{};   /* 화면은 움직이지 않음: 결과는 쓰기 칸 바로 아래에 나타남 */
@@ -1662,7 +1662,7 @@ function gradeMock(w,partial){
   if(partial){upto=-1;mock.ans.forEach((a,k)=>{if(a&&a.trim())upto=Math.max(upto,k)})}
   mock.upto=upto;mock.partial=partial&&upto<b.length-1;
   mock.res=b.map((j,k)=>k<=upto?gradeText(w.sentences[j].en,mock.ans[k]||''):null);
-  b.forEach((j,k)=>{const r=mock.res[k];if(r)recordWeak(w.id,j,r,false);if(r&&r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true}}});
+  b.forEach((j,k)=>{const r=mock.res[k];if(r)recordWeak(w.id,j,r,false);if(r&&r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true};if(w.id===curId)doneSeen.add(j)}});
   const n=upto+1,avg=Math.round(mock.res.slice(0,n).reduce((a,r)=>a+(r?r.score:0),0)/Math.max(1,n));
   prog.tests=prog.tests||{};prog.tests[w.id]=((prog.tests[w.id]||[]).concat([{at:Date.now(),score:avg,n,of:b.length}])).slice(-20);
   saveProg();render();setTimeout(()=>{const m=$('mockBox');if(m)m.scrollIntoView({block:'start',behavior:'smooth'})},40);
