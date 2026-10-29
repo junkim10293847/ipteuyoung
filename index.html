@@ -446,7 +446,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v110</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v111</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1878,7 +1878,7 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
   setInterval(()=>{if(document.visibilityState==='visible')chkVer()},15*60000);   // 켜 둔 채로 있어도 15분마다 확인
   /* 새 버전으로 바뀐 뒤: 주소의 ?fresh 를 지우고 짧게 알림 */
   if(/[?&]fresh=/.test(location.search)){try{history.replaceState(null,'',location.pathname+location.hash)}catch(_){}}
-  try{const d=sessionStorage.getItem('verDone');if(d){sessionStorage.removeItem('verDone');setTimeout(()=>{try{toast('새 버전 v'+d+'(으)로 바뀌었어요')}catch(_){}},1200)}}catch(_){}
+  try{sessionStorage.removeItem('verDone')}catch(_){}
   const ua=navigator.userAgent||'',standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   if(standalone)return;
   const isKakao=/KAKAOTALK/i.test(ua),isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),isAndroid=/Android/i.test(ua);
