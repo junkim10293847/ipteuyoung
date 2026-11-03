@@ -448,7 +448,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v114</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v115</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1397,7 +1397,7 @@ document.addEventListener('click',async e=>{
   if(t.id==='seqRetry'){const ta=$('seqIn');if(ta)ta.value='';seqAns[curId+'|'+seqPos]='';const box=$('seqRes');if(box)box.innerHTML='';return}
   if(t.id==='seqCheck'){const j=+t.dataset.j,ta=$('seqIn'),v=ta?ta.value:'';if(!v.trim()){toast('먼저 써 보거나 🎤로 말해 보세요');return}
     micStop();const r=gradeText(w.sentences[j].en,v);recordWeak(w.id,j,r,false);if(r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true};if(w.id===curId)doneSeen.add(j)}saveProg();
-    const box=$('seqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}<div class="seq-act"><button class="ghost" id="seqRetry">↺ 다시 하기</button></div></div>`;
+    const box=$('seqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;
     if(ta)ta.blur();return}
   if(t.id==='seqHint'){seqHint=!seqHint;render();return}
   if(t.id==='seqPlay'){const j=+t.dataset.j;stop();const my=token;await playOne(w.sentences[j],j,+$('rate').value,my);return}
@@ -1637,7 +1637,7 @@ function seqHtml(w){
     <div class="seq-prev"><span>${p===0?'제목':'앞 문장'}</span>${esc(prev)}</div>
     <div class="seq-q"><span>다음 문장은?</span>${seqShow?`<b>${esc(cur.en)}</b><em>${esc(cur.ko||'')}</em>`:seqHint?`<em>힌트: ${esc(cur.ko||'')}</em>`:`<em class="dim">써 보거나 🎤로 말해 본 뒤 채점하세요</em>`}</div>
     <textarea id="seqIn" rows="2" placeholder="다음 문장을 영어로 써 보세요" autocapitalize="sentences" spellcheck="false">${esc(seqAns[w.id+'|'+p]||'')}</textarea>
-    <div class="seq-act">${micBtn('seqIn')}<button class="primary" id="seqCheck" data-j="${j}">채점</button></div>
+    <div class="seq-act">${micBtn('seqIn')}<button class="primary" id="seqCheck" data-j="${j}">채점</button><button class="ghost" id="seqRetry">↺ 다시 하기</button></div>
     <div id="seqRes"></div>
     <div class="seq-act">
       <button class="ghost" id="seqPrev"${p===0?' disabled':''}>◀ 이전</button>
@@ -1685,7 +1685,7 @@ function qqHtml(w){
     <div class="seq-step">${p+1} / ${L.length}</div>
     <div class="seq-q qq-q"><span>질문 <button class="vplay" id="qqSay" aria-label="질문 듣기">🔊</button></span><b>${esc(Q.q)}</b>${qqKo&&Q.ko?`<em>${esc(Q.ko)}</em>`:''}</div>
     <textarea id="qqIn" rows="2" placeholder="외운 문장으로 대답해 보세요" autocapitalize="sentences" spellcheck="false">${esc(qqAns[key]||'')}</textarea>
-    <div class="seq-act">${micBtn('qqIn')}<button class="primary" id="qqCheck">채점</button></div>
+    <div class="seq-act">${micBtn('qqIn')}<button class="primary" id="qqCheck">채점</button><button class="ghost" id="qqRetry">↺ 다시 하기</button></div>
     <div id="qqRes"></div>
     ${qqShow?`<div class="seq-q"><span>정답 (${numLabel(w,Q.i)}번)</span><b>${esc(s.en)}</b><em>${esc(s.ko||'')}</em></div>`:''}
     <div class="seq-act">
@@ -1712,7 +1712,7 @@ document.addEventListener('click',async e=>{
     const nw=qqList(w)[qqPos];if(nw){stop();ttsSpeak(nw.q,+$('rate').value*0.95)}return}
   if(t.id==='qqCheck'){const ta=$('qqIn'),v=ta?ta.value:'';if(!v.trim()){toast('먼저 써 보거나 🎤로 말해 보세요');return}
     micStop();const r=gradeText(s.en,v);recordWeak(w.id,Q.i,r,false);saveProg();
-    const box=$('qqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(s.en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}<div class="seq-act"><button class="ghost" id="qqRetry">↺ 다시 하기</button></div></div>`;
+    const box=$('qqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(s.en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;
     if(ta)ta.blur();return}
 },true);
 /* 3. 모의 테스트 */
