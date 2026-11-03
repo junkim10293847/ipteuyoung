@@ -154,6 +154,8 @@ details.passage{margin-top:12px;padding:10px 14px}
 .seq-act button:disabled{opacity:.4}
 .mock p{margin:0;font-size:.88rem}
 .mk-ko{font-size:1rem;background:var(--bg);border-radius:10px;padding:10px 12px}
+.qq-q b{font-size:1.02rem}
+.qq-q .vplay{font-size:.9rem;vertical-align:-1px}
 .mock textarea,.seq textarea{font:inherit;font-size:.95rem;line-height:1.45;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;resize:vertical}
 .mk-total{display:flex;align-items:baseline;gap:10px}
 .mk-total b{font-family:var(--display);font-size:1.8rem;color:var(--accent);font-variant-numeric:tabular-nums}
@@ -446,7 +448,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v112</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v113</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -904,7 +906,7 @@ document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWi
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
 let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null, seqAns={};
 const toolOpen={};
-document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox')toolOpen[id]=e.target.open},true);
+document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='qqBox')toolOpen[id]=e.target.open;if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
 let psKo=false, psOpen=false;
 document.addEventListener('toggle',e=>{if(e.target.id==='psBox')psOpen=e.target.open},true);
 /* 내 표시(노랑·빨강): 문장에서 드래그해 고른 단어를 닉네임별로 저장 */
@@ -1026,6 +1028,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
      </li>`}).join('')}
    </ol>
    <details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
+   <details class="tool" id="qqBox"${toolOpen.qqBox?' open':''}><summary><span class="t-title">❓ 질문에 답하기</span><span class="t-sub">질문을 듣고 외운 문장으로 대답하기</span></summary><div id="qqBody">${qqHtml(w)}</div></details>
    <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">한글만 보고 처음부터 끝까지 써 보고 총점 받기</span></summary>${mockHtml(w)}</details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
@@ -1643,6 +1646,73 @@ function seqHtml(w){
       <button class="primary" id="seqNext">${p===b.length-1?'처음부터':'다음 ▶'}</button>
     </div></div>`;
 }
+/* 2-1. 질문에 답하기: 지문 문장마다 '그 문장이 답이 되는 쉬운 영어 질문'을 AI가 한 번 만들어 주차에 저장 → 질문을 듣고 외운 문장으로 대답 */
+let qqPos=0,qqShow=false,qqKo=false,qqBusy={},qqErr={};const qqAns={};
+function qqList(w){const qs=w.qs||[];return qs.filter(q=>q&&w.sentences[q.i]&&!w.sentences[q.i].isTitle)}
+async function makeQs(w){
+  if(qqBusy[w.id]||!sample)return;qqBusy[w.id]=1;delete qqErr[w.id];qqPatch();
+  const b=bodyOf(w);
+  const prompt=`다음은 한국인 초보 영어 학습자가 외우는 지문의 문장 목록이다(JSON 배열, 순서대로).
+각 문장마다, 그 문장을 그대로 말하면 자연스러운 대답이 되는 짧고 쉬운 영어 질문을 하나씩 만든다.
+- 질문은 지문 속 화자("I")에게 묻는 말투로, 대부분 you를 써서 묻는다. 예: "When did your daughter start her exams?"
+- 쉬운 단어로 5~12단어. 대답 문장의 핵심 표현을 질문에 그대로 쓰지 않는다(정답을 알려 주지 않게).
+- 인용문이나 이어지는 짧은 문장도 앞뒤 흐름에 맞는 질문을 만든다.
+- "ko": 질문의 자연스러운 한국어 뜻.
+입력과 같은 순서, 같은 개수로 답한다.
+Reply with only JSON: {"items":[{"q":"...","ko":"..."}]}
+
+문장 목록:
+${JSON.stringify(b.map(i=>w.sentences[i].en))}`;
+  try{
+    const res=await sample.json(prompt,{modelTier:'default'});const it=Array.isArray(res?.items)?res.items:[];
+    const qs=b.map((i,n)=>({i,q:String(it[n]?.q||'').trim(),ko:String(it[n]?.ko||'').trim()})).filter(x=>x.q);
+    if(!qs.length)throw{code:'invalid_json'};
+    w.qs=qs;{const cur=weeks.find(x=>x.id===w.id);if(cur)cur.qs=qs}
+    try{await db.doc('weeks/'+w.id).update({qs})}catch(_){}
+  }catch(e){qqErr[w.id]=e&&e.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 열어 주세요.':'질문을 만들지 못했습니다. 아래 버튼으로 다시 시도해 주세요.'}
+  delete qqBusy[w.id];qqPatch();
+}
+function qqPatch(){const b=$('qqBody'),w=weeks.find(x=>x.id===curId);if(b&&w)b.innerHTML=qqHtml(w)}
+function qqHtml(w){
+  const L=qqList(w);
+  if(!L.length){
+    if(qqBusy[w.id])return `<p class="load" style="margin-top:10px">이 지문으로 질문을 만드는 중… (20~40초)</p>`;
+    if(!sample)return `<p class="hint" style="margin-top:10px">AI 기능이 켜져 있어야 질문을 만들 수 있어요.</p>`;
+    return `<div class="seq">${qqErr[w.id]?`<p class="load">${esc(qqErr[w.id])}</p>`:'<p class="hint">펼치면 이 지문으로 질문을 만들어요.</p>'}<div class="seq-act"><button class="primary" id="qqMake">질문 만들기</button></div></div>`}
+  const p=Math.max(0,Math.min(qqPos,L.length-1)),Q=L[p],s=w.sentences[Q.i],key=w.id+'|'+Q.i;
+  return `<div class="seq">
+    <div class="seq-step">${p+1} / ${L.length}</div>
+    <div class="seq-q qq-q"><span>질문 <button class="vplay" id="qqSay" aria-label="질문 듣기">🔊</button></span><b>${esc(Q.q)}</b>${qqKo&&Q.ko?`<em>${esc(Q.ko)}</em>`:''}</div>
+    <textarea id="qqIn" rows="2" placeholder="외운 문장으로 대답해 보세요" autocapitalize="sentences" spellcheck="false">${esc(qqAns[key]||'')}</textarea>
+    <div class="seq-act">${micBtn('qqIn')}<button class="primary" id="qqCheck">채점</button></div>
+    <div id="qqRes"></div>
+    ${qqShow?`<div class="seq-q"><span>정답 (${numLabel(w,Q.i)}번)</span><b>${esc(s.en)}</b><em>${esc(s.ko||'')}</em></div>`:''}
+    <div class="seq-act">
+      <button class="ghost" id="qqPrev"${p===0?' disabled':''}>◀ 이전</button>
+      <button class="ghost" id="qqKo">${qqKo?'뜻 숨기기':'한글 뜻'}</button>
+      <button class="ghost" id="qqShow">${qqShow?'정답 숨기기':'정답 보기'}</button>
+      ${qqShow?`<button class="ghost" id="qqPlay">▶ 듣기</button>`:''}
+      <button class="primary" id="qqNext">${p===L.length-1?'처음부터':'다음 ▶'}</button>
+    </div></div>`;
+}
+document.addEventListener('input',e=>{if(e.target.id==='qqIn'){const w=weeks.find(x=>x.id===curId);if(!w)return;const L=qqList(w),Q=L[Math.min(qqPos,L.length-1)];if(Q)qqAns[w.id+'|'+Q.i]=e.target.value}});
+document.addEventListener('click',async e=>{
+  const t=e.target.closest&&e.target.closest('#qqMake,#qqSay,#qqCheck,#qqPrev,#qqNext,#qqKo,#qqShow,#qqPlay');if(!t)return;
+  e.preventDefault();e.stopPropagation();
+  const w=weeks.find(x=>x.id===curId);if(!w)return;const L=qqList(w);
+  if(t.id==='qqMake'){makeQs(w);return}
+  const p=Math.max(0,Math.min(qqPos,L.length-1)),Q=L[p];if(!Q)return;const s=w.sentences[Q.i];
+  if(t.id==='qqSay'){stop();ttsSpeak(Q.q,+$('rate').value*0.95);return}
+  if(t.id==='qqPlay'){stop();const my=token;await playOne(s,Q.i,+$('rate').value,my,true);return}
+  if(t.id==='qqKo'){qqKo=!qqKo;qqPatch();return}
+  if(t.id==='qqShow'){qqShow=!qqShow;qqPatch();return}
+  if(t.id==='qqPrev'||t.id==='qqNext'){micStop();qqPos=t.id==='qqPrev'?Math.max(0,p-1):(p>=L.length-1?0:p+1);qqShow=false;qqPatch();
+    const nw=qqList(w)[qqPos];if(nw){stop();ttsSpeak(nw.q,+$('rate').value*0.95)}return}
+  if(t.id==='qqCheck'){const ta=$('qqIn'),v=ta?ta.value:'';if(!v.trim()){toast('먼저 써 보거나 🎤로 말해 보세요');return}
+    micStop();const r=gradeText(s.en,v);recordWeak(w.id,Q.i,r,false);saveProg();
+    const box=$('qqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(s.en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;
+    if(ta)ta.blur();return}
+},true);
 /* 3. 모의 테스트 */
 /* 모의 테스트 이전/다음: 화면을 다시 그리지 않고 글자만 바꿔 키보드·스크롤이 그대로 유지되게 */
 function patchMockStep(w){
