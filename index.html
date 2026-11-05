@@ -154,7 +154,9 @@ details.passage{margin-top:12px;padding:10px 14px}
 .seq-act button:disabled{opacity:.4}
 .mock p{margin:0;font-size:.88rem}
 .mk-ko{font-size:1rem;background:var(--bg);border-radius:10px;padding:10px 12px}
-.qq-q b{font-size:1.02rem}
+.qq-q b,.mk-q b{font-size:1.02rem}
+.mk-mine summary{font-size:.8rem;color:var(--muted);cursor:pointer}
+.mk-line{font-size:.86rem;padding:4px 0;border-bottom:1px dashed var(--line)}
 .qq-q .vplay{font-size:.9rem;vertical-align:-1px}
 .mock textarea,.seq textarea{font:inherit;font-size:.95rem;line-height:1.45;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;resize:vertical}
 .mk-total{display:flex;align-items:baseline;gap:10px}
@@ -448,7 +450,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v115</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v116</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -626,7 +628,7 @@ function loadLocalProg(){
       else{p={done:{},pace:{}};for(let n=0;n<localStorage.length;n++){const k=localStorage.key(n);if(k.startsWith('done:'))p.done[k.slice(5)]=JSON.parse(localStorage.getItem(k)||'{}');if(k.startsWith('pace:'))p.pace[k.slice(5)]=JSON.parse(localStorage.getItem(k)||'"auto"')}}
       localStorage.setItem('progMigrated','1');
     }
-    if(p&&p.done)prog={done:p.done||{},pace:p.pace||{},qa:p.qa||{},marks:p.marks||{},weak:p.weak||{},tests:p.tests||{},wb:p.wb||{}};
+    if(p&&p.done)prog={done:p.done||{},pace:p.pace||{},qa:p.qa||{},marks:p.marks||{},weak:p.weak||{},tests:p.tests||{},wb:p.wb||{},mine:p.mine||{}};
   }catch(e){}
 }
 async function attachProgRef(){
@@ -634,7 +636,7 @@ async function attachProgRef(){
   try{
     const ref=db.collection('data/users/'+me).doc('progress-'+hashNick(nick));
     const snap=await ref.get();
-    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb)}}
+    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})}}}
     progRef=ref;reconcileProg();render();
     if(snap.exists||Object.keys(prog.done||{}).length)saveProg();   /* 오프라인·다른 기기에서 쌓인 기록을 합친 결과를 서버에 다시 저장 */
   }catch(e){progRef=null}
@@ -649,7 +651,7 @@ const wbList=()=>Object.values(prog.wb||{}).filter(e=>e&&!e.off).sort((a,b)=>b.a
 function saveProg(){
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
+  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
 }
 const doneOf=id=>prog.done[id]||{};
 /* 공부 가능한 날: 배정 다음 날(일) ~ 테스트 전날(금) = 6일 */
@@ -906,7 +908,7 @@ document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWi
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
 let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null, seqAns={};
 const toolOpen={};
-document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='qqBox')toolOpen[id]=e.target.open;if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
+document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='qqBox'||id==='mkBox')toolOpen[id]=e.target.open;if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
 let psKo=false, psOpen=false;
 document.addEventListener('toggle',e=>{if(e.target.id==='psBox')psOpen=e.target.open},true);
 /* 내 표시(노랑·빨강): 문장에서 드래그해 고른 단어를 닉네임별로 저장 */
@@ -1029,6 +1031,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    </ol>
    <details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
    <details class="tool" id="qqBox"${toolOpen.qqBox?' open':''}><summary><span class="t-title">❓ 질문에 답하기</span><span class="t-sub">질문을 듣고 외운 문장으로 대답하기</span></summary><div id="qqBody">${qqHtml(w)}</div></details>
+   <details class="tool" id="mkBox"${toolOpen.mkBox?' open':''}><summary><span class="t-title">✏️ 숙어로 문장 만들기</span><span class="t-sub">이번 주 표현으로 내 문장 말하고 첨삭 받기</span></summary><div id="mkBody">${mkHtml(w)}</div></details>
    <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">한글만 보고 처음부터 끝까지 써 보고 총점 받기</span></summary>${mockHtml(w)}</details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
@@ -1714,6 +1717,68 @@ document.addEventListener('click',async e=>{
     micStop();const r=gradeText(s.en,v);recordWeak(w.id,Q.i,r,false);saveProg();
     const box=$('qqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(s.en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;
     if(ta)ta.blur();return}
+},true);
+/* 2-2. 숙어로 문장 만들기: 이번 주 단어·숙어로 '내 문장'을 만들어 말하거나 쓰고 AI가 짧게 첨삭 (오늘 문장 표현부터) */
+let mkPos=0,mkBusy=false,mkErr='',mkRes=null,mkHint=false;const mkDraft={};
+function mkItems(w){const out=[],seen=new Set();
+  const today=(()=>{try{const d=plan(w),v=todayView(w);return v&&v[0]==='d'?(d[+v.slice(1)]||[]):[]}catch(_){return []}})();
+  const order=[...new Set([...today,...w.sentences.map((_,i)=>i)])];
+  order.forEach(i=>(w.sentences[i].vocab||[]).forEach((v,j)=>{const k=cleanTerm(v.t).toLowerCase();if(v.t&&!seen.has(k)){seen.add(k);out.push({i,j,v,today:today.includes(i)})}}));
+  return out}
+const mkKey=(w,it)=>w.id+'|'+it.i+'-'+it.j;
+function mkPatch(){const b=$('mkBody'),w=weeks.find(x=>x.id===curId);if(b&&w)b.innerHTML=mkHtml(w)}
+function mkHtml(w){
+  const L=mkItems(w);if(!L.length)return `<p class="hint" style="margin-top:10px">이 주차에는 아직 단어·숙어가 없어요.</p>`;
+  const p=Math.max(0,Math.min(mkPos,L.length-1)),it=L[p],k=mkKey(w,it),s=w.sentences[it.i],mine=((prog.mine||{})[k]||[]);
+  const res=mkRes&&mkRes.k===k?mkRes:null;
+  return `<div class="seq">
+    <div class="seq-step">${p+1} / ${L.length}${it.today?' · 📖 오늘':''}</div>
+    <div class="seq-q mk-q"><span>이 표현으로 내 문장 만들기 <button class="vplay" id="mkSay" aria-label="듣기">🔊</button></span><b>${esc(it.v.t)}</b><em>${esc(it.v.m||'')}</em></div>
+    ${mkHint?`<div class="seq-prev"><span>지문에서는 이렇게 썼어요</span>${esc(s.en)}<em style="font-style:normal;font-size:.84rem">${esc(s.ko||'')}</em></div>`:''}
+    <textarea id="mkIn" rows="2" placeholder="예: 내 생활·일·가족 이야기로 한 문장" autocapitalize="sentences" spellcheck="false">${esc(mkDraft[k]||'')}</textarea>
+    <div class="seq-act">${micBtn('mkIn')}<button class="primary" id="mkCheck"${mkBusy?' disabled':''}>${mkBusy?'첨삭 중…':'첨삭 받기'}</button><button class="ghost" id="mkRetry">↺ 다시 하기</button></div>
+    ${mkErr?`<p class="load">${esc(mkErr)}</p>`:''}
+    ${res?`<div class="seq-r ${res.ok?'ok':''}"><b>${res.ok?'✅ 자연스러워요':'✏️ 이렇게 고쳐 보세요'}</b>${res.ok?`<div class="wr-diff">${esc(res.fixed)}</div>`:diffHtml(gradeText(res.fixed,res.user))}${res.better&&res.better!==res.fixed?`<em>더 자연스럽게: ${esc(res.better)}</em>`:''}${res.tip?`<em>${esc(res.tip)}</em>`:''}<div class="seq-act"><button class="ghost" id="mkPlay">▶ 고친 문장 듣기</button></div></div>`:''}
+    ${mine.length?`<details class="mk-mine"><summary>📒 이 표현으로 만든 내 문장 ${mine.length}</summary>${mine.slice().reverse().map(x=>`<div class="mk-line">${esc(x.fixed)}</div>`).join('')}</details>`:''}
+    <div class="seq-act">
+      <button class="ghost" id="mkPrev"${p===0?' disabled':''}>◀ 이전</button>
+      <button class="ghost" id="mkHintBtn">${mkHint?'힌트 숨기기':'지문 문장 힌트'}</button>
+      <button class="primary" id="mkNext">${p===L.length-1?'처음부터':'다음 ▶'}</button>
+    </div></div>`;
+}
+document.addEventListener('input',e=>{if(e.target.id==='mkIn'){const w=weeks.find(x=>x.id===curId);if(!w)return;const L=mkItems(w),it=L[Math.min(mkPos,L.length-1)];if(it)mkDraft[mkKey(w,it)]=e.target.value}});
+document.addEventListener('click',async e=>{
+  const t=e.target.closest&&e.target.closest('#mkSay,#mkCheck,#mkRetry,#mkPrev,#mkNext,#mkHintBtn,#mkPlay');if(!t)return;
+  e.preventDefault();e.stopPropagation();
+  const w=weeks.find(x=>x.id===curId);if(!w)return;const L=mkItems(w),p=Math.max(0,Math.min(mkPos,L.length-1)),it=L[p];if(!it)return;const k=mkKey(w,it),s=w.sentences[it.i];
+  if(t.id==='mkSay'){stop();speak(cleanTerm(it.v.t)||it.v.t,0.9,it.v.audio||'');return}
+  if(t.id==='mkPlay'){if(mkRes&&mkRes.fixed){stop();ttsSpeak(mkRes.fixed,+$('rate').value)}return}
+  if(t.id==='mkHintBtn'){mkHint=!mkHint;mkPatch();return}
+  if(t.id==='mkRetry'){micStop();mkDraft[k]='';mkRes=null;mkErr='';mkPatch();return}
+  if(t.id==='mkPrev'||t.id==='mkNext'){micStop();mkPos=t.id==='mkPrev'?Math.max(0,p-1):(p>=L.length-1?0:p+1);mkRes=null;mkErr='';mkHint=false;mkPatch();return}
+  if(t.id==='mkCheck'){
+    const ta=$('mkIn'),u=(ta?ta.value:'').trim();if(!u){toast('먼저 써 보거나 🎤로 말해 보세요');return}
+    if(!sample){mkErr='AI 기능이 켜져 있어야 첨삭할 수 있어요.';mkPatch();return}
+    micStop();mkBusy=true;mkErr='';mkRes=null;mkDraft[k]=u;mkPatch();
+    const prompt=`너는 한국인 초보 영어 학습자의 영작을 다정하게 고쳐 주는 영어 강사다.
+학습자가 아래 표현을 써서 자기 문장을 만들었다.
+[표현] ${it.v.t} — ${it.v.m||''}
+[지문에서 쓰인 문장] ${s.en}
+[학습자 문장] ${u}
+(학습자 문장은 한국어가 섞였거나 음성 인식으로 받아 적어 철자가 이상할 수 있다. 뜻을 짐작해 고친다.)
+규칙:
+- "ok": 문법과 뜻이 자연스럽고 표현을 맞게 썼으면 true (사소한 대소문자·마침표는 무시).
+- "fixed": 학습자의 뜻을 최대한 살려, 가장 적게 고친 올바른 영어 문장 하나. ok면 학습자 문장을 다듬어 그대로.
+- "better": 원어민이 더 자연스럽게 말하는 문장 하나 (fixed와 같으면 빈 문자열).
+- "tip": 무엇을 왜 고쳤는지 한국어 한 문장 (ok면 칭찬 한 마디와 함께 다음에 써 볼 만한 활용 한 가지).
+JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
+    try{
+      const j=await sample.json(prompt,{modelTier:'default'});
+      const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
+      mkRes={k,user:u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};
+      prog.mine=prog.mine||{};prog.mine[k]=((prog.mine[k]||[]).concat([{u,fixed,at:Date.now()}])).slice(-10);saveProg();
+    }catch(err){mkErr=err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':err&&err.code==='network'?'답이 늦어 멈췄습니다. 다시 눌러 주세요.':'첨삭을 받지 못했습니다. 다시 눌러 주세요.'}
+    mkBusy=false;mkPatch();return}
 },true);
 /* 3. 모의 테스트 */
 /* 모의 테스트 이전/다음: 화면을 다시 그리지 않고 글자만 바꿔 키보드·스크롤이 그대로 유지되게 */
