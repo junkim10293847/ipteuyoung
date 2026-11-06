@@ -454,7 +454,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v118</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v119</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -859,7 +859,9 @@ function sayPraise(kind){
   const n=kind==='fire'?'praise-fire.mp3':kind==='close'?'praise-close.mp3':'praise-'+(1+Math.floor(Math.random()*8))+'.mp3';
   const txt=kind==='fire'?"Wow, you're on fire!":kind==='close'?'So close! Almost perfect!':PRAISE_T[+n.match(/\d+/)[0]-1];
   setTimeout(()=>{try{
-    if(window.__ixHas&&window.__ixHas(n)){const a=new Audio('audio/'+n);a.volume=1;a.play().catch(()=>ttsSpeak(txt,1))}else ttsSpeak(txt,1);
+    /* 칭찬 음성이 끝나면 박수 소리 */
+    const clap=()=>{if(kind==='close'||!(window.__ixHas&&window.__ixHas('applause.mp3')))return;const c=new Audio('audio/applause.mp3');c.volume=.55;c.play().catch(()=>{})};
+    if(window.__ixHas&&window.__ixHas(n)){const a=new Audio('audio/'+n);a.volume=1;a.onended=clap;a.play().catch(()=>ttsSpeak(txt,1).then(clap))}else ttsSpeak(txt,1).then(clap);
   }catch(_){}},380);
   return txt}
 function cheer(box,kind){
