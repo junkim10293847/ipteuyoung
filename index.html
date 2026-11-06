@@ -495,7 +495,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v127</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v128</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1022,7 +1022,7 @@ document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWi
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
 let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null, seqAns={};
 const toolOpen={};
-document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='qqBox'||id==='mkBox'||id==='gsBox')toolOpen[id]=e.target.open;if(id==='gsBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!w.clues)makeClues(w)}if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
+document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='qqBox'||id==='mkBox'||id==='gsBox')toolOpen[id]=e.target.open;if((id==='gsBox'||id==='mkBox')&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w){makeKey10(w);if(id==='gsBox'&&(!w.clues||mkItems(w).some(x=>!w.clues[x.i+'-'+x.j])))makeClues(w)}}if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
 let psKo=false, psOpen=false;
 document.addEventListener('toggle',e=>{if(e.target.id==='psBox')psOpen=e.target.open},true);
 /* 내 표시(노랑·빨강): 문장에서 드래그해 고른 단어를 닉네임별로 저장 */
@@ -1145,8 +1145,8 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    </ol>
    <details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
    <details class="tool" id="qqBox"${toolOpen.qqBox?' open':''}><summary><span class="t-title">❓ 질문에 답하기</span><span class="t-sub">질문을 듣고 외운 문장으로 대답하기</span></summary><div id="qqBody">${qqHtml(w)}</div></details>
-   <details class="tool" id="mkBox"${toolOpen.mkBox?' open':''}><summary><span class="t-title">✏️ 숙어로 문장 만들기</span><span class="t-sub">이번 주 표현으로 내 문장 말하고 첨삭 받기</span></summary><div id="mkBody">${mkHtml(w)}</div></details>
-   <details class="tool" id="gsBox"${toolOpen.gsBox?' open':''}><summary><span class="t-title">🎯 영어로 설명하고 맞히기</span><span class="t-sub">토요일 게임 연습 · 설명 듣고 맞히기 / 내가 설명하기</span></summary><div id="gsBody">${gsHtml(w)}</div></details>
+   <details class="tool" id="mkBox"${toolOpen.mkBox?' open':''}><summary><span class="t-title">✏️ 숙어로 문장 만들기</span><span class="t-sub">이번 주 핵심 표현 10개로 내 문장 말하고 첨삭 받기</span></summary><div id="mkBody">${mkHtml(w)}</div></details>
+   <details class="tool" id="gsBox"${toolOpen.gsBox?' open':''}><summary><span class="t-title">🎯 영어로 설명하고 맞히기</span><span class="t-sub">핵심 표현 10개 · 설명 듣고 맞히기 / 내가 설명하기</span></summary><div id="gsBody">${gsHtml(w)}</div></details>
    <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">한글만 보고 처음부터 끝까지 써 보고 총점 받기</span></summary>${mockHtml(w)}</details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
@@ -1927,11 +1927,29 @@ document.addEventListener('click',async e=>{
 },true);
 /* 2-2. 숙어로 문장 만들기: 이번 주 단어·숙어로 '내 문장'을 만들어 말하거나 쓰고 AI가 짧게 첨삭 (오늘 문장 표현부터) */
 let mkPos=0,mkBusy=false,mkErr='',mkRes=null,mkHint=false;const mkDraft={};
-function mkItems(w){const out=[],seen=new Set();
+/* 이번 주 핵심 표현 10개: AI가 한 번 골라 주차에 저장(모두 같이), 고르기 전에는 여러 단어로 된 숙어를 우선 */
+function allItems(w){const out=[],seen=new Set();w.sentences.forEach((s,i)=>(s.vocab||[]).forEach((v,j)=>{const k=cleanTerm(v.t).toLowerCase();if(v.t&&!seen.has(k)){seen.add(k);out.push({i,j,v})}}));return out}
+function keyTen(w){const A=allItems(w);const ok=Array.isArray(w.key10)?w.key10.filter(k=>A.some(x=>x.i+'-'+x.j===k)):[];
+  if(ok.length>=Math.min(10,A.length))return ok.slice(0,10);
+  const sc=x=>{const n=cleanTerm(x.v.t).split(/\s+/).length;return (n>1?100:0)+Math.min(n,4)*5+cleanTerm(x.v.t).length*.1};
+  return A.slice().sort((a,b)=>sc(b)-sc(a)).slice(0,10).map(x=>x.i+'-'+x.j)}
+const key10Busy={};
+async function makeKey10(w){
+  if(Array.isArray(w.key10)&&w.key10.length||key10Busy[w.id]||!sample)return;const A=allItems(w);if(A.length<=10)return;key10Busy[w.id]=1;
+  try{const j=await sample.json(`한국인 초보 영어 학습자가 이번 주 지문에서 꼭 외워야 할 핵심 단어·숙어 10개를 고른다.
+기준: 일상 회화에서 자주 쓰고 다른 문장에도 활용하기 좋은 숙어·구동사·덩어리 표현 우선, 너무 쉬운 단어(예: yesterday, daughter)나 지문에만 쓰이는 고유한 단어는 제외.
+번호 목록 중 10개의 번호만 중요한 순서대로 고른다.
+${A.map((x,n)=>n+'. '+x.v.t+' — '+(x.v.m||'')).join('\n')}
+JSON만: {"pick":[번호,...]}`,{modelTier:'default'});
+    const pick=(Array.isArray(j?.pick)?j.pick:[]).map(Number).filter(n=>A[n]).slice(0,10).map(n=>A[n].i+'-'+A[n].j);
+    if(pick.length>=5){w.key10=pick;{const cur=weeks.find(x=>x.id===w.id);if(cur)cur.key10=pick}try{await db.doc('weeks/'+w.id).update({key10:pick})}catch(_){}}
+  }catch(_){}
+  delete key10Busy[w.id];gsOrder=null;mkPatch();gsPatch();
+}
+function mkItems(w){const K=new Set(keyTen(w));
   const today=(()=>{try{const d=plan(w),v=todayView(w);return v&&v[0]==='d'?(d[+v.slice(1)]||[]):[]}catch(_){return []}})();
-  const order=[...new Set([...today,...w.sentences.map((_,i)=>i)])];
-  order.forEach(i=>(w.sentences[i].vocab||[]).forEach((v,j)=>{const k=cleanTerm(v.t).toLowerCase();if(v.t&&!seen.has(k)){seen.add(k);out.push({i,j,v,today:today.includes(i)})}}));
-  return out}
+  const A=allItems(w).filter(x=>K.has(x.i+'-'+x.j)).map(x=>({...x,today:today.includes(x.i)}));
+  const ord=[...K];return A.sort((a,b)=>(b.today-a.today)||(ord.indexOf(a.i+'-'+a.j)-ord.indexOf(b.i+'-'+b.j)))}
 const mkKey=(w,it)=>w.id+'|'+it.i+'-'+it.j;
 function mkPatch(){const b=$('mkBody'),w=weeks.find(x=>x.id===curId);if(b&&w)b.innerHTML=mkHtml(w)}
 function mkHtml(w){
@@ -2004,7 +2022,7 @@ JSON만: {"items":["...","..."]}
 표현 목록: ${JSON.stringify(L.map(x=>x.v.t+' ('+(x.v.m||'')+')'))}`,{modelTier:'default'});
     const it=Array.isArray(res?.items)?res.items:[];const clues={};L.forEach((x,n)=>{const c=String(it[n]||'').trim();if(c)clues[x.i+'-'+x.j]=c});
     if(!Object.keys(clues).length)throw{code:'invalid_json'};
-    w.clues=clues;{const cur=weeks.find(x=>x.id===w.id);if(cur)cur.clues=clues}
+    Object.assign(clues,{...(w.clues||{}),...clues});w.clues=clues;{const cur=weeks.find(x=>x.id===w.id);if(cur)cur.clues=clues}
     try{await db.doc('weeks/'+w.id).update({clues})}catch(_){}
   }catch(e){gsClueErr[w.id]='설명을 만들지 못했어요. 아래 버튼으로 다시 시도해 주세요.'}
   delete gsClueBusy[w.id];gsPatch();
