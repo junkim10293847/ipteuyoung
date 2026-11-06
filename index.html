@@ -278,6 +278,10 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .qa{border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:8px}
 .qa-hd{display:flex;align-items:baseline;gap:8px}.qa-hd h4{flex:1;margin:0}.qa-hd .qa-tg{flex:none}
 .qa-old{display:grid;gap:8px}
+.d-quiz{display:grid;gap:6px;border-left:3px solid #8b5cf6;padding-left:10px}
+.d-quiz h4{margin:0;display:inline-block;justify-self:start;background:#8b5cf6;color:#fff;border-radius:999px;padding:1px 10px;font-size:.74rem}
+.d-quiz p{margin:0}
+.dq-ans summary{font-size:.78rem;color:var(--muted);cursor:pointer}
 .qz{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:6px}
 .qz-h{font-size:.8rem;font-weight:700;color:var(--accent)}
 .qz-in{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);width:100%;box-sizing:border-box}
@@ -484,7 +488,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v124</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v125</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -662,7 +666,7 @@ function loadLocalProg(){
       else{p={done:{},pace:{}};for(let n=0;n<localStorage.length;n++){const k=localStorage.key(n);if(k.startsWith('done:'))p.done[k.slice(5)]=JSON.parse(localStorage.getItem(k)||'{}');if(k.startsWith('pace:'))p.pace[k.slice(5)]=JSON.parse(localStorage.getItem(k)||'"auto"')}}
       localStorage.setItem('progMigrated','1');
     }
-    if(p&&p.done)prog={done:p.done||{},pace:p.pace||{},qa:p.qa||{},marks:p.marks||{},weak:p.weak||{},tests:p.tests||{},wb:p.wb||{},mine:p.mine||{},cel:p.cel||{}};
+    if(p&&p.done)prog={done:p.done||{},pace:p.pace||{},qa:p.qa||{},marks:p.marks||{},weak:p.weak||{},tests:p.tests||{},wb:p.wb||{},mine:p.mine||{},cel:p.cel||{},dq:p.dq||{}};
   }catch(e){}
 }
 async function attachProgRef(){
@@ -670,7 +674,7 @@ async function attachProgRef(){
   try{
     const ref=db.collection('data/users/'+me).doc('progress-'+hashNick(nick));
     const snap=await ref.get();
-    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})},cel:{...(d.cel||{}),...(prog.cel||{})}}}
+    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})},cel:{...(d.cel||{}),...(prog.cel||{})},dq:{...(d.dq||{}),...(prog.dq||{})}}}
     progRef=ref;reconcileProg();render();
     if(snap.exists||Object.keys(prog.done||{}).length)saveProg();   /* 오프라인·다른 기기에서 쌓인 기록을 합친 결과를 서버에 다시 저장 */
   }catch(e){progRef=null}
@@ -729,7 +733,7 @@ function stampOn(el){
 function saveProg(){checkWeekDone();checkSmallWins();
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},cel:prog.cel||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
+  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},cel:prog.cel||{},dq:prog.dq||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
 }
 const doneOf=id=>prog.done[id]||{};
 /* 공부 가능한 날: 배정 다음 날(일) ~ 테스트 전날(금) = 6일 */
@@ -1303,6 +1307,54 @@ ${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):
   }
   delete qaLive[key];patchAskAll();
 }
+/* 단어·숙어 설명마다 '확인 퀴즈' — 한 번 만든 퀴즈는 주차에 저장(모두 함께), 내 답과 첨삭은 닉네임별 저장 */
+const dqBusy={};let dqErr={};
+function dqLoc(k){const p=String(k).split('~');const wid=p.length>1?p[0]:curId,ij=p.length>1?p[1]:String(k);const [i,j]=ij.split('-').map(Number);
+  const w=weeks.find(x=>x.id===wid);const v=w&&w.sentences[i]&&w.sentences[i].vocab&&w.sentences[i].vocab[j];return v?{w,i,j,v,key:wid+'|'+i+'-'+j}:null}
+function dqHtml(k){const L=dqLoc(k);if(!L||!L.v.detail)return '';const q=L.v.detail.quiz,z=((prog.dq||{})[L.key])||null,b=dqBusy[L.key],id='dq-'+L.key.replace(/[^a-z0-9]/gi,'_');
+  if(!q)return `<div class="d-quiz"><h4>확인 퀴즈</h4>${dqErr[L.key]?`<p class="load">${esc(dqErr[L.key])}</p>`:''}<button type="button" class="ghost dq-make" data-dk="${esc(k)}"${b?' disabled':''}>${b?'퀴즈 만드는 중…':'✏️ 이 표현으로 확인 퀴즈 풀기'}</button></div>`;
+  return `<div class="d-quiz"><h4>확인 퀴즈</h4><p>${esc(q)}</p>
+    <input class="qz-in" id="${id}" data-dk="${esc(k)}" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" placeholder="여기에 영어로 써 보세요" value="${esc(z&&z.u||'')}">
+    <div class="seq-act">${micBtn(id)}<button type="button" class="primary dq-go" data-dk="${esc(k)}"${b?' disabled':''}>${b?'첨삭 중…':'첨삭 받기'}</button>${z?`<button type="button" class="ghost dq-re" data-dk="${esc(k)}">↺ 다시 하기</button>`:''}</div>
+    ${z&&z.err?`<p class="load">${esc(z.err)}</p>`:''}
+    ${z&&z.fixed?`<div class="seq-r ${z.ok?'ok':''}"><b>${z.ok?'✅ 맞았어요':'✏️ 이렇게 고쳐 보세요'}</b>${z.ok?`<div class="wr-diff">${esc(z.fixed)}</div>`:diffHtml(gradeText(z.fixed,z.u))}${z.better&&z.better!==z.fixed?`<em>더 자연스럽게: ${esc(z.better)}</em>`:''}${z.tip?`<em>${esc(z.tip)}</em>`:''}</div>`:''}
+    ${z&&!z.ok&&L.v.detail.quizAns?`<details class="dq-ans"><summary>모범 답 보기</summary>${esc(L.v.detail.quizAns)}</details>`:''}
+  </div>`}
+function dqRefresh(k){const L=dqLoc(k);if(!L)return;if(wbView)wbPatch();else{if(L.w.id===curId)renderCard(L.i)}}
+document.addEventListener('click',async e=>{
+  const t=e.target.closest&&e.target.closest('.dq-make,.dq-go,.dq-re');if(!t)return;e.preventDefault();e.stopPropagation();
+  const k=t.dataset.dk,L=dqLoc(k);if(!L)return;prog.dq=prog.dq||{};
+  if(t.classList.contains('dq-re')){delete prog.dq[L.key];saveProg();dqRefresh(k);return}
+  if(!sample){dqErr[L.key]='AI 기능이 켜져 있어야 해요.';dqRefresh(k);return}
+  if(t.classList.contains('dq-make')){
+    dqBusy[L.key]=1;delete dqErr[L.key];dqRefresh(k);
+    try{const j=await sample.json(`한국인 초보 영어 학습자가 아래 표현을 외웠다. 이 표현을 직접 써 보게 하는 '확인 퀴즈' 하나를 만든다.
+[표현] ${L.v.t} — ${L.v.m||''}
+[지문 문장] ${L.w.sentences[L.i].en}
+규칙: 지문 문장과 다른 일상 상황의 짧은 한국어 문장(8~20자)을 주고 영어로 말하게 한다. 형식: "'(한국어 문장)'을 영어로 말해 보세요." 정답은 그 표현을 꼭 쓰는 쉬운 영어 한 문장.
+JSON만: {"quiz":"...","answer":"..."}`,{modelTier:'default'});
+      const quiz=String(j?.quiz||'').trim(),ans=String(j?.answer||'').trim();if(!quiz)throw{code:'invalid_json'};
+      L.v.detail={...L.v.detail,quiz,quizAns:ans};
+      const cur=weeks.find(x=>x.id===L.w.id);if(cur&&cur.sentences[L.i]&&cur.sentences[L.i].vocab[L.j])cur.sentences[L.i].vocab[L.j].detail=L.v.detail;
+      try{await db.doc('weeks/'+L.w.id).update({sentences:JSON.parse(JSON.stringify((cur||L.w).sentences))})}catch(_){}
+    }catch(err){dqErr[L.key]='퀴즈를 만들지 못했어요. 다시 눌러 주세요.'}
+    delete dqBusy[L.key];dqRefresh(k);return}
+  const inp=t.closest('.d-quiz').querySelector('.qz-in'),u=(inp?inp.value:'').trim();if(!u){toast('먼저 써 보거나 🎤로 말해 보세요');return}
+  micStop();dqBusy[L.key]=1;prog.dq[L.key]={u};dqRefresh(k);let ok=false;
+  try{const j=await sample.json(`너는 한국인 초보 영어 학습자를 다정하게 가르치는 영어 강사다.
+[외운 표현] ${L.v.t} — ${L.v.m||''}
+[확인 퀴즈] ${L.v.detail.quiz}
+[모범 답] ${L.v.detail.quizAns||''}
+[학습자 답] ${u}
+(음성 인식으로 받아 적어 철자가 이상하거나 한국어가 섞였을 수 있다. 뜻을 짐작해 고친다. 모범 답과 달라도 뜻이 맞고 표현을 맞게 썼으면 ok.)
+"ok"(true/false), "fixed"(학습자 답을 가장 적게 고친 올바른 문장), "better"(더 자연스러운 문장, 같으면 빈 문자열), "tip"(한국어 한 문장).
+JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'default'});
+    const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
+    prog.dq[L.key]={u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};ok=!!j.ok}
+  catch(err){prog.dq[L.key]={u,err:'첨삭을 받지 못했어요. 다시 눌러 주세요.'}}
+  delete dqBusy[L.key];saveProg();dqRefresh(k);
+  if(ok){const el=document.querySelector(`.dq-go[data-dk="${CSS.escape(k)}"]`);const box=el&&el.closest('.d-quiz').querySelector('.seq-r');if(box)celebrateBox(box)}
+},true);
 function detHtml(d,k,wb,wbQ){
   if(!d){
     if(detBusy[k])return `<p class="load">자세한 설명을 만드는 중… <span class="det-t" data-t0="${detBusy[k]}"></span> (보통 20~60초)</p>`;
@@ -1314,6 +1366,7 @@ function detHtml(d,k,wb,wbQ){
    ${(d.examples||[]).length?`<div class="d-ex"><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
    ${(d.similar||[]).length?`<div class="d-sim"><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
    ${d.tip?`<div class="d-tip"><h4>외우는 팁 · 주의할 점</h4><p>${esc(d.tip)}</p></div>`:''}
+   ${dqHtml(wbQ||k)}
    ${wb?`${wbQ?qaHtml(wbQ):''}<button class="vmore vfold wbmore" data-wbk="${esc(wb)}" aria-expanded="true">▲ 접기</button>`:`${qaHtml(k)}
    <button class="vmore vfold" data-k="${k}" aria-expanded="true">▲ 접기</button>`}`;
 }
