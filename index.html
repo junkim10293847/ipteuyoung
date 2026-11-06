@@ -327,6 +327,22 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .cheer-big b{display:block;font-family:Fraunces,Georgia,serif;font-size:1.45rem;font-weight:700;color:#e56b1f;letter-spacing:.5px;white-space:nowrap}
 .cheer-big span{display:inline-block;margin-top:2px;font-size:.8rem;font-weight:700;color:#fff;background:#e56b1f;border-radius:999px;padding:1px 10px}
 @keyframes cheerUp{0%{opacity:0;transform:translate(-50%,20px) scale(.5)}14%{opacity:1;transform:translate(-50%,0) scale(1.15)}26%{transform:translate(-50%,0) scale(1)}78%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-30px) scale(.95)}}
+.wk-cel{position:fixed;inset:0;z-index:300;background:rgba(10,40,45,.55);display:flex;align-items:center;justify-content:center;padding:16px;animation:wkIn .3s ease-out}
+.wk-cel.out{opacity:0;transition:opacity .3s}
+.wk-rain{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.wk-rain span{position:absolute;top:-40px;font-size:1.6rem;animation:wkFall linear infinite}
+.wk-card{position:relative;background:var(--surface,#fff);border-radius:22px;padding:22px 22px 18px;max-width:340px;width:100%;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.25);animation:wkPop .55s cubic-bezier(.2,1.4,.4,1)}
+.wk-trophy{font-size:3.6rem;line-height:1;animation:wkBounce 1.2s ease-in-out infinite}
+.wk-h{display:block;font-size:1.5rem;margin-top:6px;color:#e56b1f}
+.wk-t{font-family:Fraunces,Georgia,serif;font-weight:700;margin-top:2px}
+.wk-stats{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0 6px}
+.wk-stats span{background:var(--accent-soft,#e6f3f4);border-radius:999px;padding:4px 12px;font-size:.84rem}
+.wk-msg{font-size:.88rem;color:var(--muted);margin:6px 0 14px}
+.wk-act{display:flex;gap:8px;justify-content:center}
+@keyframes wkIn{from{opacity:0}to{opacity:1}}
+@keyframes wkPop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes wkBounce{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+@keyframes wkFall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(110vh) rotate(360deg)}}
 @keyframes wrPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes wrBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 .card.celebrate{animation:wrGlow 1.8s ease-out}
@@ -454,7 +470,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v119</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v120</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -632,7 +648,7 @@ function loadLocalProg(){
       else{p={done:{},pace:{}};for(let n=0;n<localStorage.length;n++){const k=localStorage.key(n);if(k.startsWith('done:'))p.done[k.slice(5)]=JSON.parse(localStorage.getItem(k)||'{}');if(k.startsWith('pace:'))p.pace[k.slice(5)]=JSON.parse(localStorage.getItem(k)||'"auto"')}}
       localStorage.setItem('progMigrated','1');
     }
-    if(p&&p.done)prog={done:p.done||{},pace:p.pace||{},qa:p.qa||{},marks:p.marks||{},weak:p.weak||{},tests:p.tests||{},wb:p.wb||{},mine:p.mine||{}};
+    if(p&&p.done)prog={done:p.done||{},pace:p.pace||{},qa:p.qa||{},marks:p.marks||{},weak:p.weak||{},tests:p.tests||{},wb:p.wb||{},mine:p.mine||{},cel:p.cel||{}};
   }catch(e){}
 }
 async function attachProgRef(){
@@ -640,7 +656,7 @@ async function attachProgRef(){
   try{
     const ref=db.collection('data/users/'+me).doc('progress-'+hashNick(nick));
     const snap=await ref.get();
-    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})}}}
+    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})},cel:{...(d.cel||{}),...(prog.cel||{})}}}
     progRef=ref;reconcileProg();render();
     if(snap.exists||Object.keys(prog.done||{}).length)saveProg();   /* 오프라인·다른 기기에서 쌓인 기록을 합친 결과를 서버에 다시 저장 */
   }catch(e){progRef=null}
@@ -652,10 +668,32 @@ const wbKey=t=>String(t||'').trim().toLowerCase().replace(/\s+/g,' ');
 function mergeWb(a,b){const o={...(a||{})};Object.entries(b||{}).forEach(([k,v])=>{if(!o[k]||(v&&v.at||0)>=(o[k].at||0))o[k]=v});return o}
 const wbHas=t=>{const e=(prog.wb||{})[wbKey(t)];return !!(e&&!e.off)};
 const wbList=()=>Object.values(prog.wb||{}).filter(e=>e&&!e.off).sort((a,b)=>b.at-a.at);
-function saveProg(){
+/* 한 주 문장을 모두 외우면(✓ 외움 전부) 한 번만 특별 축하 화면 */
+function checkWeekDone(){try{
+  const w=weeks.find(x=>x.id===curId);if(!w)return;prog.cel=prog.cel||{};if(prog.cel[w.id])return;
+  const b=bodyOf(w),d=doneOf(w.id);if(!b.length||!b.every(i=>d[i]))return;
+  prog.cel[w.id]=Date.now();setTimeout(()=>celebrateWeek(w),900);
+}catch(_){}}
+function celebrateWeek(w){
+  const b=bodyOf(w),tests=((prog.tests||{})[w.id]||[]),best=tests.length?Math.max(...tests.map(t=>t.score)):null;
+  const ov=document.createElement('div');ov.className='wk-cel';ov.setAttribute('role','dialog');
+  ov.innerHTML=`<div class="wk-rain">${Array.from({length:36},(_,k)=>`<span style="left:${Math.random()*100}%;animation-delay:${(Math.random()*2.2).toFixed(2)}s;animation-duration:${(2.6+Math.random()*1.8).toFixed(2)}s">${['🎉','✨','⭐','🌟','🏆','💯','🎊'][k%7]}</span>`).join('')}</div>
+    <div class="wk-card"><div class="wk-trophy">🏆</div><b class="wk-h">이번 주 완주!</b><div class="wk-t">${esc(w.title||'')}</div>
+      <div class="wk-stats"><span><b>${b.length}</b>문장 모두 외움</span>${best!=null?`<span>모의 테스트 최고 <b>${best}</b>점</span>`:''}</div>
+      <p class="wk-msg">${esc(nick||'')}님, 한 주 지문을 끝까지 외웠어요. 토요일 테스트도 자신 있게!</p>
+      <div class="wk-act"><button class="ghost" id="wkListen">▶ 전체 지문 듣기</button><button class="primary" id="wkClose">닫기</button></div></div>`;
+  document.body.appendChild(ov);
+  try{if(navigator.vibrate)navigator.vibrate([60,60,60,60,120])}catch(_){}
+  setTimeout(()=>{try{const n='praise-week.mp3',t='Congratulations! You memorized the whole passage. Amazing work!';
+    if(window.__ixHas&&window.__ixHas(n)){const a=new Audio('audio/'+n);a.play().catch(()=>ttsSpeak(t,1))}else ttsSpeak(t,1)}catch(_){}},500);
+  const close=()=>{ov.classList.add('out');setTimeout(()=>ov.remove(),300)};
+  ov.addEventListener('click',e=>{if(e.target.id==='wkClose'||e.target===ov)close();
+    if(e.target.id==='wkListen'){close();setTimeout(()=>{const bx=$('psBox');if(bx){bx.open=true;bx.scrollIntoView({block:'start',behavior:'smooth'})}const lb=$('longBtn');if(lb)lb.click()},350)}});
+}
+function saveProg(){checkWeekDone();
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
+  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},cel:prog.cel||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
 }
 const doneOf=id=>prog.done[id]||{};
 /* 공부 가능한 날: 배정 다음 날(일) ~ 테스트 전날(금) = 6일 */
@@ -859,9 +897,7 @@ function sayPraise(kind){
   const n=kind==='fire'?'praise-fire.mp3':kind==='close'?'praise-close.mp3':'praise-'+(1+Math.floor(Math.random()*8))+'.mp3';
   const txt=kind==='fire'?"Wow, you're on fire!":kind==='close'?'So close! Almost perfect!':PRAISE_T[+n.match(/\d+/)[0]-1];
   setTimeout(()=>{try{
-    /* 칭찬 음성이 끝나면 박수 소리 */
-    const clap=()=>{if(kind==='close'||!(window.__ixHas&&window.__ixHas('applause.mp3')))return;const c=new Audio('audio/applause.mp3');c.volume=.55;c.play().catch(()=>{})};
-    if(window.__ixHas&&window.__ixHas(n)){const a=new Audio('audio/'+n);a.volume=1;a.onended=clap;a.play().catch(()=>ttsSpeak(txt,1).then(clap))}else ttsSpeak(txt,1).then(clap);
+    if(window.__ixHas&&window.__ixHas(n)){const a=new Audio('audio/'+n);a.volume=1;a.play().catch(()=>ttsSpeak(txt,1))}else ttsSpeak(txt,1);
   }catch(_){}},380);
   return txt}
 function cheer(box,kind){

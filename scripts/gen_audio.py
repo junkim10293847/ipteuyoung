@@ -15,7 +15,8 @@ VOICE = {'af': 'af_heart', 'am': 'am_michael', 'bf': 'bf_emma'}
 PRAISE = {'praise-1.mp3': 'Perfect!', 'praise-2.mp3': 'Excellent!', 'praise-3.mp3': 'Awesome! You nailed it!',
           'praise-4.mp3': 'Wonderful!', 'praise-5.mp3': 'Great job!', 'praise-6.mp3': 'Fantastic!',
           'praise-7.mp3': 'Brilliant! Well done!', 'praise-8.mp3': 'Amazing!',
-          'praise-fire.mp3': "Wow, you're on fire!", 'praise-close.mp3': 'So close! Almost perfect!'}
+          'praise-fire.mp3': "Wow, you're on fire!", 'praise-close.mp3': 'So close! Almost perfect!',
+          'praise-week.mp3': 'Congratulations! You memorized the whole passage. Amazing work!'}
 
 
 def api_url():
