@@ -488,7 +488,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v125</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v126</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1938,7 +1938,8 @@ function mkHtml(w){
     <div class="seq-act">${micBtn('mkIn')}<button class="primary" id="mkCheck"${mkBusy?' disabled':''}>${mkBusy?'첨삭 중…':'첨삭 받기'}</button><button class="ghost" id="mkRetry">↺ 다시 하기</button></div>
     ${mkErr?`<p class="load">${esc(mkErr)}</p>`:''}
     ${res?`<div class="seq-r ${res.ok?'ok':''}"><b>${res.ok?'✅ 자연스러워요':'✏️ 이렇게 고쳐 보세요'}</b>${res.ok?`<div class="wr-diff">${esc(res.fixed)}</div>`:diffHtml(gradeText(res.fixed,res.user))}${res.better&&res.better!==res.fixed?`<em>더 자연스럽게: ${esc(res.better)}</em>`:''}${res.tip?`<em>${esc(res.tip)}</em>`:''}<div class="seq-act"><button class="ghost" id="mkPlay">▶ 고친 문장 듣기</button></div></div>`:''}
-    ${mine.length?`<details class="mk-mine"><summary>📒 이 표현으로 만든 내 문장 ${mine.length}</summary>${mine.slice().reverse().map(x=>`<div class="mk-line">${esc(x.fixed)}</div>`).join('')}</details>`:''}
+    ${(()=>{const nk=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(),seen=new Set(),uq=mine.slice().reverse().filter(x=>{const t=nk(x.fixed);if(seen.has(t))return false;seen.add(t);return true});
+      return uq.length?`<details class="mk-mine"><summary>📒 이 표현으로 만든 내 문장 ${uq.length}</summary>${uq.map(x=>`<div class="mk-line">${esc(x.fixed)}</div>`).join('')}</details>`:''})()}
     <div class="seq-act">
       <button class="ghost" id="mkPrev"${p===0?' disabled':''}>◀ 이전</button>
       <button class="ghost" id="mkHintBtn">${mkHint?'힌트 숨기기':'지문 문장 힌트'}</button>
@@ -1975,7 +1976,7 @@ JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
       const j=await sample.json(prompt,{modelTier:'default'});
       const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
       mkRes={k,user:u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim(),fresh:1};
-      prog.mine=prog.mine||{};prog.mine[k]=((prog.mine[k]||[]).concat([{u,fixed,at:Date.now()}])).slice(-10);saveProg();
+      prog.mine=prog.mine||{};{const nk=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();prog.mine[k]=((prog.mine[k]||[]).filter(x=>nk(x.fixed)!==nk(fixed)).concat([{u,fixed,at:Date.now()}])).slice(-10)}saveProg();
     }catch(err){mkErr=err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':err&&err.code==='network'?'답이 늦어 멈췄습니다. 다시 눌러 주세요.':'첨삭을 받지 못했습니다. 다시 눌러 주세요.'}
     mkBusy=false;mkPatch();if(mkRes&&mkRes.fresh){delete mkRes.fresh;if(mkRes.ok){const rb=document.querySelector('#mkBody .seq-r');celebrateBox(rb)}}return}
 },true);
