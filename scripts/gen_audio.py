@@ -12,6 +12,10 @@ import json, os, re, subprocess, sys, urllib.request
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 AUDIO = os.path.join(ROOT, 'audio')
 VOICE = {'af': 'af_heart', 'am': 'am_michael', 'bf': 'bf_emma'}
+PRAISE = {'praise-1.mp3': 'Perfect!', 'praise-2.mp3': 'Excellent!', 'praise-3.mp3': 'Awesome! You nailed it!',
+          'praise-4.mp3': 'Wonderful!', 'praise-5.mp3': 'Great job!', 'praise-6.mp3': 'Fantastic!',
+          'praise-7.mp3': 'Brilliant! Well done!', 'praise-8.mp3': 'Amazing!',
+          'praise-fire.mp3': "Wow, you're on fire!", 'praise-close.mp3': 'So close! Almost perfect!'}
 
 
 def api_url():
@@ -174,6 +178,10 @@ def main():
     have = set(os.listdir(AUDIO))
     texts = load_texts()
     jobs, longs = plan(weeks, have, texts)
+    # 써보기 완벽할 때 들려줄 칭찬 음성 (미국 여성 목소리, 한 번만 만듦)
+    for n, t in PRAISE.items():
+        if n not in have:
+            jobs[n] = (t, 'af')
     todo = len(jobs) + len(longs)
     print(f'만들 음성 {len(jobs)}개, 연속 듣기 {len(longs)}개')
     out('todo', todo)

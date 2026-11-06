@@ -323,6 +323,10 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .wr-res.perfect .wr-score b{display:block;font-size:1.6rem;line-height:1.3;color:var(--done);margin-bottom:2px}
 .wr-res.perfect .wr-diff{display:none}
 .wr-res.perfect::after{content:'';position:absolute;left:0;bottom:0;height:4px;width:100%;background:var(--done);transform-origin:left;animation:wrBar 3s linear forwards}
+.cheer-big{position:fixed;left:50%;top:30%;background:#fff;border:2px solid #f2b37a;border-radius:16px;padding:4px 16px 6px;box-shadow:0 6px 18px rgba(229,107,31,.25);transform:translate(-50%,0);z-index:5;pointer-events:none;text-align:center;animation:cheerUp 2.2s ease-out forwards}
+.cheer-big b{display:block;font-family:Fraunces,Georgia,serif;font-size:1.45rem;font-weight:700;color:#e56b1f;letter-spacing:.5px;white-space:nowrap}
+.cheer-big span{display:inline-block;margin-top:2px;font-size:.8rem;font-weight:700;color:#fff;background:#e56b1f;border-radius:999px;padding:1px 10px}
+@keyframes cheerUp{0%{opacity:0;transform:translate(-50%,20px) scale(.5)}14%{opacity:1;transform:translate(-50%,0) scale(1.15)}26%{transform:translate(-50%,0) scale(1)}78%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-30px) scale(.95)}}
 @keyframes wrPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes wrBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 .card.celebrate{animation:wrGlow 1.8s ease-out}
@@ -450,7 +454,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v116</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v117</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -491,7 +495,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   let adminPw='';try{adminPw=localStorage.getItem('adminPw')||''}catch(e){}
 
   /* 음성 목록(audio/index.json): GitHub Actions가 새 음성을 만들 때마다 갱신 */
-  let ix=new Set();
+  let ix=new Set();window.__ixHas=n=>ix.has(n);
   async function loadIndex(){try{const r=await fetch('audio/index.json?t='+Date.now(),{cache:'no-store'});if(r.ok)ix=new Set(await r.json())}catch(e){}}
   const clean=t=>String(t||'').replace(/\(.*?\)/g,'').replace(/[가-힣~]+/g,'').replace(/\+.*$/,'').trim()||String(t||'');
   const vkey=t=>clean(t).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'x';
@@ -849,6 +853,31 @@ function patchWriteOpen(w,i){
 document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear,#mockPrev,#mockNext');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
 document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.wr-check,.wr-clear,#mockPrev,#mockNext');if(b){const a=document.activeElement;if(a&&a.tagName==='TEXTAREA')e.preventDefault()}},true);
 /* 100% 정답 축하: 결과 상자 튀어나옴 + 반짝이 + 카드 테두리 빛 + 짧은 진동·작은 '딩동' */
+/* 완벽할 때: 예쁜 원어민 목소리 칭찬 + 큰 글씨 + 연속 완벽 카운트 */
+let perfRun=0;const PRAISE_T=['Perfect!','Excellent!','Awesome! You nailed it!','Wonderful!','Great job!','Fantastic!','Brilliant! Well done!','Amazing!'];
+function sayPraise(kind){
+  const n=kind==='fire'?'praise-fire.mp3':kind==='close'?'praise-close.mp3':'praise-'+(1+Math.floor(Math.random()*8))+'.mp3';
+  const txt=kind==='fire'?"Wow, you're on fire!":kind==='close'?'So close! Almost perfect!':PRAISE_T[+n.match(/\d+/)[0]-1];
+  setTimeout(()=>{try{
+    if(window.__ixHas&&window.__ixHas(n)){const a=new Audio('audio/'+n);a.volume=1;a.play().catch(()=>ttsSpeak(txt,1))}else ttsSpeak(txt,1);
+  }catch(_){}},380);
+  return txt}
+function cheer(box,kind){
+  if(!box)return;kind=kind||'perfect';
+  if(kind==='perfect')perfRun++;else perfRun=0;
+  const fire=kind==='perfect'&&perfRun>=3&&perfRun%3===0;
+  const txt=sayPraise(fire?'fire':kind);
+  const big=document.createElement('div');big.className='cheer-big';
+  big.innerHTML=`<b>${esc(txt.split('!')[0])}!</b>${kind==='perfect'&&perfRun>=2?`<span>🔥 ${perfRun}연속 완벽</span>`:''}`;
+  document.body.appendChild(big);setTimeout(()=>big.remove(),2300);
+}
+function celebrateBox(box){
+  if(!box)return;const cf=document.createElement('div');cf.className='wr-confetti';
+  cf.innerHTML=Array.from({length:12},(_,k)=>`<span style="left:${4+Math.random()*92}%;animation-delay:${(Math.random()*.35).toFixed(2)}s">${['🎉','✨','⭐','🌟','💯'][k%5]}</span>`).join('');
+  box.style.position='relative';box.appendChild(cf);setTimeout(()=>cf.remove(),2200);
+  try{if(navigator.vibrate)navigator.vibrate([30,40,30])}catch(_){}
+  cheer(box);
+}
 function celebrate(i){
   const cd=$('c'+i),box=cd&&cd.querySelector('.wr-res.perfect');if(!box)return;
   cd.classList.remove('celebrate');void cd.offsetWidth;cd.classList.add('celebrate');setTimeout(()=>cd.classList.remove('celebrate'),1900);
@@ -856,6 +885,7 @@ function celebrate(i){
   cf.innerHTML=Array.from({length:14},(_,k)=>`<span style="left:${4+Math.random()*92}%;animation-delay:${(Math.random()*.35).toFixed(2)}s">${['🎉','✨','⭐','🌟','💯'][k%5]}</span>`).join('');
   box.appendChild(cf);setTimeout(()=>cf.remove(),2200);
   try{if(navigator.vibrate)navigator.vibrate([30,40,30])}catch(_){}
+  cheer(box);
   try{const A=window.AudioContext||window.webkitAudioContext;if(A){const ac=celebrate.ac||(celebrate.ac=new A());const t=ac.currentTime;[[880,0],[1318.5,.12]].forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.07,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.35);o.connect(g).connect(ac.destination);o.start(t+d);o.stop(t+d+.4)})}}catch(_){}
 }
 function patchWriteRes(w,i){
@@ -1400,7 +1430,7 @@ document.addEventListener('click',async e=>{
   if(t.id==='seqRetry'){const ta=$('seqIn');if(ta)ta.value='';seqAns[curId+'|'+seqPos]='';const box=$('seqRes');if(box)box.innerHTML='';return}
   if(t.id==='seqCheck'){const j=+t.dataset.j,ta=$('seqIn'),v=ta?ta.value:'';if(!v.trim()){toast('먼저 써 보거나 🎤로 말해 보세요');return}
     micStop();const r=gradeText(w.sentences[j].en,v);recordWeak(w.id,j,r,false);if(r.perfect){prog.done[w.id]={...doneOf(w.id),[j]:true};if(w.id===curId)doneSeen.add(j)}saveProg();
-    const box=$('seqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;
+    const box=$('seqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(w.sentences[j].en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;if(box){const rb=box.querySelector('.seq-r');if(r.perfect)celebrateBox(rb);else{perfRun=0;if(r.almost)cheer(rb,'close')}}
     if(ta)ta.blur();return}
   if(t.id==='seqHint'){seqHint=!seqHint;render();return}
   if(t.id==='seqPlay'){const j=+t.dataset.j;stop();const my=token;await playOne(w.sentences[j],j,+$('rate').value,my);return}
@@ -1446,6 +1476,7 @@ document.addEventListener('click',async e=>{
     const showRes=()=>{};   /* 화면은 움직이지 않음: 결과는 쓰기 칸 바로 아래에 나타남 */
     if(patchWriteRes(w,i)&&patchCardState(w,i)){
       /* 100%면 '완벽해요'를 잠깐 보여 준 뒤 써보기를 자동으로 접음 (외움 체크는 이미 됨) */
+      if(!r.perfect){perfRun=0;if(r.almost){const c=$('c'+i),bx=c&&c.querySelector('.wr-res');if(bx)cheer(bx,'close')}}
       if(r.perfect){celebrate(i);setTimeout(()=>{if(!writeOpen.has(i))return;foldWriteSmooth(w,i,()=>{writeOpen.delete(i);delete writeDraft[key];delete writeRes[key];patchWriteOpen(w,i)})},3000)}
       return}
     stay(i,render,showRes);return}
@@ -1715,7 +1746,7 @@ document.addEventListener('click',async e=>{
     const nw=qqList(w)[qqPos];if(nw){stop();ttsSpeak(nw.q,+$('rate').value*0.95)}return}
   if(t.id==='qqCheck'){const ta=$('qqIn'),v=ta?ta.value:'';if(!v.trim()){toast('먼저 써 보거나 🎤로 말해 보세요');return}
     micStop();const r=gradeText(s.en,v);recordWeak(w.id,Q.i,r,false);saveProg();
-    const box=$('qqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(s.en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;
+    const box=$('qqRes');if(box)box.innerHTML=`<div class="seq-r ${r.perfect?'ok':''}"><b>${r.perfect?'🎉 완벽해요':r.almost?'거의 완벽 (쉼표만)':r.score+'%'}</b>${r.perfect?`<div class="wr-diff">${esc(s.en)}</div>`:`<em>${errCount(r)}</em>${diffHtml(r)}`}</div>`;if(box){const rb=box.querySelector('.seq-r');if(r.perfect)celebrateBox(rb);else{perfRun=0;if(r.almost)cheer(rb,'close')}}
     if(ta)ta.blur();return}
 },true);
 /* 2-2. 숙어로 문장 만들기: 이번 주 단어·숙어로 '내 문장'을 만들어 말하거나 쓰고 AI가 짧게 첨삭 (오늘 문장 표현부터) */
@@ -1775,10 +1806,10 @@ JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
     try{
       const j=await sample.json(prompt,{modelTier:'default'});
       const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
-      mkRes={k,user:u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};
+      mkRes={k,user:u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim(),fresh:1};
       prog.mine=prog.mine||{};prog.mine[k]=((prog.mine[k]||[]).concat([{u,fixed,at:Date.now()}])).slice(-10);saveProg();
     }catch(err){mkErr=err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':err&&err.code==='network'?'답이 늦어 멈췄습니다. 다시 눌러 주세요.':'첨삭을 받지 못했습니다. 다시 눌러 주세요.'}
-    mkBusy=false;mkPatch();return}
+    mkBusy=false;mkPatch();if(mkRes&&mkRes.fresh){delete mkRes.fresh;if(mkRes.ok){const rb=document.querySelector('#mkBody .seq-r');celebrateBox(rb)}}return}
 },true);
 /* 3. 모의 테스트 */
 /* 모의 테스트 이전/다음: 화면을 다시 그리지 않고 글자만 바꿔 키보드·스크롤이 그대로 유지되게 */
