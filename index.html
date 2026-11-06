@@ -347,11 +347,14 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 @keyframes wkBounce{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
 @keyframes wkFall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(110vh) rotate(360deg)}}
 .card{position:relative}
-.done-stamp{position:absolute;top:8px;right:10px;z-index:4;pointer-events:none;width:78px;height:78px;border:3px solid #e2574c;border-radius:50%;color:#e2574c;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.88);transform:rotate(-14deg);animation:stampIn .45s cubic-bezier(.2,1.6,.4,1);box-shadow:0 0 0 3px rgba(226,87,76,.15) inset}
-.done-stamp span{font-size:1.5rem;line-height:1}
-.done-stamp b{font-size:.68rem;letter-spacing:-.5px;margin-top:2px;white-space:nowrap}
-.done-stamp.fade{opacity:0;transform:rotate(-14deg) scale(.9);transition:opacity .5s,transform .5s}
-@keyframes stampIn{0%{opacity:0;transform:rotate(-30deg) scale(2.2)}60%{opacity:1;transform:rotate(-10deg) scale(.92)}100%{transform:rotate(-14deg) scale(1)}}
+.done-stamp{position:absolute;top:6px;right:8px;z-index:6;pointer-events:none;width:104px;height:104px;border:4px solid #e0473b;border-radius:50%;color:#e0473b;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,250,248,.93);transform:rotate(-14deg);animation:stampIn .5s cubic-bezier(.2,1.6,.4,1);box-shadow:0 4px 14px rgba(224,71,59,.28)}
+.done-stamp i{position:absolute;inset:5px;border:2px dashed rgba(224,71,59,.55);border-radius:50%}
+.done-stamp span{font-size:2.1rem;line-height:1}
+.done-stamp b{font-size:.84rem;font-weight:800;letter-spacing:-.6px;margin-top:3px;white-space:nowrap}
+.done-stamp.fade{opacity:0;transform:rotate(-14deg) scale(.88);transition:opacity .55s,transform .55s}
+@keyframes stampIn{0%{opacity:0;transform:rotate(-34deg) scale(2.6)}55%{opacity:1;transform:rotate(-10deg) scale(.9)}75%{transform:rotate(-15deg) scale(1.05)}100%{transform:rotate(-14deg) scale(1)}}
+.thump{animation:thump .45s ease .18s}
+@keyframes thump{0%,100%{transform:translate(0,0)}25%{transform:translate(0,3px)}50%{transform:translate(0,-1px)}75%{transform:translate(0,1px)}}
 .num.bump{animation:nBump .5s ease;display:inline-block}
 @keyframes nBump{0%{transform:scale(1)}40%{transform:scale(1.5);color:#e56b1f}100%{transform:scale(1)}}
 @keyframes wrPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
@@ -481,7 +484,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v123</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v124</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -713,12 +716,15 @@ function checkSmallWins(){try{
   const msg=n===1?'첫 문장 외움! 시작이 반이에요':n===half?'🎯 절반 달성! 이 속도면 충분해요':N-n===1?'🔥 이제 딱 1문장 남았어요!':N-n===2?'2문장만 더 하면 완주!':['좋아요! 하나씩 쌓이고 있어요','멋져요! 계속 가 봐요','착착 외우고 있어요','오늘도 한 걸음!'][n%4];
   setTimeout(()=>toast(`⭐ 이번 주 ${n}/${N} 외움 · ${msg}`),300);
 }catch(_){}}
-function stampCard(i){
-  const c=$('c'+i);if(!c)return;
+function stampCard(i){const c=$('c'+i);if(!c)return;stampOn(c);const n=c.querySelector('.num');if(n){n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump')}}
+/* 빨간 '참 잘했어요' 도장: 쾅 찍히며 카드가 살짝 흔들리고 2.4초 뒤 사라짐 (완벽할 때마다 매번) */
+function stampOn(el){
+  if(!el||el.querySelector(':scope > .done-stamp'))return;
+  if(getComputedStyle(el).position==='static')el.style.position='relative';
   const st=document.createElement('div');st.className='done-stamp';
-  st.innerHTML=`<span>${['💮','🌸','⭐','🍀','👍','💯'][Math.floor(Math.random()*6)]}</span><b>참 잘했어요</b>`;
-  c.appendChild(st);setTimeout(()=>st.classList.add('fade'),1500);setTimeout(()=>st.remove(),2100);
-  const n=c.querySelector('.num');if(n){n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump')}
+  st.innerHTML=`<i></i><span>${['💮','🌸','⭐','🍀','👍','💯','🏅'][Math.floor(Math.random()*7)]}</span><b>참 잘했어요</b>`;
+  el.appendChild(st);el.classList.remove('thump');void el.offsetWidth;el.classList.add('thump');
+  setTimeout(()=>{st.classList.add('fade');el.classList.remove('thump')},2400);setTimeout(()=>st.remove(),3000);
 }
 function saveProg(){checkWeekDone();checkSmallWins();
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
@@ -940,7 +946,7 @@ function cheer(box,kind){
   document.body.appendChild(big);setTimeout(()=>big.remove(),2300);
 }
 function celebrateBox(box){
-  if(!box)return;const cf=document.createElement('div');cf.className='wr-confetti';
+  if(!box)return;setTimeout(()=>stampOn(box),150);const cf=document.createElement('div');cf.className='wr-confetti';
   cf.innerHTML=Array.from({length:12},(_,k)=>`<span style="left:${4+Math.random()*92}%;animation-delay:${(Math.random()*.35).toFixed(2)}s">${['🎉','✨','⭐','🌟','💯'][k%5]}</span>`).join('');
   box.style.position='relative';box.appendChild(cf);setTimeout(()=>cf.remove(),2200);
   try{if(navigator.vibrate)navigator.vibrate([30,40,30])}catch(_){}
@@ -1586,7 +1592,7 @@ document.addEventListener('click',async e=>{
         setTimeout(reveal,350);setTimeout(reveal,750)}
       /* 100%면 '완벽해요'를 잠깐 보여 준 뒤 써보기를 자동으로 접음 (외움 체크는 이미 됨) */
       if(!r.perfect){perfRun=0;if(r.almost){const c=$('c'+i),bx=c&&c.querySelector('.wr-res');if(bx)cheer(bx,'close')}}
-      if(r.perfect){celebrate(i);setTimeout(()=>{if(!writeOpen.has(i))return;foldWriteSmooth(w,i,()=>{writeOpen.delete(i);delete writeDraft[key];delete writeRes[key];patchWriteOpen(w,i)})},3000)}
+      if(r.perfect){celebrate(i);stampCard(i);setTimeout(()=>{if(!writeOpen.has(i))return;foldWriteSmooth(w,i,()=>{writeOpen.delete(i);delete writeDraft[key];delete writeRes[key];patchWriteOpen(w,i)})},3000)}
       return}
     stay(i,render,showRes);return}
   if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);if(!patchCardState(w,i))stay(i,render);return}
