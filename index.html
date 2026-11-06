@@ -343,6 +343,14 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 @keyframes wkPop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes wkBounce{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
 @keyframes wkFall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(110vh) rotate(360deg)}}
+.card{position:relative}
+.done-stamp{position:absolute;top:8px;right:10px;z-index:4;pointer-events:none;width:78px;height:78px;border:3px solid #e2574c;border-radius:50%;color:#e2574c;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.88);transform:rotate(-14deg);animation:stampIn .45s cubic-bezier(.2,1.6,.4,1);box-shadow:0 0 0 3px rgba(226,87,76,.15) inset}
+.done-stamp span{font-size:1.5rem;line-height:1}
+.done-stamp b{font-size:.68rem;letter-spacing:-.5px;margin-top:2px;white-space:nowrap}
+.done-stamp.fade{opacity:0;transform:rotate(-14deg) scale(.9);transition:opacity .5s,transform .5s}
+@keyframes stampIn{0%{opacity:0;transform:rotate(-30deg) scale(2.2)}60%{opacity:1;transform:rotate(-10deg) scale(.92)}100%{transform:rotate(-14deg) scale(1)}}
+.num.bump{animation:nBump .5s ease;display:inline-block}
+@keyframes nBump{0%{transform:scale(1)}40%{transform:scale(1.5);color:#e56b1f}100%{transform:scale(1)}}
 @keyframes wrPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes wrBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 .card.celebrate{animation:wrGlow 1.8s ease-out}
@@ -470,7 +478,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v120</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v121</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -690,7 +698,26 @@ function celebrateWeek(w){
   ov.addEventListener('click',e=>{if(e.target.id==='wkClose'||e.target===ov)close();
     if(e.target.id==='wkListen'){close();setTimeout(()=>{const bx=$('psBox');if(bx){bx.open=true;bx.scrollIntoView({block:'start',behavior:'smooth'})}const lb=$('longBtn');if(lb)lb.click()},350)}});
 }
-function saveProg(){checkWeekDone();
+/* 한 문장이라도 새로 외움이 되면 작게 축하: 카드에 '참 잘했어요' 도장 + 이번 주 몇 개째인지 알림 */
+let lastDone={id:null,set:null};
+function checkSmallWins(){try{
+  const w=weeks.find(x=>x.id===curId);if(!w)return;const b=bodyOf(w),d=doneOf(w.id),now=new Set(b.filter(i=>d[i]));
+  if(lastDone.id!==w.id||!lastDone.set){lastDone={id:w.id,set:now};return}
+  const fresh=[...now].filter(i=>!lastDone.set.has(i));lastDone.set=now;if(!fresh.length)return;
+  fresh.forEach((i,k)=>setTimeout(()=>stampCard(i),k*250));
+  const n=now.size,N=b.length;if(n>=N)return;   // 다 외웠으면 큰 축하 화면이 대신 나옴
+  const half=Math.ceil(N/2);
+  const msg=n===1?'첫 문장 외움! 시작이 반이에요':n===half?'🎯 절반 달성! 이 속도면 충분해요':N-n===1?'🔥 이제 딱 1문장 남았어요!':N-n===2?'2문장만 더 하면 완주!':['좋아요! 하나씩 쌓이고 있어요','멋져요! 계속 가 봐요','착착 외우고 있어요','오늘도 한 걸음!'][n%4];
+  setTimeout(()=>toast(`⭐ 이번 주 ${n}/${N} 외움 · ${msg}`),300);
+}catch(_){}}
+function stampCard(i){
+  const c=$('c'+i);if(!c)return;
+  const st=document.createElement('div');st.className='done-stamp';
+  st.innerHTML=`<span>${['💮','🌸','⭐','🍀','👍','💯'][Math.floor(Math.random()*6)]}</span><b>참 잘했어요</b>`;
+  c.appendChild(st);setTimeout(()=>st.classList.add('fade'),1500);setTimeout(()=>st.remove(),2100);
+  const n=c.querySelector('.num');if(n){n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump')}
+}
+function saveProg(){checkWeekDone();checkSmallWins();
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
   progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},cel:prog.cel||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
