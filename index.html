@@ -278,6 +278,9 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .qa{border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:8px}
 .qa-hd{display:flex;align-items:baseline;gap:8px}.qa-hd h4{flex:1;margin:0}.qa-hd .qa-tg{flex:none}
 .qa-old{display:grid;gap:8px}
+.qz{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:6px}
+.qz-h{font-size:.8rem;font-weight:700;color:var(--accent)}
+.qz-in{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);width:100%;box-sizing:border-box}
 .qa-q{display:flex;align-items:baseline;gap:8px}.qa-q span{flex:1;min-width:0}
 .qa-q .qa-it{flex:none}
 .qa-del{flex:none;border:0;background:none;padding:0 2px;font:inherit;font-size:.74rem;color:var(--muted);cursor:pointer;text-decoration:underline}
@@ -478,7 +481,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v122</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v123</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1147,8 +1150,44 @@ const openVoc=new Set(), openDet=new Set(), detBusy={}, detErr={};
 document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('voc')){const i=+d.dataset.i;d.open?openVoc.add(i):openVoc.delete(i)}},true);
 /* 단어·숙어 바로 질문: 답은 닉네임별 개인 기록에 저장 */
 const qaLive={}, qaDraft={}, qaJust={}, qaOpen=new Set(), qaItem={};
+/* 답 끝의 '확인 퀴즈'에 바로 써서 첨삭 받기 */
+const qzBusy={};
+function qzText(a){const m=String(a||'').match(/확인\s*퀴즈\s*[:：]\s*([^\n]+)/);return m?m[1].trim():''}
+function qzHtml(x,key,i){const q=qzText(x.a);if(!q)return '';const z=x.qz,b=qzBusy[key+'#'+i];
+  return `<div class="qz"><div class="qz-h">✏️ 확인 퀴즈 풀기</div>
+    <input class="qz-in" id="qz-${i}" data-qk="${esc(key)}" data-i="${i}" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" placeholder="여기에 영어로 써 보세요" value="${esc(z&&z.u||'')}">
+    <div class="seq-act">${micBtn('qz-'+i)}<button type="button" class="primary qz-go" data-qk="${esc(key)}" data-i="${i}"${b?' disabled':''}>${b?'첨삭 중…':'첨삭 받기'}</button>${z?`<button type="button" class="ghost qz-re" data-qk="${esc(key)}" data-i="${i}">↺ 다시 하기</button>`:''}</div>
+    ${z&&z.err?`<p class="load">${esc(z.err)}</p>`:''}
+    ${z&&z.fixed?`<div class="seq-r ${z.ok?'ok':''}"><b>${z.ok?'✅ 맞았어요':'✏️ 이렇게 고쳐 보세요'}</b>${z.ok?`<div class="wr-diff">${esc(z.fixed)}</div>`:diffHtml(gradeText(z.fixed,z.u))}${z.better&&z.better!==z.fixed?`<em>더 자연스럽게: ${esc(z.better)}</em>`:''}${z.tip?`<em>${esc(z.tip)}</em>`:''}</div>`:''}
+  </div>`}
 const qaRe=el=>{const q=el.closest('.qa');if(q)q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)};
-document.addEventListener('click',e=>{
+document.addEventListener('click',async e=>{
+  const zq=e.target.closest&&e.target.closest('.qz-go,.qz-re');
+  if(zq){e.preventDefault();e.stopPropagation();const k=zq.dataset.qk,i=+zq.dataset.i,arr=(prog.qa&&prog.qa[k])||[],x=arr[i];if(!x)return;
+    if(zq.classList.contains('qz-re')){delete x.qz;saveProg();qaRe(zq);return}
+    const inp=zq.closest('.qz').querySelector('.qz-in'),u=(inp?inp.value:'').trim();if(!u){toast('먼저 써 보거나 🎤로 말해 보세요');return}
+    if(!sample){x.qz={u,err:'AI 기능이 켜져 있어야 첨삭할 수 있어요.'};qaRe(zq);return}
+    micStop();qzBusy[k+'#'+i]=1;x.qz={u};qaRe(zq);
+    const prompt=`너는 한국인 초보 영어 학습자를 다정하게 가르치는 영어 강사다.
+앞서 학습자가 한 질문: ${x.q}
+그에 대한 설명 끝에 낸 확인 퀴즈: ${qzText(x.a)}
+학습자의 답: ${u}
+(답은 음성 인식으로 받아 적어 철자가 이상하거나 한국어가 섞였을 수 있다. 뜻을 짐작해 고친다.)
+규칙:
+- "ok": 퀴즈가 요구한 뜻과 표현을 맞게, 문법적으로 자연스럽게 썼으면 true (대소문자·마침표는 무시).
+- "fixed": 학습자 답을 최대한 살려 가장 적게 고친 올바른 영어 문장. ok면 다듬은 학습자 문장.
+- "better": 원어민이 더 자연스럽게 말하는 문장 (fixed와 같으면 빈 문자열).
+- "tip": 무엇을 왜 고쳤는지 한국어 한 문장 (ok면 칭찬 한 마디).
+JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
+    let fresh=null;
+    try{const j=await sample.json(prompt,{modelTier:'default'});const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
+      x.qz={u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};fresh=x.qz.ok}
+    catch(err){x.qz={u,err:err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':'첨삭을 받지 못했습니다. 다시 눌러 주세요.'}}
+    delete qzBusy[k+'#'+i];saveProg();
+    const host=document.querySelector(`.qz-go[data-qk="${CSS.escape(k)}"][data-i="${i}"]`)||document.querySelector(`.qa[data-k]`);
+    if(host){const q=host.closest('.qa');if(q){q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)}}
+    if(fresh){const rb=document.querySelector(`.qz-in[data-qk="${CSS.escape(k)}"][data-i="${i}"]`);const box=rb&&rb.closest('.qz').querySelector('.seq-r');if(box)celebrateBox(box)}
+    return}
   const b=e.target.closest&&e.target.closest('.qa-tg,.qa-it,.qa-del');if(!b)return;e.preventDefault();e.stopPropagation();
   const k=b.dataset.qk;
   if(b.classList.contains('qa-tg')){qaOpen.has(k)?qaOpen.delete(k):qaOpen.add(k);qaRe(b);return}
@@ -1168,7 +1207,7 @@ function qaHtml(k,title,ph){
   const just=qaJust[key]&&all.length?[all[all.length-1]]:[], old=just.length?all.slice(0,-1):all;
   /* 질문 하나하나 펼치기·접기·삭제 (방금 받은 답은 펼친 채로) */
   const one=x=>{const i=all.indexOf(x),ik=key+'#'+i,isJ=just.includes(x),o=ik in qaItem?qaItem[ik]:isJ;
-    return `<div class="qa-item"><div class="qa-q"><span>Q. ${esc(x.q)}</span><button type="button" class="vmore qa-it" data-qk="${esc(key)}" data-i="${i}" data-o="${o?1:0}">${o?'접기 ▴':'펼치기 ▾'}</button><button type="button" class="qa-del" data-qk="${esc(key)}" data-i="${i}" aria-label="이 질문 삭제">삭제</button></div>${o?`<div class="qa-a">${esc(x.a)}</div>`:''}</div>`};
+    return `<div class="qa-item"><div class="qa-q"><span>Q. ${esc(x.q)}</span><button type="button" class="vmore qa-it" data-qk="${esc(key)}" data-i="${i}" data-o="${o?1:0}">${o?'접기 ▴':'펼치기 ▾'}</button><button type="button" class="qa-del" data-qk="${esc(key)}" data-i="${i}" aria-label="이 질문 삭제">삭제</button></div>${o?`<div class="qa-a">${esc(x.a)}</div>${qzHtml(x,key,i)}`:''}</div>`};
   const op=qaOpen.has(key);
   const tg=old.length?`<button type="button" class="vmore qa-tg" data-qk="${esc(key)}">${op?'기록 접기 ▴':`${just.length?'이전 ':''}질문 기록 ${old.length} ▾`}</button>`:'';
   const items=(old.length&&op?`<div class="qa-old">${old.map(one).join('')}</div>`:'')+just.map(one).join('')
@@ -1177,7 +1216,7 @@ function qaHtml(k,title,ph){
   const off=!sample||readOnly;
   return `<div class="qa" data-k="${esc(k)}" data-t="${esc(title||'')}" data-p="${esc(ph||'')}"><div class="qa-hd"><h4>${title||'궁금한 점 바로 묻기'}</h4>${tg}</div>${items}
     ${off?`<p class="load">AI 질문 기능은 관리자가 Gemini 키를 넣으면 쓸 수 있습니다.</p>`:
-    `<form class="qa-form" data-k="${esc(k)}"><input id="qaIn-${esc(k)}" data-k="${esc(k)}" maxlength="300" placeholder="${esc(ph||'예: get stressed out과 be stressed는 뭐가 달라요?')}" value="${esc(qaDraft[key]||'')}"${live?' disabled':''}><button class="primary" type="submit"${live?' disabled':''}>질문</button></form>`}</div>`;
+    `<form class="qa-form" data-k="${esc(k)}" autocomplete="off"><input id="qaIn-${esc(k)}" data-k="${esc(k)}" autocomplete="off" autocorrect="off" name="q-${Date.now()}" maxlength="300" placeholder="${esc(ph||'예: get stressed out과 be stressed는 뭐가 달라요?')}" value="${esc(qaDraft[key]||'')}"${live?' disabled':''}><button class="primary" type="submit"${live?' disabled':''}>질문</button></form>`}</div>`;
 }
 /* 전체 지문 아래 '영어 무엇이든 묻기': 지문과 상관없는 영어 질문도 바로 답함 */
 function askAllHtml(){return `<div class="askall" id="qaAllBox">${qaHtml('all','💬 영어 무엇이든 묻기','예: fill up과 be full은 어떻게 달라요?')}</div>`}
