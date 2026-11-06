@@ -454,7 +454,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v117</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v118</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -886,7 +886,6 @@ function celebrate(i){
   box.appendChild(cf);setTimeout(()=>cf.remove(),2200);
   try{if(navigator.vibrate)navigator.vibrate([30,40,30])}catch(_){}
   cheer(box);
-  try{const A=window.AudioContext||window.webkitAudioContext;if(A){const ac=celebrate.ac||(celebrate.ac=new A());const t=ac.currentTime;[[880,0],[1318.5,.12]].forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.07,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.35);o.connect(g).connect(ac.destination);o.start(t+d);o.stop(t+d+.4)})}}catch(_){}
 }
 function patchWriteRes(w,i){
   const c=$('c'+i),wr=c&&c.querySelector('.wr');if(!wr)return false;
