@@ -495,7 +495,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v128</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v129</span></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -2008,7 +2008,7 @@ JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
 },true);
 /* 2-3. 영어로 설명하고 맞히기 (토요일 스터디 게임 연습)
    맞히기: AI가 만든 쉬운 영어 설명을 듣고 어떤 표현인지 맞힘 / 설명하기: 표현을 쓰지 않고 영어로 설명하면 AI가 듣는 사람이 되어 맞혀 봄 */
-let gsMode='guess',gsPos=0,gsOrder=null,gsHint=0,gsShow=false,gsRes=null,gsBusy=false,gsErr='',gsScore={ok:0,tried:0},gsClueBusy={},gsClueErr={},gsTimer=null,gsLeft=0;const gsDraft={};
+const gsSeen=new Set(),gsGot=new Set();let gsAuto=null;let gsMode='guess',gsPos=0,gsOrder=null,gsHint=0,gsShow=false,gsRes=null,gsBusy=false,gsErr='',gsScore={ok:0,tried:0},gsClueBusy={},gsClueErr={},gsTimer=null,gsLeft=0;const gsDraft={};
 function gsItems(w){const L=mkItems(w);if(!gsOrder||gsOrder.wid!==w.id||gsOrder.n!==L.length){const idx=L.map((_,k)=>k);for(let k=idx.length-1;k>0;k--){const r=Math.floor(Math.random()*(k+1));[idx[k],idx[r]]=[idx[r],idx[k]]}gsOrder={wid:w.id,n:L.length,idx}}return gsOrder.idx.map(k=>L[k])}
 async function makeClues(w){
   if(gsClueBusy[w.id]||!sample)return;gsClueBusy[w.id]=1;delete gsClueErr[w.id];gsPatch();
@@ -2048,8 +2048,8 @@ function gsHtml(w){
       <div class="seq-q gs-clue"><span>영어 설명 <button class="vplay" id="gsSay" aria-label="설명 듣기">🔊</button></span><b>${esc(clue)}</b>
         ${gsHint>=1?`<em>힌트 ① 뜻: ${esc(it.v.m||'')}</em>`:''}${gsHint>=2?`<em>힌트 ② 모양: ${esc(gsMask(it.v.t))}</em>`:''}</div>
       <input class="qz-in" id="gsIn" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="어떤 표현일까요? (영어로)" value="${esc(gsDraft[key]||'')}">
-      <div class="seq-act">${micBtn('gsIn')}<button class="primary" id="gsCheck">정답 확인</button>${gsHint<2?`<button class="ghost" id="gsHintBtn">💡 힌트</button>`:''}<button class="ghost" id="gsShowBtn">정답 보기</button></div>
-      ${res?`<div class="seq-r ${res.ok?'ok':''}"><b>${res.ok?'🎉 정답!':'🤔 아쉬워요, 다시 해 보세요'}</b>${res.ok?`<div class="wr-diff">${esc(it.v.t)} · ${esc(it.v.m||'')}</div>`:''}</div>`:''}
+      <div class="seq-act">${micBtn('gsIn')}<button class="primary" id="gsCheck"${gsGot.has(key)?' disabled':''}>${gsGot.has(key)?'✓ 맞힘':'정답 확인'}</button>${gsHint<2?`<button class="ghost" id="gsHintBtn">💡 힌트</button>`:''}<button class="ghost" id="gsShowBtn">정답 보기</button></div>
+      ${res?`<div class="seq-r ${res.ok?'ok':''}"><b>${res.ok?'🎉 정답!':'🤔 아쉬워요, 다시 해 보세요'}</b>${res.ok?`<div class="wr-diff">${esc(it.v.t)} · ${esc(it.v.m||'')}</div><em>잠시 뒤 다음 문제로 넘어가요</em>`:''}</div>`:''}
       ${gsShow&&!(res&&res.ok)?`<div class="seq-q"><span>정답</span><b>${esc(it.v.t)}</b><em>${esc(it.v.m||'')}</em></div>`:''}
       ${nav}</div>`;
   }
@@ -2070,8 +2070,8 @@ document.addEventListener('click',async e=>{
   const t=e.target.closest&&e.target.closest('#gsTabG,#gsTabE,#gsMake,#gsSay,#gsCheck,#gsHintBtn,#gsShowBtn,#gsPrev,#gsNext,#gsTime,#gsJudge,#gsExRe');if(!t)return;
   e.preventDefault();e.stopPropagation();const w=weeks.find(x=>x.id===curId);if(!w)return;
   const L=gsItems(w),p=Math.max(0,Math.min(gsPos,L.length-1)),it=L[p],key=it?w.id+'|'+it.i+'-'+it.j:'';
-  const reset=()=>{gsHint=0;gsShow=false;gsRes=null;gsErr='';clearInterval(gsTimer);gsLeft=0;micStop()};
-  if(t.id==='gsTabG'||t.id==='gsTabE'){gsMode=t.id==='gsTabG'?'guess':'explain';reset();gsScore={ok:0,tried:0};gsPatch();if(gsMode==='guess'&&!w.clues)makeClues(w);return}
+  const reset=()=>{gsHint=0;gsShow=false;gsRes=null;gsErr='';clearInterval(gsTimer);gsLeft=0;clearTimeout(gsAuto);micStop()};
+  if(t.id==='gsTabG'||t.id==='gsTabE'){gsMode=t.id==='gsTabG'?'guess':'explain';reset();gsScore={ok:0,tried:0};gsSeen.clear();gsGot.clear();gsPatch();if(gsMode==='guess'&&!w.clues)makeClues(w);return}
   if(t.id==='gsMake'){makeClues(w);return}
   if(!it)return;
   if(t.id==='gsPrev'||t.id==='gsNext'){gsPos=t.id==='gsPrev'?Math.max(0,p-1):(p>=L.length-1?0:p+1);reset();gsPatch();
@@ -2079,9 +2079,14 @@ document.addEventListener('click',async e=>{
   if(t.id==='gsSay'){const c=(w.clues||{})[it.i+'-'+it.j];if(c){stop();ttsSpeak(c,+$('rate').value*0.95)}return}
   if(t.id==='gsHintBtn'){gsHint=Math.min(2,gsHint+1);gsPatch();return}
   if(t.id==='gsShowBtn'){gsShow=!gsShow;gsPatch();return}
-  if(t.id==='gsCheck'){const v=(($('gsIn')||{}).value||'').trim();if(!v){toast('먼저 써 보거나 🎤로 말해 보세요');return}
-    micStop();const ok=gsMatch(it.v.t,v);gsScore.tried++;if(ok)gsScore.ok++;gsRes={key,ok};gsPatch();
-    const rb=document.querySelector('#gsBody .seq-r');if(ok)celebrateBox(rb);else{perfRun=0;const inp=$('gsIn');if(inp)inp.select()}return}
+  if(t.id==='gsCheck'){if(gsGot.has(key))return;const v=(($('gsIn')||{}).value||'').trim();if(!v){toast('먼저 써 보거나 🎤로 말해 보세요');return}
+    micStop();const ok=gsMatch(it.v.t,v);
+    if(!gsSeen.has(key)){gsSeen.add(key);gsScore.tried++}   // 한 문제는 한 번만 점수에 셈
+    if(ok){gsGot.add(key);gsScore.ok++}
+    gsRes={key,ok};gsPatch();
+    const rb=document.querySelector('#gsBody .seq-r');
+    if(ok){celebrateBox(rb);clearTimeout(gsAuto);gsAuto=setTimeout(()=>{const nb=$('gsNext');if(nb&&gsRes&&gsRes.key===key)nb.click()},2600)}   // 맞히면 잠시 뒤 다음 문제로
+    else{perfRun=0;const inp=$('gsIn');if(inp)inp.select()}return}
   if(t.id==='gsTime'){clearInterval(gsTimer);gsLeft=60;gsPatch();gsTimer=setInterval(()=>{gsLeft--;const b=$('gsTime');if(b)b.textContent=gsLeft>0?`⏱ ${gsLeft}초`:'⏰ 시간 끝!';if(gsLeft<=0){clearInterval(gsTimer);try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(_){}}},1000);return}
   if(t.id==='gsExRe'){micStop();gsDraft['ex|'+key]='';gsRes=null;gsErr='';gsPatch();return}
   if(t.id==='gsJudge'){const ex=(($('gsEx')||{}).value||'').trim();if(!ex){toast('먼저 영어로 설명을 써 보거나 🎤로 말해 보세요');return}
@@ -2102,7 +2107,7 @@ document.addEventListener('click',async e=>{
 JSON만: {"guess":"...","ok":true,"used":false,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'default'});
       const ok=!!j?.ok||gsMatch(it.v.t,String(j?.guess||''));
       gsRes={key,ok:ok&&!j?.used,guess:String(j?.guess||'').trim(),used:!!j?.used,fixed:String(j?.fixed||'').trim()===ex?'':String(j?.fixed||'').trim(),better:String(j?.better||'').trim(),tip:String(j?.tip||'').trim()};
-      gsScore.tried++;if(gsRes.ok)gsScore.ok++;
+      if(!gsSeen.has('ex|'+key)){gsSeen.add('ex|'+key);gsScore.tried++}if(gsRes.ok&&!gsGot.has('ex|'+key)){gsGot.add('ex|'+key);gsScore.ok++}
     }catch(err){gsErr=err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':'AI가 답하지 못했어요. 다시 눌러 주세요.'}
     gsBusy=false;gsPatch();if(gsRes&&gsRes.ok){celebrateBox(document.querySelector('#gsBody .seq-r'))}return}
 },true);
