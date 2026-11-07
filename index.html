@@ -190,6 +190,7 @@ details.passage{margin-top:12px;padding:10px 14px}
 .members h2{font-size:1.05rem;margin:0 0 8px}.members h2 small{color:var(--muted);font-weight:600}
 .mem{margin:0;padding-left:1.3em;display:grid;gap:8px}.mem li span{display:block;color:var(--muted);font-size:.82rem}.mem li em{display:block;font-style:normal;font-size:.82rem;color:var(--accent)}
 .adminfoot{text-align:center;margin:28px 0 0}
+.ver{border:0;background:none;font:inherit;color:inherit;padding:0 2px;cursor:pointer;text-decoration:underline dotted}
 .copyright-note{text-align:center;font-size:.72rem;line-height:1.6;color:var(--muted);margin:10px 0 0;opacity:.85}
 .adminfoot button{font:inherit;font-size:.76rem;color:var(--muted);background:none;border:0;cursor:pointer;opacity:.7}
 .howto{margin-top:12px;font-size:.82rem;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;display:grid;gap:3px}
@@ -495,7 +496,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><span class="ver" title="앱 화면을 고친 횟수">v129</span></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v130</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -2342,6 +2343,11 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
     const go=()=>{if(busy()){setTimeout(go,5000);return}try{saveUi();sessionStorage.setItem('verDone',nv)}catch(_){}location.replace(base+'?fresh='+Date.now())};
     setTimeout(go,800);
   }catch(_){}}
+  /* 버전 번호를 누르면: 휴대폰에 저장된 화면을 모두 지우고 인터넷에서 최신 버전을 바로 받음 (아이패드 등에서 예전 화면이 남을 때) */
+  document.addEventListener('click',async e=>{if(!(e.target&&e.target.id==='verBtn'))return;e.target.textContent='최신 버전 받는 중…';
+    try{try{saveUi()}catch(_){}if('caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}
+      if(navigator.serviceWorker){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}}catch(_){}
+    location.replace(new URL('./',location.href).href+'?fresh='+Date.now())});
   chkVer();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chkVer()});
   setInterval(()=>{if(document.visibilityState==='visible')chkVer()},15*60000);   // 켜 둔 채로 있어도 15분마다 확인
   /* 새 버전으로 바뀐 뒤: 주소의 ?fresh 를 지우고 짧게 알림 */
