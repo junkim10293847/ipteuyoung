@@ -510,7 +510,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v136</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v137</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -532,16 +532,23 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 (function(){
   const API=(window.APP_CONFIG||{}).api||'';
   const errCode=m=>/not_granted/.test(m)?'not_granted':/rate_limited/.test(m)?'rate_limited':/invalid_json/.test(m)?'invalid_json':/not_admin/.test(m)?'invalid_argument':'upstream_error';
+  let nextLim=0;
   async function run(fn,...args){
     if(!API||/여기에/.test(API))throw{code:'upstream_error',message:'no_api'};
-    let r;
+    const lim0=nextLim;nextLim=0;
+    let j;
     for(let t=0;;t++){
-      /* 구글 서버가 가끔 멈춘 듯 응답이 없을 때가 있어 20초(AI는 60초) 넘으면 끊고 한 번 더 시도 */
-      const ac=typeof AbortController!=='undefined'?new AbortController():null,lim=/^ai/.test(fn)?120000:20000,tm=ac&&setTimeout(()=>ac.abort(),lim);
-      try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args}),redirect:'follow',signal:ac?ac.signal:undefined});clearTimeout(tm);break}
-      catch(e){clearTimeout(tm);if(t>=1||/^ai/.test(fn))throw{code:'network',message:String(e)};await new Promise(z=>setTimeout(z,1200))}
+      /* 구글 서버가 가끔 멈춘 듯 응답이 없을 때가 있어 20초(AI는 120초, 첨삭은 50초) 넘으면 끊음.
+         답을 끝까지 다 받을 때까지 시간을 재야 함 — 휴대폰에서 응답 도중 연결이 멈추면 '첨삭 중…'이 끝나지 않던 문제 */
+      const lim=lim0||(/^ai/.test(fn)?120000:20000);
+      const ac=typeof AbortController!=='undefined'?new AbortController():null;let tm,dead;
+      const guard=new Promise((_,rej)=>{tm=setTimeout(()=>{dead=1;try{ac&&ac.abort()}catch(_){}rej({code:'network',message:'timeout'})},lim)});
+      try{
+        const r=await Promise.race([fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args}),redirect:'follow',signal:ac?ac.signal:undefined}),guard]);
+        try{j=await Promise.race([r.json(),guard])}catch(e){if(dead)throw e;throw{code:'upstream_error',message:'bad_response '+r.status}}
+        clearTimeout(tm);break}
+      catch(e){clearTimeout(tm);if(e&&e.code==='upstream_error')throw e;if(t>=1||/^ai/.test(fn))throw{code:'network',message:String(e&&e.message||e)};await new Promise(z=>setTimeout(z,1200))}
     }
-    let j;try{j=await r.json()}catch(e){throw{code:'upstream_error',message:'bad_response '+r.status}}
     if(j&&j.err)throw{code:errCode(j.err),message:j.err};
     return j?j.res:null;
   }
@@ -622,7 +629,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   /* AI: Apps Script에 넣어 둔 Gemini 무료 키로 답함 */
   const flat=i=>typeof i==='string'?i:i.map(m=>(m.role==='assistant'?'[이전 답변] ':'')+m.content).join('\n\n');
   const sample=async(input,opts={})=>{const text=await run('aiText',flat(input));if(opts.onText)opts.onText({text,delta:text});return{text,truncated:false}};
-  sample.json=async input=>run('aiJson',flat(input));
+  sample.json=async(input,opts={})=>{nextLim=opts.limit||0;return run('aiJson',flat(input))};
 
   const user={isOwner:async()=>adminPw?!!(await run('checkAdmin',adminPw).catch(()=>false)):false,id:async()=>'m',can:async()=>true,profiles:async()=>({})};
   window.claude={use:async n=>n==='db'?db:n==='user'?user:n==='sample'?sample:null};
@@ -1239,9 +1246,9 @@ document.addEventListener('click',async e=>{
 - "tip": 무엇을 왜 고쳤는지 한국어 한 문장 (ok면 칭찬 한 마디).
 JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
     let fresh=null;
-    try{const j=await sample.json(prompt,{modelTier:'default'});const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
+    try{const j=await sample.json(prompt,{modelTier:'default',limit:50000});const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
       x.qz={u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};fresh=x.qz.ok}
-    catch(err){x.qz={u,err:err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':'첨삭을 받지 못했습니다. 다시 눌러 주세요.'}}
+    catch(err){x.qz={u,err:err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':err&&err.code==='network'?'답이 늦어 멈췄어요. [첨삭 받기]를 다시 눌러 주세요.':'첨삭을 받지 못했습니다. 다시 눌러 주세요.'}}
     delete qzBusy[k+'#'+i];saveProg();
     const host=document.querySelector(`.qz-go[data-qk="${CSS.escape(k)}"][data-i="${i}"]`)||document.querySelector(`.qa[data-k]`);
     if(host){const q=host.closest('.qa');if(q){q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)}}
@@ -1381,7 +1388,7 @@ document.addEventListener('click',async e=>{
 [표현] ${L.v.t} — ${L.v.m||''}
 [지문 문장] ${L.w.sentences[L.i].en}
 규칙: 지문 문장과 다른 일상 상황의 짧은 한국어 문장(8~20자)을 주고 영어로 말하게 한다. 형식: "'(한국어 문장)'을 영어로 말해 보세요." 정답은 그 표현을 꼭 쓰는 쉬운 영어 한 문장.
-JSON만: {"quiz":"...","answer":"..."}`,{modelTier:'default'});
+JSON만: {"quiz":"...","answer":"..."}`,{modelTier:'default',limit:50000});
       const quiz=String(j?.quiz||'').trim(),ans=String(j?.answer||'').trim();if(!quiz)throw{code:'invalid_json'};
       L.v.detail={...L.v.detail,quiz,quizAns:ans};
       const cur=weeks.find(x=>x.id===L.w.id);if(cur&&cur.sentences[L.i]&&cur.sentences[L.i].vocab[L.j])cur.sentences[L.i].vocab[L.j].detail=L.v.detail;
@@ -1397,10 +1404,10 @@ JSON만: {"quiz":"...","answer":"..."}`,{modelTier:'default'});
 [학습자 답] ${u}
 (음성 인식으로 받아 적어 철자가 이상하거나 한국어가 섞였을 수 있다. 뜻을 짐작해 고친다. 모범 답과 달라도 뜻이 맞고 표현을 맞게 썼으면 ok.)
 "ok"(true/false), "fixed"(학습자 답을 가장 적게 고친 올바른 문장), "better"(더 자연스러운 문장, 같으면 빈 문자열), "tip"(한국어 한 문장).
-JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'default'});
+JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'default',limit:50000});
     const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
     prog.dq[L.key]={u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};ok=!!j.ok}
-  catch(err){prog.dq[L.key]={u,err:'첨삭을 받지 못했어요. 다시 눌러 주세요.'}}
+  catch(err){prog.dq[L.key]={u,err:err&&err.code==='network'?'답이 늦어 멈췄어요. [첨삭 받기]를 다시 눌러 주세요.':'첨삭을 받지 못했어요. 다시 눌러 주세요.'}}
   delete dqBusy[L.key];saveProg();dqRefresh(k);
   if(ok){const el=document.querySelector(`.dq-go[data-dk="${CSS.escape(k)}"]`);const box=el&&el.closest('.d-quiz').querySelector('.seq-r');if(box)celebrateBox(box)}
 },true);
@@ -2101,7 +2108,7 @@ document.addEventListener('click',async e=>{
 - "tip": 무엇을 왜 고쳤는지 한국어 한 문장 (ok면 칭찬 한 마디와 함께 다음에 써 볼 만한 활용 한 가지).
 JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
     try{
-      const j=await sample.json(prompt,{modelTier:'default'});
+      const j=await sample.json(prompt,{modelTier:'default',limit:50000});
       const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
       mkRes={k,user:u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim(),fresh:1};
       prog.mine=prog.mine||{};{const nk=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();prog.mine[k]=((prog.mine[k]||[]).filter(x=>nk(x.fixed)!==nk(fixed)).concat([{u,fixed,at:Date.now()}])).slice(-10)}saveProg();
