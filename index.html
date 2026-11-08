@@ -277,6 +277,9 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 :root[data-theme="dark"] .vdet{background:#3a3418;border-color:#7a6a2a}.vdet .d-use{--sec:var(--done)}.vdet .d-ex{--sec:#3b7dd8}.vdet .d-sim{--sec:#8a6fc7}.vdet .d-tip{--sec:var(--warn)}
 .vdet h4{display:inline-block;width:max-content;max-width:100%;justify-self:start;margin:0 0 6px;font-size:.74rem;letter-spacing:.02em;color:#fff;background:var(--sec,var(--accent));border-radius:999px;padding:2px 10px}
 .vdet p{margin:0}
+.vdet .d-pron{border-left:0;padding:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:.92rem}
+.d-pron .ipa{font-family:"Lucida Sans Unicode","Arial Unicode MS","Segoe UI",sans-serif;color:var(--muted)}
+.d-pron .kp{font-weight:700}.d-pron .kp b{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px #f2dc3a inset}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) mark.hl{background:#8a7a10;box-shadow:none}}
 :root[data-theme="dark"] mark.hl{background:#8a7a10;box-shadow:none}
@@ -507,7 +510,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v134</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v135</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1407,7 +1410,7 @@ function detHtml(d,k,wb,wbQ){
     if(detErr[k])return `<p class="load">${esc(detErr[k])}</p>`;
     return `<p class="load">불러오는 중…</p>`;
   }
-  return `${detBusy[k]?`<p class="load">설명을 더 보완하는 중… <span class="det-t" data-t0="${detBusy[k]}"></span></p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
+  return `${pronHtml(k,wbQ)}${detBusy[k]?`<p class="load">설명을 더 보완하는 중… <span class="det-t" data-t0="${detBusy[k]}"></span></p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
    ${d.usage?`<div class="d-use"><h4>이 문장에서의 쓰임</h4><p>${esc(d.usage)}</p></div>`:''}
    ${(d.examples||[]).length?`<div class="d-ex"><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
    ${(d.similar||[]).length?`<div class="d-sim"><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
@@ -1426,6 +1429,38 @@ function renderCard(i){
   try{render()}finally{tmp.id='';real.id='main'}
   const nc=tmp.querySelector('#c'+i),oc=real.querySelector('#c'+i);
   if(nc&&oc)oc.replaceWith(nc);tmp.remove();
+}
+/* 발음: 자세히를 열면 맨 위에 [한글 발음]과 /발음기호/ 표시. 없으면 그 주차 단어·숙어 전체를 한 번에 만들어 저장(v.pron) */
+const pronBusy={};
+function pronV(k,wbQ){let wid=curId,ij=k;if(wbQ&&wbQ.includes('~')){[wid,ij]=wbQ.split('~')}
+  const w=weeks.find(x=>x.id===wid);if(!w)return null;const [i,j]=String(ij).split('-').map(Number);const v=w.sentences[i]&&w.sentences[i].vocab&&w.sentences[i].vocab[j];return v?{w,v}:null}
+function pronHtml(k,wbQ){const L=pronV(k,wbQ);if(!L)return '';const p=L.v.pron;
+  if(!p){if(!pronBusy[L.w.id])setTimeout(()=>loadPron(L.w),0);return pronBusy[L.w.id]===-1?'':`<div class="d-pron"><span class="ipa">발음 표시 만드는 중…</span></div>`}
+  if(!p.ipa&&!p.ko)return '';
+  const kp=esc(p.ko||'').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  return `<div class="d-pron"><button class="vplay" data-t="${esc(L.v.t)}" data-a="${esc(L.v.audio||'')}" aria-label="발음 듣기">🔊</button>${p.ko?`<span class="kp">[${kp}]</span>`:''}${p.ipa?`<span class="ipa">${esc(p.ipa)}</span>`:''}</div>`}
+async function loadPron(w){
+  if(pronBusy[w.id]||!sample||readOnly){if(!sample||readOnly)pronBusy[w.id]=-1;return}
+  const items=[];w.sentences.forEach((s,i)=>(s.vocab||[]).forEach((v,j)=>{if(!v.pron)items.push({i,j,t:v.t})}));if(!items.length)return;
+  pronBusy[w.id]=Date.now();
+  const prompt=`영어 단어·숙어 목록의 미국식 발음을 한국인 학습자용으로 적는다.
+각 항목마다
+- ipa: 사전식 IPA 발음기호를 슬래시로 감싸서 (예: /poʊstˈpɑːrtəm dɪˈpreʃən/). 강세 표시(ˈ) 포함.
+- ko: 실제로 들리는 소리에 가깝게 한글로 (예: 포우스트**파**ː럼 디**프레**션). 각 단어의 강세 음절을 **굵게** 표시. 연음·약화는 실제 소리대로.
+- '~', 'A', 'sb', 'sth' 같은 자리 표시는 빼고 영어 부분만 적는다.
+- 한글 설명이나 문법 패턴처럼 발음할 영어가 없으면 ipa와 ko를 빈 문자열로.
+목록:
+${items.map((x,n)=>`${n+1}. ${x.t}`).join('\n')}
+
+{"items":[{"n":1,"ipa":"...","ko":"..."}, ...]} 형태의 JSON으로만 답한다.`;
+  try{let r=await sample.json(prompt,{modelTier:'default'});const arr=Array.isArray(r)?r:(r&&r.items)||[];
+    let got=0;arr.forEach(o=>{const x=items[(+o.n||0)-1];if(!x)return;const pr={ipa:String(o.ipa||'').trim(),ko:String(o.ko||'').trim()};
+      [w,weeks.find(y=>y.id===w.id)].forEach(y=>{const v=y&&y.sentences[x.i]&&y.sentences[x.i].vocab[x.j];if(v&&v.t===x.t)v.pron=pr});got++});
+    if(!got)throw 0;
+    const cur=weeks.find(y=>y.id===w.id)||w;try{await db.doc('weeks/'+w.id).update({sentences:JSON.parse(JSON.stringify(cur.sentences))})}catch(e){}
+    delete pronBusy[w.id];
+  }catch(e){pronBusy[w.id]=-1}
+  if(wbView)wbPatch();else if(w.id===curId){const is=new Set([...openDet].map(k=>+String(k).split('-')[0]));is.forEach(i=>renderCard(i))}
 }
 async function loadDetail(w,i,j,k,quiet){
   const rc=()=>{if(!quiet||openDet.has(k))renderCard(i)};
