@@ -277,6 +277,17 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 :root[data-theme="dark"] .vdet{background:#3a3418;border-color:#7a6a2a}.vdet .d-use{--sec:var(--done)}.vdet .d-ex{--sec:#3b7dd8}.vdet .d-sim{--sec:#8a6fc7}.vdet .d-tip{--sec:var(--warn)}
 .vdet h4{display:inline-block;width:max-content;max-width:100%;justify-self:start;margin:0 0 6px;font-size:.74rem;letter-spacing:.02em;color:#fff;background:var(--sec,var(--accent));border-radius:999px;padding:2px 10px}
 .vdet p{margin:0}
+mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px #f2dc3a inset}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) mark.hl{background:#8a7a10;box-shadow:none}}
+:root[data-theme="dark"] mark.hl{background:#8a7a10;box-shadow:none}
+.hlbtn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:60;border:0;border-radius:999px;padding:12px 22px;font:inherit;font-weight:700;font-size:1rem;background:#ffe94a;color:#3a3200;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.hlbtn.del{background:#fff;color:#b33;border:1.5px solid #e0b0b0}
+.hlbox{margin:6px 0 14px}.hlbox>summary{cursor:pointer;font-weight:700;padding:8px 0}
+.hl-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.hl-list li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:start}
+.hl-list .hl-t{background:#fff27a;color:#2a2400;border-radius:4px;padding:1px 3px;line-height:1.6;overflow-wrap:anywhere}
+.hl-list .hl-m{grid-column:1/-1;font-size:.76rem;color:var(--muted)}
+.hl-list .hl-x{border:0;background:none;color:var(--muted);font:inherit;font-size:.8rem;text-decoration:underline;padding:2px}
 .vdet ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
 .vdet .ko{font-size:.8rem}
 .vdet .sim{display:grid;gap:6px}
@@ -496,7 +507,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v132</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v133</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -682,7 +693,7 @@ async function attachProgRef(){
   try{
     const ref=db.collection('data/users/'+me).doc('progress-'+hashNick(nick));
     const snap=await ref.get();
-    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})},cel:{...(d.cel||{}),...(prog.cel||{})},dq:{...(d.dq||{}),...(prog.dq||{})}}}
+    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})},cel:{...(d.cel||{}),...(prog.cel||{})},dq:{...(d.dq||{}),...(prog.dq||{})},hl:mergeWb(d.hl,prog.hl)}}
     progRef=ref;reconcileProg();render();
     if(snap.exists||Object.keys(prog.done||{}).length)saveProg();   /* 오프라인·다른 기기에서 쌓인 기록을 합친 결과를 서버에 다시 저장 */
   }catch(e){progRef=null}
@@ -741,7 +752,7 @@ function stampOn(el){
 function saveProg(){checkWeekDone();checkSmallWins();
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},cel:prog.cel||{},dq:prog.dq||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
+  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},cel:prog.cel||{},dq:prog.dq||{},hl:prog.hl||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
 }
 const doneOf=id=>prog.done[id]||{};
 /* 공부 가능한 날: 배정 다음 날(일) ~ 테스트 전날(금) = 6일 */
@@ -1075,7 +1086,7 @@ function render(){
   const main=$('main');
   if(!loaded){if(window.__snap)return;main.innerHTML=`<div class="empty-state"><b>주차 목록을 불러오는 중</b>잠시만 기다려 주세요.</div>`;return}
   if(dbFailed){main.innerHTML=`<div class="empty-state"><b>저장된 주차를 불러올 수 없습니다</b>잠시 후 다시 열어 주세요. 계속 안 되면 관리자에게 알려 주세요.</div>`;return}
-  if(wbView){main.innerHTML=`<section class="wbpage"><h2>⭐ 내 단어장</h2><p class="meta">모든 주차에서 ☆로 담은 단어·숙어를 한곳에 모았어요. 최근에 담은 것부터 보여요.</p><div id="wbBody">${wbHtml()}</div></section>`;return}
+  if(wbView){main.innerHTML=`<section class="wbpage"><h2>⭐ 내 단어장</h2><p class="meta">모든 주차에서 ☆로 담은 단어·숙어를 한곳에 모았어요. 최근에 담은 것부터 보여요.</p><div id="hlBody">${hlHtml()}</div><div id="wbBody">${wbHtml()}</div></section>`;return}
   const w=weeks.find(x=>x.id===curId);
   if(!w){main.innerHTML=`<div class="empty-state"><b>아직 등록된 주차가 없습니다</b>위의 '+ 새 주차'를 눌러 지문을 붙여 넣으면 월~금 분량이 자동으로 나뉩니다.</div>`;return}
   const days=plan(w), start=startOf(w), sat=studyOf(w), prev=prevStudyOf(w), tv=todayView(w), pace=paceOf(w), per=perDay(w);
@@ -2188,6 +2199,55 @@ let wbHide=true,wbView=false;const wbShown=new Set();const wbOpen=new Set();
 function wbLoc(e){const k=wbKey(e.t),ws=[weeks.find(x=>x.id===e.wid),...weeks].filter(Boolean);
   for(const w of ws)for(let i=0;i<w.sentences.length;i++){const vs=w.sentences[i].vocab||[];const j=vs.findIndex(v=>wbKey(v.t)===k);if(j>=0)return {w,i,j,v:vs[j],dk:'wb:'+w.id+':'+i+'-'+j}}
   return null}
+/* 🖍 형광펜: 설명(자세히·질문 답변) 글을 손가락으로 선택 → [🖍 형광펜] 누르면 칠해지고 단어장 화면 맨 위에 모임
+   칠한 곳을 누르면 [형광펜 지우기]. 기록은 prog.hl {id:{t,wid,wt,at,off?}} 로 서버에 저장 */
+const HL_ZONE='.qa-a,.vdet,.qz,.hl-zone';
+const hlList=()=>Object.values(prog.hl||{}).filter(e=>e&&!e.off&&e.t).sort((a,b)=>b.at-a.at);
+const hlId=t=>wbKey(t.replace(/\s+/g,' ').trim().slice(0,120));
+function hlHtml(){const L=hlList();if(!L.length)return '';
+  return `<details class="hlbox"${hlBoxOpen?' open':''}><summary>🖍 형광펜 모음 <b>${L.length}</b></summary><ul class="hl-list">${L.map(e=>`<li><span class="hl-t">${esc(e.t)}</span><button class="hl-x" data-hlk="${esc(hlId(e.t))}">지우기</button><span class="hl-m">${esc(e.wt||'')}${e.q?' · '+esc(e.q):''}</span></li>`).join('')}</ul></details>`}
+let hlBoxOpen=false;
+function hlPatch(){const b=$('hlBody');if(b)b.innerHTML=hlHtml()}
+function hlPaint(root){const L=hlList();if(!L.length)return;
+  (root.matches&&root.matches(HL_ZONE)?[root]:[]).concat([...root.querySelectorAll(HL_ZONE)]).forEach(z=>{
+    if(z.closest('mark.hl')&&z!==z.closest(HL_ZONE))return;
+    for(const e of L){const t=e.t.replace(/\s+/g,' ').trim();if(!t)continue;
+      const tw=document.createTreeWalker(z,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest('button,textarea,input,mark.hl')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+      const ns=[];let all='';for(let n;(n=tw.nextNode());){ns.push([n,all.length]);all+=n.data}
+      const norm=all.replace(/\s/g,' ');const at=norm.indexOf(t);if(at<0)continue;const end=at+t.length;
+      for(let k=ns.length-1;k>=0;k--){const [n,o]=ns[k],a=Math.max(at,o),b=Math.min(end,o+n.data.length);if(a>=b)continue;
+        let m=n;if(b-o<n.data.length)m.splitText(b-o);if(a>o)m=m.splitText(a-o);
+        const mk=document.createElement('mark');mk.className='hl';mk.dataset.hlk=hlId(t);m.parentNode.insertBefore(mk,m);mk.appendChild(m)}}})}
+(function(){let busy=false;const mo=new MutationObserver(ms=>{if(busy)return;busy=true;mo.disconnect();
+    try{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1)hlPaint(n)}finally{busy=false;mo.observe(document.body,{childList:true,subtree:true})}});
+  const go=()=>{hlPaint(document.body);mo.observe(document.body,{childList:true,subtree:true})};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
+  let btn=null,sel=null;
+  const hide=()=>{if(btn){btn.remove();btn=null}};
+  const show=(txt,cls,fn)=>{hide();btn=document.createElement('button');btn.type='button';btn.className='hlbtn'+(cls?' '+cls:'');btn.textContent=txt;{const d=document.querySelector('.dock');if(d&&d.offsetHeight)btn.style.bottom=(d.offsetHeight+14)+'px'}
+    btn.addEventListener('pointerdown',e=>e.preventDefault());btn.addEventListener('mousedown',e=>e.preventDefault());
+    btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const f=fn;hide();f()});document.body.appendChild(btn)};
+  const save=()=>{if(!sel)return;const {t,z}=sel;sel=null;prog.hl=prog.hl||{};const k=hlId(t);
+    const w=weeks.find(x=>x.id===curId)||{};const qi=z.closest('.qa-item');const q=qi?(qi.querySelector('.qa-q span,.qa-q')||{}).textContent:'';
+    const vh=z.closest('li')&&z.closest('li').querySelector('.vt b,.wb-t b,.vt');
+    prog.hl[k]={t,wid:w.id||'',wt:wbView?'내 단어장':(w.title||''),q:(q||'').replace(/^Q\.\s*/,'').replace(/(접기|펼치기)[▴▾ ]*|삭제/g,'').trim().slice(0,60)||(vh?vh.textContent.trim().slice(0,40):''),at:Date.now()};
+    try{getSelection().removeAllRanges()}catch(_){}saveProg();hlPaint(document.body);hlPatch();
+    toast(hlList().length===1?'🖍 칠했어요 · 맨 위 [⭐ 내 단어장]에서 모아 봐요':'🖍 칠했어요')};
+  document.addEventListener('selectionchange',()=>{const s=getSelection();const t=s&&!s.isCollapsed&&s.rangeCount?(String(s)||s.getRangeAt(0).toString()).replace(/\s+/g,' ').trim():'';
+    if(!t||t.length<2){sel=null;if(btn&&!btn.classList.contains('del'))hide();return}
+    const n=s.anchorNode&&(s.anchorNode.nodeType===1?s.anchorNode:s.anchorNode.parentElement);const z=n&&n.closest(HL_ZONE);
+    const f=s.focusNode&&(s.focusNode.nodeType===1?s.focusNode:s.focusNode.parentElement);
+    if(!z||!f||!z.contains(f)){sel=null;hide();return}
+    sel={t:t.slice(0,400),z};if(!btn||btn.classList.contains('del'))show('🖍 형광펜',null,save)});
+  document.addEventListener('click',e=>{const m=e.target.closest&&e.target.closest('mark.hl');
+    const x=e.target.closest&&e.target.closest('.hl-x');
+    const del=k=>{const e0=(prog.hl||{})[k];if(!e0)return;prog.hl[k]={...e0,off:true,at:Date.now()};saveProg();
+      document.querySelectorAll('mark.hl').forEach(mk=>{if(mk.dataset.hlk===k){mk.replaceWith(...mk.childNodes)}});hlPatch();toast('형광펜을 지웠어요')};
+    if(x){e.preventDefault();e.stopPropagation();del(x.dataset.hlk);return}
+    if(m&&!(getSelection()&&!getSelection().isCollapsed)){const k=m.dataset.hlk;show('형광펜 지우기','del',()=>del(k));return}
+    if(btn&&!(btn.contains(e.target)))hide()},true);
+  document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('hlbox'))hlBoxOpen=e.target.open},true);
+})();
 function wbHtml(){const L=wbList();
   if(!L.length)return `<p class="hint" style="margin-top:10px">단어·숙어 목록에서 표현 옆 <b>☆</b>를 누르면 여기에 모입니다. 주차가 바뀌어도 계속 남아요.</p>`;
   return `<div class="wb"><div class="wb-top"><span>${L.length}개</span><button class="ghost" id="wbHideBtn">${wbHide?'뜻·문장 보기':'뜻·문장 가리기'}</button></div>
