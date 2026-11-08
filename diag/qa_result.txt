@@ -1,4 +1,0 @@
-features: 0.0s {"res":{"ai":true,"tts":true}}
-quiz #1: 0.0s {"res":{"ok":false,"fixed":"I am going to return to work next week.","better":"I'm returning to work next week.","tip":"배운 표현인 'return to work'를 아주 정확하게 잘 활용하셨어요! 다만 문제에 있던 '다음 주에'라는 뜻의 'next week'를 문장 끝에 붙여주시면 완벽합니다. 정말 잘하셨어요! 😊"}}
-quiz #2: 0.0s {"res":{"ok":true,"fixed":"I am going to return to work next week.","better":"I am returning to work next week.","tip":"'다음 주에'라는 시간 표현(next week)만 문장 끝에 붙여주시면 완벽해요! 문법과 'return to work' 활용 모두 정말 잘하셨어요. 진행형(am returning)을 써서 정해진 미래를 나타낼 수도 있답니다."}}
-quiz #3: 0.0s {"res":{"ok":true,"fixed":"I am going to return to work next week.","better":"I'm returning to work next week.","tip":"정답이에요! 'Return to work'를 정확하게 잘 활용하셨어요. 다만 '다음 주에'라는 표현(next week)이 빠져서 문장 끝에 붙여주시면 완벽해요. 추가로, 이미 정해진 일정은 'be -ing' 형태를 써서 'I'm returning to work next week'라고도 자연스럽게 표현할 수 있답니다."}}
