@@ -496,7 +496,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v130</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v131</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -804,6 +804,16 @@ function numVal(words){let total=0,cur=0,ord=false;
   }return {v:total+cur,ord}}
 const ordSuf=n=>{const t=n%100;return t>=11&&t<=13?'th':['th','st','nd','rd'][n%10]||'th'};
 /* 문장 → 토큰 [{t:보이는 글자, k:비교 키}] — 쉼표는 따로 한 토큰(빠지거나 더 쓰면 틀림) */
+/* 줄임말과 풀어 쓴 말은 같은 것으로 채점: I'm = I am, don't = do not, can't = cannot = can not … */
+const CONTR=(()=>{const m={"i'm":'i am',"let's":'let us',"can't":'can not','cannot':'can not',"won't":'will not',"shan't":'shall not',"ain't":'is not'};
+  ['you','we','they'].forEach(p=>m[p+"'re"]=p+' are');
+  ['he','she','it','that','there','what','who','where','here','how'].forEach(p=>m[p+"'s"]=p+' is');
+  ['i','you','we','they','who','would','should','could','might','must'].forEach(p=>m[p+"'ve"]=p+' have');
+  ['i','you','he','she','it','we','they','that','there','who'].forEach(p=>{m[p+"'ll"]=p+' will';m[p+"'d"]=p+' would'});
+  ['do','does','did','is','are','was','were','have','has','had','would','should','could','must','need','might'].forEach(v=>m[v+"n't"]=v+' not');
+  return m})();
+const CONTR_PAIRS=new Set(Object.values(CONTR));
+const coreOf=w=>String(w||'').toLowerCase().replace(/[’‘]/g,"'").replace(/^[^a-z0-9']+|[^a-z0-9']+$/g,'');
 function tokenize(text){
   const raw=[];
   for(let w of (text||'').trim().split(/\s+/).filter(Boolean)){
@@ -839,6 +849,14 @@ function tokenize(text){
       const {v,ord}=numVal(ws);let pc=false;
       if(/^percent\b/i.test(raw[j]||'')){grp.push(raw[j]);j++;pc=true}
       out.push({t:grp.join(' '),k:'#'+v+(ord?'o':'')+(pc?'%':'')});i=j-1;continue}
+    {const c=coreOf(w);
+      if(CONTR[c]){out.push({t:w,k:'~'+CONTR[c].replace(' ','_')});continue}
+      const nx=raw[i+1];
+      if(nx&&nx!==','&&!/[.!?;:]$/.test(w)){const pair=c+' '+coreOf(nx);if(CONTR_PAIRS.has(pair)){out.push({t:w+' '+nx,k:'~'+pair.replace(' ','_')});i++;continue}}}
+    /* 14-month-old = fourteen-month-old: 하이픈 낱말 속 숫자 단어를 숫자로 */
+    if(/-/.test(core)){const ps=core.split('-');let k=0;const nums=[];while(k<ps.length&&isNumWord(ps[k])){nums.push(ps[k]);k++}
+      if(nums.length&&k<ps.length){const {v}=numVal(nums);out.push({t:w,k:v+ps.slice(k).join('')});continue}
+      if(/^[0-9]+$/.test(ps[0])&&ps.length>1){out.push({t:w,k:ps[0]+ps.slice(1).join('')});continue}}
     out.push({t:w,k:normTok(w)});
   }
   return out.filter(o=>o.k);
