@@ -1,21 +1,21 @@
 import json, time, urllib.request, re
 api = re.search(r'https://script[^"]+', open('config.js').read()).group(0)
-out = []
 def call(fn, *args):
     t = time.time()
     try:
         req = urllib.request.Request(api, data=json.dumps({'fn': fn, 'args': list(args)}).encode(), headers={'Content-Type': 'text/plain;charset=utf-8'})
-        r = urllib.request.urlopen(req, timeout=180).read().decode()
-        return f'{time.time()-t:.1f}s ' + r[:300]
+        return f'{time.time()-t:.1f}s ' + urllib.request.urlopen(req, timeout=180).read().decode()[:1500]
     except Exception as e:
-        return f'{time.time()-t:.1f}s EXC ' + repr(e)[:200]
-out.append('features: ' + call('features'))
-out.append('aiText short: ' + call('aiText', 'Say OK in one word.'))
-p = '''너는 영어 강사다. [지문 문장] At the forest we can enjoy forest activities and go on walks. [설명할 표현] go on walks [간단한 뜻] 산책을 가다
-core, usage, examples(en,ko 3개), similar(t,m 3개), tip 키를 가진 JSON으로 한국어로 자세히 답한다.'''
-EX = ''
-long = p + "\n\n[좋은 답의 예시]\n" + EX + "\n위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태로만 답한다."
-for k in range(2):
-    out.append(f'aiJson short #{k+1}: ' + call('aiJson', p))
-out.append('aiJson real-length: ' + call('aiJson', long))
-open('diag/qa_result.txt', 'w').write('\n'.join(out))
+        return 'EXC ' + repr(e)[:200]
+lst = [{"n":0,"en":"Just before returning to work, we also spent two weeks living in Jeju Island.","ko":"복직 직전에는 제주도에서 두 달이 아니라 두 주 동안 살기도 했다."},
+       {"n":1,"en":"I had postpartum depression.","ko":"나는 산후우울증을 겪었다."}]
+prompt = '''너는 꼼꼼한 영한 번역 검수자다. 아래는 영어 원문과 한국어 해석 쌍이다.
+해석이 다음 중 하나에 해당하는 것만 골라 고친다.
+- 원문에 없는 내용(대조 '~이 아니라', 강조, 추측, 부연 설명)을 덧붙임
+- 원문의 내용 일부를 빠뜨림
+- 뜻·숫자·기간·시제·주어를 잘못 옮김
+- 한국어로 매우 어색함
+문제없는 항목은 답에 넣지 않는다. 고칠 때는 원문 뜻 그대로 자연스러운 한국어 한 문장으로.
+''' + json.dumps(lst, ensure_ascii=False) + '''
+{"fix":[{"n":번호,"ko":"고친 해석","why":"짧은 이유"}]} 형태의 JSON으로만 답한다. 고칠 것이 없으면 {"fix":[]}.'''
+open('diag/qa_result.txt', 'w').write('koCheck: ' + call('aiJson', prompt))
