@@ -507,7 +507,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v133</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v134</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1620,7 +1620,12 @@ document.addEventListener('click',async e=>{
       return}
     openDet.add(k);openVoc.add(i);
     const v=w.sentences[i].vocab[j];
+    /* 자세히를 누른 단어 줄이 화면에서 같은 자리에 그대로 있게: 카드를 다시 그리면 브라우저가 아래쪽 내용을 기준으로
+       화면을 맞춰 설명 끝(접기)으로 밀려 내려가던 문제 방지 */
+    const y0=t.getBoundingClientRect().top;
     if((!v.detail||!v.detail.usage||!v.detail.core)&&!detBusy[k])loadDetail(w,i,j,k);else renderCard(i);
+    const pin=()=>{const el=document.querySelector(`.vmore[data-k="${k}"]:not(.vfold)`);if(!el)return;const d=el.getBoundingClientRect().top-y0;if(Math.abs(d)>2)window.scrollBy(0,d)};
+    pin();requestAnimationFrame(pin);setTimeout(pin,120);
     return}
   if(t.classList.contains('vplay')){stop();speak(cleanTerm(t.dataset.t)||t.dataset.t,0.9,t.dataset.a||'');return}
   if(t.id==='todoGo'){
