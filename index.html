@@ -510,7 +510,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v135</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v136</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1534,6 +1534,7 @@ async function prefetchDetails(){
       if(document.visibilityState!=='visible'||!sample||readOnly||!(window.__features||{}).ai)break;
       const w=weeks.find(x=>x.id===curId);if(!w)break;
       if(missing0(w)){if(!autoTried[w.id])await autoEnrich(w);break}
+      if(!w.koChk&&!koTried[w.id]&&canWrite){await koCheck(w);continue}
       const today=(()=>{try{const d=plan(w),v=todayView(w);return v&&v[0]==='d'?(d[+v.slice(1)]||[]):[]}catch(_){return []}})();
       const order=[...new Set([...today,...w.sentences.map((_,i)=>i)])];
       let job=null;
@@ -1790,7 +1791,7 @@ async function enrich(sentences,onStatus){
   if(!sample)throw {code:'unavailable'};
   const prompt=`다음은 한국인 성인 학습자가 일주일 동안 암기할 영어 지문의 문장 목록(JSON 배열, 순서대로)이다.
 각 문장마다:
-- "ko": 자연스러운 한국어 해석 한 문장
+- "ko": 자연스러운 한국어 해석 한 문장. 원문에 있는 뜻만 옮긴다. 원문에 없는 대조('~이 아니라'), 강조, 추측, 설명을 덧붙이지 않고, 원문의 내용을 빼지도 않는다. 숫자·기간·고유명사는 원문 그대로.
 - "vocab": 외워야 할 핵심 단어·숙어·문법 패턴 2~6개. 각 항목은 {"t": 영어 표현(문형이면 '사역동사 make + 사람 + 동사원형'처럼 써도 됨), "m": 한국어 뜻과 필요한 경우 괄호 안 짧은 설명}
 첫 항목이 제목이면 제목도 똑같이 처리한다. 입력과 같은 순서, 같은 개수로 답한다.
 Reply with only JSON in this shape: {"items":[{"ko":"...","vocab":[{"t":"...","m":"..."}]}]}
@@ -1842,6 +1843,29 @@ async function regenCore(w,onStatus){
 }
 /* 새 주차 저장 때 AI 정리가 실패해 해석·단어가 비어 있으면, 그 주차를 여는 멤버 기기에서 한 번 자동으로 다시 정리 */
 const autoTried={};
+/* 해석 점검: 주차마다 한 번, 영어 원문과 한국어 해석을 대조해 원문에 없는 말을 덧붙였거나(예: '두 달이 아니라 두 주')
+   빠뜨리거나 뜻이 틀린 해석만 고쳐 저장 → 모든 멤버에게 고친 해석이 보임 */
+const koTried={};
+async function koCheck(w){
+  koTried[w.id]=1;const list=w.sentences.map((x,n)=>({n,en:x.en,ko:x.ko||''})).filter(x=>x.en&&x.ko);if(!list.length)return;
+  const prompt=`너는 꼼꼼한 영한 번역 검수자다. 아래는 영어 원문과 한국어 해석 쌍이다.
+해석이 다음 중 하나에 해당하는 것만 골라 고친다.
+- 원문에 없는 내용(대조 '~이 아니라', 강조, 추측, 부연 설명)을 덧붙임
+- 원문의 내용 일부를 빠뜨림
+- 뜻·숫자·기간·시제·주어를 잘못 옮김
+- 한국어로 매우 어색함
+문제없는 항목은 답에 넣지 않는다. 고칠 때는 원문 뜻 그대로 자연스러운 한국어 한 문장으로.
+${JSON.stringify(list)}
+{"fix":[{"n":번호,"ko":"고친 해석","why":"짧은 이유"}]} 형태의 JSON으로만 답한다. 고칠 것이 없으면 {"fix":[]}.`;
+  try{const r=await sample.json(prompt,{modelTier:'default'});const fx=(r&&Array.isArray(r.fix))?r.fix:[];
+    const cur=weeks.find(y=>y.id===w.id)||w;const changed=[];
+    fx.forEach(o=>{const n=+o.n,ko=String(o.ko||'').trim();if(!ko||!cur.sentences[n]||ko===cur.sentences[n].ko)return;
+      [w,cur].forEach(y=>{if(y.sentences[n])y.sentences[n].ko=ko});changed.push(n)});
+    w.koChk=cur.koChk=Date.now();
+    try{await db.doc('weeks/'+w.id).update({sentences:JSON.parse(JSON.stringify(cur.sentences)),koChk:w.koChk})}catch(e){}
+    if(w.id===curId&&!wbView)changed.forEach(n=>{if(document.getElementById('c'+n))renderCard(n)});
+  }catch(e){}
+}
 async function autoEnrich(w){
   if(!w||!missing0(w)||autoTried[w.id]||!sample||readOnly||!canWrite||!(window.__features||{}).ai)return;
   autoTried[w.id]=1;
