@@ -496,7 +496,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v131</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v132</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1036,6 +1036,14 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
     const r=t.getBoundingClientRect(),d=r.bottom-(H0*ratio-12);
     if(Math.abs(d)>8&&r.top-d>8)window.scrollBy(0,d)},true);
 })();
+/* 쓰는 중(키보드가 올라온 상태)에 같은 카드의 듣기·천천히·영어 보기·다시 쓰기·외움을 눌러도 키보드가 내려가지 않게
+   → 키보드가 내려가며 화면 크기가 바뀌어 화면이 움직이던 문제 방지 (접기·채점은 원래대로 키보드를 내림) */
+(function(){const keep=e=>{const a=document.activeElement;if(!a||a.tagName!=='TEXTAREA')return;
+  const b=e.target.closest&&e.target.closest('button');if(!b)return;
+  if(b.classList.contains('write')||b.classList.contains('wr-check'))return;
+  const card=a.closest('li.card,.seq,.d-quiz,.qa,.mock');const inCard=card&&card.contains(b);const inDock=b.closest('.dock');
+  if(inCard||inDock)e.preventDefault()};
+  document.addEventListener('pointerdown',keep,true);document.addEventListener('mousedown',keep,true)})();
 document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))setTimeout(()=>{const a=document.activeElement;if(!(a&&a.matches&&a.matches('textarea,.qa-form input')))document.body.classList.remove('typing')},150)});
 document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWith('wr-'))writeDraft[curId+'|'+el.dataset.i]=el.value});
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
