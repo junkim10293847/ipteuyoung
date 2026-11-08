@@ -510,7 +510,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v137</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v138</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1219,10 +1219,14 @@ const qaLive={}, qaDraft={}, qaJust={}, qaOpen=new Set(), qaItem={};
 /* 답 끝의 '확인 퀴즈'에 바로 써서 첨삭 받기 */
 const qzBusy={};
 function qzText(a){const m=String(a||'').match(/확인\s*퀴즈\s*[:：]\s*([^\n]+)/);return m?m[1].trim():''}
-function qzHtml(x,key,i){const q=qzText(x.a);if(!q)return '';const z=x.qz,b=qzBusy[key+'#'+i];
+/* 첨삭 버튼: 기다리는 중에는 '첨삭 중… N초', 12초가 지나면 다시 누를 수 있게 풀어 둠 (휴대폰 연결이 멈춰도 갇히지 않게) */
+const BUSY_RETRY=12000;
+const busyBtn=(b,label)=>{if(!b)return {dis:'',txt:label};const sec=Math.round((Date.now()-b)/1000);return Date.now()-b<BUSY_RETRY?{dis:' disabled',txt:`첨삭 중… ${sec}초`}:{dis:'',txt:`첨삭 중… ${sec}초 · 다시 누르기`}};
+setInterval(()=>{document.querySelectorAll('[data-busy0]').forEach(el=>{const b=+el.dataset.busy0,r=busyBtn(b,'');el.textContent=r.txt;el.disabled=!!r.dis})},1000);
+function qzHtml(x,key,i){const q=qzText(x.a);if(!q)return '';const z=x.qz,b=qzBusy[key+'#'+i],bb=busyBtn(b,'첨삭 받기');
   return `<div class="qz"><div class="qz-h">✏️ 확인 퀴즈 풀기</div>
     <input class="qz-in" id="qz-${i}" data-qk="${esc(key)}" data-i="${i}" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" placeholder="여기에 영어로 써 보세요" value="${esc(z&&z.u||'')}">
-    <div class="seq-act">${micBtn('qz-'+i)}<button type="button" class="primary qz-go" data-qk="${esc(key)}" data-i="${i}"${b?' disabled':''}>${b?'첨삭 중…':'첨삭 받기'}</button>${z?`<button type="button" class="ghost qz-re" data-qk="${esc(key)}" data-i="${i}">↺ 다시 하기</button>`:''}</div>
+    <div class="seq-act">${micBtn('qz-'+i)}<button type="button" class="primary qz-go" data-qk="${esc(key)}" data-i="${i}"${bb.dis}${b?` data-busy0="${b}"`:''}>${bb.txt}</button>${z?`<button type="button" class="ghost qz-re" data-qk="${esc(key)}" data-i="${i}">↺ 다시 하기</button>`:''}</div>
     ${z&&z.err?`<p class="load">${esc(z.err)}</p>`:''}
     ${z&&z.fixed?`<div class="seq-r ${z.ok?'ok':''}"><b>${z.ok?'✅ 맞았어요':'✏️ 이렇게 고쳐 보세요'}</b>${z.ok?`<div class="wr-diff">${esc(z.fixed)}</div>`:diffHtml(gradeText(z.fixed,z.u))}${z.better&&z.better!==z.fixed?`<em>더 자연스럽게: ${esc(z.better)}</em>`:''}${z.tip?`<em>${esc(z.tip)}</em>`:''}</div>`:''}
   </div>`}
@@ -1233,7 +1237,7 @@ document.addEventListener('click',async e=>{
     if(zq.classList.contains('qz-re')){delete x.qz;saveProg();qaRe(zq);return}
     const inp=zq.closest('.qz').querySelector('.qz-in'),u=(inp?inp.value:'').trim();if(!u){toast('먼저 써 보거나 🎤로 말해 보세요');return}
     if(!sample){x.qz={u,err:'AI 기능이 켜져 있어야 첨삭할 수 있어요.'};qaRe(zq);return}
-    micStop();qzBusy[k+'#'+i]=1;x.qz={u};qaRe(zq);
+    micStop();const myT=Date.now();qzBusy[k+'#'+i]=myT;x.qz={u};qaRe(zq);
     const prompt=`너는 한국인 초보 영어 학습자를 다정하게 가르치는 영어 강사다.
 앞서 학습자가 한 질문: ${x.q}
 그에 대한 설명 끝에 낸 확인 퀴즈: ${qzText(x.a)}
@@ -1249,7 +1253,8 @@ JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
     try{const j=await sample.json(prompt,{modelTier:'default',limit:50000});const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
       x.qz={u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};fresh=x.qz.ok}
     catch(err){x.qz={u,err:err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':err&&err.code==='network'?'답이 늦어 멈췄어요. [첨삭 받기]를 다시 눌러 주세요.':'첨삭을 받지 못했습니다. 다시 눌러 주세요.'}}
-    delete qzBusy[k+'#'+i];saveProg();
+    if(qzBusy[k+'#'+i]!==myT)return;   /* 그사이 다시 눌렀으면 이 늦은 답은 버림 */
+    delete qzBusy[k+'#'+i];try{saveProg()}catch(_){}
     const host=document.querySelector(`.qz-go[data-qk="${CSS.escape(k)}"][data-i="${i}"]`)||document.querySelector(`.qa[data-k]`);
     if(host){const q=host.closest('.qa');if(q){q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)}}
     if(fresh){const rb=document.querySelector(`.qz-in[data-qk="${CSS.escape(k)}"][data-i="${i}"]`);const box=rb&&rb.closest('.qz').querySelector('.seq-r');if(box)celebrateBox(box)}
@@ -1371,7 +1376,7 @@ function dqHtml(k){const L=dqLoc(k);if(!L||!L.v.detail)return '';const q=L.v.det
   if(!q)return `<div class="d-quiz"><h4>확인 퀴즈</h4>${dqErr[L.key]?`<p class="load">${esc(dqErr[L.key])}</p>`:''}<button type="button" class="ghost dq-make" data-dk="${esc(k)}"${b?' disabled':''}>${b?'퀴즈 만드는 중…':'✏️ 이 표현으로 확인 퀴즈 풀기'}</button></div>`;
   return `<div class="d-quiz"><h4>확인 퀴즈</h4><p>${esc(q)}</p>
     <input class="qz-in" id="${id}" data-dk="${esc(k)}" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" placeholder="여기에 영어로 써 보세요" value="${esc(z&&z.u||'')}">
-    <div class="seq-act">${micBtn(id)}<button type="button" class="primary dq-go" data-dk="${esc(k)}"${b?' disabled':''}>${b?'첨삭 중…':'첨삭 받기'}</button>${z?`<button type="button" class="ghost dq-re" data-dk="${esc(k)}">↺ 다시 하기</button>`:''}</div>
+    <div class="seq-act">${micBtn(id)}${(()=>{const bb=busyBtn(b,'첨삭 받기');return `<button type="button" class="primary dq-go" data-dk="${esc(k)}"${bb.dis}${b?` data-busy0="${b}"`:''}>${bb.txt}</button>`})()}${z?`<button type="button" class="ghost dq-re" data-dk="${esc(k)}">↺ 다시 하기</button>`:''}</div>
     ${z&&z.err?`<p class="load">${esc(z.err)}</p>`:''}
     ${z&&z.fixed?`<div class="seq-r ${z.ok?'ok':''}"><b>${z.ok?'✅ 맞았어요':'✏️ 이렇게 고쳐 보세요'}</b>${z.ok?`<div class="wr-diff">${esc(z.fixed)}</div>`:diffHtml(gradeText(z.fixed,z.u))}${z.better&&z.better!==z.fixed?`<em>더 자연스럽게: ${esc(z.better)}</em>`:''}${z.tip?`<em>${esc(z.tip)}</em>`:''}</div>`:''}
     ${z&&!z.ok&&L.v.detail.quizAns?`<details class="dq-ans"><summary>모범 답 보기</summary>${esc(L.v.detail.quizAns)}</details>`:''}
@@ -1396,7 +1401,7 @@ JSON만: {"quiz":"...","answer":"..."}`,{modelTier:'default',limit:50000});
     }catch(err){dqErr[L.key]='퀴즈를 만들지 못했어요. 다시 눌러 주세요.'}
     delete dqBusy[L.key];dqRefresh(k);return}
   const inp=t.closest('.d-quiz').querySelector('.qz-in'),u=(inp?inp.value:'').trim();if(!u){toast('먼저 써 보거나 🎤로 말해 보세요');return}
-  micStop();dqBusy[L.key]=1;prog.dq[L.key]={u};dqRefresh(k);let ok=false;
+  micStop();const myT=Date.now();dqBusy[L.key]=myT;prog.dq[L.key]={u};dqRefresh(k);let ok=false;
   try{const j=await sample.json(`너는 한국인 초보 영어 학습자를 다정하게 가르치는 영어 강사다.
 [외운 표현] ${L.v.t} — ${L.v.m||''}
 [확인 퀴즈] ${L.v.detail.quiz}
@@ -1408,7 +1413,8 @@ JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'defau
     const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
     prog.dq[L.key]={u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};ok=!!j.ok}
   catch(err){prog.dq[L.key]={u,err:err&&err.code==='network'?'답이 늦어 멈췄어요. [첨삭 받기]를 다시 눌러 주세요.':'첨삭을 받지 못했어요. 다시 눌러 주세요.'}}
-  delete dqBusy[L.key];saveProg();dqRefresh(k);
+  if(dqBusy[L.key]!==myT)return;   /* 그사이 다시 눌렀으면 이 늦은 답은 버림 */
+  delete dqBusy[L.key];try{saveProg()}catch(_){}dqRefresh(k);
   if(ok){const el=document.querySelector(`.dq-go[data-dk="${CSS.escape(k)}"]`);const box=el&&el.closest('.d-quiz').querySelector('.seq-r');if(box)celebrateBox(box)}
 },true);
 function detHtml(d,k,wb,wbQ){
