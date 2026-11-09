@@ -54,6 +54,10 @@ html{font-size:16px}
 .todo.done{border-color:var(--done)}.todo.done .todo-h b{color:var(--done)}
 .brand{display:flex;align-items:center;gap:12px;padding:6px 0 14px;margin-bottom:12px;border-bottom:2px solid var(--accent-soft)}
 .brand-mark{flex:none;width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.7rem;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+/* 입트영·귀트영 고르기: 고른 쪽은 꽉 찬 동그라미, 다른 쪽은 작은 테두리 동그라미 */
+.progsw{display:flex;align-items:center;gap:6px;flex:none}
+.progsw .brand-mark{border:0;padding:0;cursor:pointer;font:inherit;font-family:var(--display);font-weight:800;font-size:1.7rem;transition:all .15s}
+.progsw .brand-mark[aria-pressed="false"]{width:38px;height:38px;font-size:1.15rem;background:var(--surface);color:var(--accent);border:2px solid var(--accent);box-shadow:none;opacity:.85}
 .brand-t{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,7vw,2.6rem);line-height:1.1;color:var(--accent);letter-spacing:-.01em}
 .gate-brand{margin-bottom:18px}
 .brand-s{color:var(--muted);font-size:.84rem;margin-top:3px;text-wrap:balance}
@@ -483,13 +487,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <header class="brand"><span class="brand-mark" aria-hidden="true">입</span><div><div class="brand-t">입트영 스터디</div><div class="brand-s">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div></header>
+  <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div></header>
   <div class="install-slot"></div>
   <div class="who" id="who" hidden>👤 <b id="whoName"></b><button id="addBtn" class="who-add" type="button" hidden>+ 새 주차</button><button id="nickChange" type="button">닉네임 변경</button></div>
   <div class="weeks scroller"><div class="row" id="weekRow"></div></div>
 
   <section class="panel" id="addPanel" hidden>
-    <h2>새 주차 추가</h2>
+    <h2><span id="addProg">입트영</span> 새 주차 추가</h2>
     <label for="fTitle">지문 제목<input id="fTitle" placeholder="예: Rice in a Pot"></label>
     <label for="fDate">테스트하는 토요일 (배정받은 다음 주 토요일)<input id="fDate" type="date"></label>
     <label for="fText">영어 지문 (그대로 붙여넣기)<textarea id="fText" placeholder="첫 줄이 제목이면 자동으로 제목으로 인식합니다.&#10;문장은 마침표·물음표·느낌표 기준으로 자동 분리됩니다."></textarea></label>
@@ -510,7 +514,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v138</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v139</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -667,6 +671,17 @@ let mcp=null, downloads=null, db=null, sample=null, weeks=[], curId=null, view=n
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+/* 입트영·귀트영: 같은 구조, 주차만 따로. 귀트영 주차는 prog:'gtv' 표시 + 저장 번호를 그 주 일요일 날짜로(입트영은 월요일) 해서 겹치지 않게 */
+const PROGS={ipt:{mark:'입',t:'입트영 스터디',s:'EBS 입이 트이는 영어 · 듣고 쓰고 외우기',doc:'입트영 주간 암기'},gtv:{mark:'귀',t:'귀트영 스터디',s:'EBS 귀가 트이는 영어 · 듣고 쓰고 외우기',doc:'귀트영 주간 암기'}};
+let curProg=PROGS[ls.get('prog','ipt')]?ls.get('prog','ipt'):'ipt', allWeeks=[];
+const progOf=w=>w&&w.prog==='gtv'?'gtv':'ipt';
+const weekIdFor=mon=>curProg==='gtv'?ymd(addDays(parse(mon),-1)):mon;
+const lastKey=()=>curProg==='gtv'?'lastWeekGtv':'lastWeek';
+const otherProg=wid=>{const w=allWeeks.find(x=>x.id===wid);return !!w&&progOf(w)!==curProg};
+function renderBrand(){const P=PROGS[curProg];const t=$('brandT'),sb=$('brandS'),ap=$('addProg');if(ap)ap.textContent=P.t.replace(' 스터디','');if(t)t.textContent=P.t;if(sb)sb.textContent=P.s;document.title=P.doc;
+  document.querySelectorAll('#progSw .brand-mark').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.prog===curProg)));
+  /* 고른 쪽 동그라미가 앞(왼쪽)에 오게 */
+  const sw=$('progSw'),a=sw&&sw.querySelector(`[data-prog="${curProg}"]`);if(sw&&a&&sw.firstElementChild!==a)sw.insertBefore(a,sw.firstElementChild)}
 
 /* ---------- dates ---------- */
 const pad=n=>String(n).padStart(2,'0');
@@ -714,7 +729,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 const wbKey=t=>String(t||'').trim().toLowerCase().replace(/\s+/g,' ');
 function mergeWb(a,b){const o={...(a||{})};Object.entries(b||{}).forEach(([k,v])=>{if(!o[k]||(v&&v.at||0)>=(o[k].at||0))o[k]=v});return o}
 const wbHas=t=>{const e=(prog.wb||{})[wbKey(t)];return !!(e&&!e.off)};
-const wbList=()=>Object.values(prog.wb||{}).filter(e=>e&&!e.off).sort((a,b)=>b.at-a.at);
+const wbList=()=>Object.values(prog.wb||{}).filter(e=>e&&!e.off&&!otherProg(e.wid)).sort((a,b)=>b.at-a.at);
 /* 한 주 문장을 모두 외우면(✓ 외움 전부) 한 번만 특별 축하 화면 */
 function checkWeekDone(){try{
   const w=weeks.find(x=>x.id===curId);if(!w)return;prog.cel=prog.cel||{};if(prog.cel[w.id])return;
@@ -803,6 +818,17 @@ const mdw=d=>`${md(d)}(${WD[d.getDay()]})`;
 function numLabel(w,i){const s=w.sentences;if(s[i].isTitle)return 'T';return s[0]?.isTitle?i:i+1}
 
 /* ---------- render ---------- */
+/* 입·귀 동그라미를 누르면 입트영 ↔ 귀트영 전환 (각자 마지막으로 보던 주차로) */
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#progSw .brand-mark');if(!b)return;e.preventDefault();
+  const p=b.dataset.prog;if(!PROGS[p]||p===curProg)return;
+  try{stop()}catch(_){}{const la=$('longAudio');if(la)la.pause()}
+  wbView=false;writeOpen.clear();revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};try{openDet.clear();openVoc.clear()}catch(_){}
+  curProg=p;ls.set('prog',p);weeks=allWeeks.filter(w=>progOf(w)===curProg);
+  const last=ls.get(lastKey(),null),thisMon=weekIdFor(ymd(mondayOf(today())));
+  curId=(weeks.find(w=>w.id===last)||weeks.find(w=>w.id===thisMon)||weeks[0]||{}).id||null;
+  view=curId?todayView(weeks.find(w=>w.id===curId)):null;
+  $('addPanel').hidden=true;renderBrand();full();window.scrollTo(0,0);
+  toast(PROGS[p].t.replace(' 스터디','')+(weeks.length?'로 바꿨어요':' — 아직 주차가 없어요. [+ 새 주차]로 지문을 올려 주세요'))});
 function renderWeeks(){
   $('weekRow').innerHTML=`<button class="chip wbchip" id="wbChip" aria-pressed="${wbView}">⭐ 내 단어장${wbList().length?` <b>${wbList().length}</b>`:''}</button>`+weeks.map(w=>`<button class="chip" data-week="${esc(w.id)}" aria-pressed="${!wbView&&w.id===curId}" title="${md(studyOf(w))} 테스트">${esc(w.title)}</button>`).join('')+'';{const ab=$('addBtn');if(ab)ab.hidden=!canWrite}
 }
@@ -1209,7 +1235,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    </div></details>`:''}`;
 }
 function stay(i,fn,after){const id=typeof i==='string'?i:'c'+i;const c=$(id);const top=c?c.getBoundingClientRect().top:null;const a=document.activeElement;if(a&&a.blur&&a!==document.body)a.blur();fn();const fix=()=>{const n=$(id);if(n&&top!=null){const d=n.getBoundingClientRect().top-top;if(Math.abs(d)>1)window.scrollBy(0,d)}};fix();requestAnimationFrame(fix);setTimeout(()=>{fix();if(after)after()},350);setTimeout(fix,700)}
-function full(){renderWeeks();render();if(typeof prefetchDetails==='function')prefetchDetails()}
+function full(){renderBrand();renderWeeks();render();if(typeof prefetchDetails==='function')prefetchDetails()}
 const missing0=w=>w.sentences.some(x=>!x.ko);
 /* 단어·숙어 '자세히': Claude가 핵심 의미·쓰임·예문·비슷한 표현·팁을 만들고 주차 데이터에 저장 */
 const openVoc=new Set(), openDet=new Set(), detBusy={}, detErr={};
@@ -1655,7 +1681,7 @@ document.addEventListener('click',async e=>{
   if(ps){const w0=weeks.find(x=>x.id===curId);if(!w0)return;const sl=window.getSelection();if(sl&&!sl.isCollapsed)return;const j=+ps.dataset.ps;stop();const my=token;document.querySelectorAll('.ps.on').forEach(x=>x.classList.remove('on'));ps.classList.add('on');await playOne(w0.sentences[j],j,+$('rate').value,my,true);ps.classList.remove('on');if(my===token)hl(null);return}
   const t=e.target.closest('button,.en'); if(!t)return;
   const w=weeks.find(x=>x.id===curId);
-  if(t.dataset.week){stop();wbView=false;writeOpen.clear();{const la=$('longAudio');if(la)la.pause()}revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set('lastWeek',curId);$('addPanel').hidden=true;full();return}
+  if(t.dataset.week){stop();wbView=false;writeOpen.clear();{const la=$('longAudio');if(la)la.pause()}revealed.clear();hiddenEn.clear();doneSeen.clear();hideSeed={};curId=t.dataset.week;view=todayView(weeks.find(x=>x.id===curId));ls.set(lastKey(),curId);$('addPanel').hidden=true;full();return}
   if(t.id==='addBtn'){openAdd();return}
   if(t.dataset.view){stop();view=view===t.dataset.view&&t.dataset.view==='all'?todayView(w):t.dataset.view;render();return}
   if(t.dataset.pace){stop();prog.pace[w.id]=t.dataset.pace;saveProg();view=todayView(w);render();return}
@@ -1824,8 +1850,8 @@ $('fSave').onclick=async()=>{
   if(!date){st.textContent='스터디 토요일을 선택해 주세요.';st.className='status err';return}
   if(!db){st.textContent='저장소에 연결되지 않아 저장할 수 없습니다.';st.className='status err';return}
   const pd=parse(date); if(pd.getDay()!==6){st.textContent='스터디 날짜는 토요일로 선택해 주세요.';st.className='status err';return}
-  const mon=ymd(addDays(pd,-5));
-  const ex=weeks.find(x=>x.id===mon);
+  const mon=ymd(addDays(pd,-5)),wid=weekIdFor(mon);
+  const ex=allWeeks.find(x=>x.id===wid);
   if(ex&&!confirm(`${pd.getMonth()+1}/${pd.getDate()} 테스트 주차에는 이미 "${ex.title}" 지문이 있어요.\n\n덮어쓰면 그 지문과 음성은 사라집니다. 정말 바꿀까요?\n(새 지문이면 '취소'를 누르고 다음 주 토요일을 고르세요)`)){st.textContent='날짜를 다시 골라 주세요.';st.className='status err';return}
   const {title,sentences}=splitText(raw,$('fTitle').value);
   btn.disabled=true;st.className='status';
@@ -1833,14 +1859,14 @@ $('fSave').onclick=async()=>{
   try{final=await enrich(sentences,m=>st.textContent=m)}catch(e){note=' '+errCopy(e.code)}
   try{
     st.textContent='저장하는 중…';
-    const rec={title,monday:mon,sentences:final,updated:Date.now()};if(me)rec.addedBy=me;if(nick)rec.addedByName=nick;
-    await db.doc('weeks/'+mon).set(rec);
-    curId=mon;view=todayView(rec);ls.set('lastWeek',mon);
+    const rec={title,monday:mon,sentences:final,updated:Date.now()};if(curProg==='gtv')rec.prog='gtv';if(me)rec.addedBy=me;if(nick)rec.addedByName=nick;
+    await db.doc('weeks/'+wid).set(rec);
+    curId=wid;view=todayView(rec);ls.set(lastKey(),wid);
     $('fText').value='';$('fTitle').value='';$('fDate').value='';
     $('addPanel').hidden=true; st.textContent='';
     full();
     if(note){$('wStatus').textContent='저장했습니다.'+note;$('wStatus').className='status err'}
-    else requestAudio({id:mon,title},$('wStatus'));
+    else requestAudio({id:wid,title},$('wStatus'));
   }catch(e){st.textContent=e.code==='quota_exceeded'?'저장 공간이 가득 찼습니다. 오래된 주차를 삭제해 주세요.':'저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';st.className='status err'}
   finally{btn.disabled=false}
 };
@@ -2279,7 +2305,7 @@ function wbLoc(e){const k=wbKey(e.t),ws=[weeks.find(x=>x.id===e.wid),...weeks].f
 /* 🖍 형광펜: 설명(자세히·질문 답변) 글을 손가락으로 선택 → [🖍 형광펜] 누르면 칠해지고 단어장 화면 맨 위에 모임
    칠한 곳을 누르면 [형광펜 지우기]. 기록은 prog.hl {id:{t,wid,wt,at,off?}} 로 서버에 저장 */
 const HL_ZONE='.qa-a,.vdet,.qz,.hl-zone';
-const hlList=()=>Object.values(prog.hl||{}).filter(e=>e&&!e.off&&e.t).sort((a,b)=>b.at-a.at);
+const hlList=()=>Object.values(prog.hl||{}).filter(e=>e&&!e.off&&e.t&&!otherProg(e.wid)).sort((a,b)=>b.at-a.at);
 const hlId=t=>wbKey(t.replace(/\s+/g,' ').trim().slice(0,120));
 function hlHtml(){const L=hlList();if(!L.length)return '';
   return `<details class="hlbox"${hlBoxOpen?' open':''}><summary>🖍 형광펜 모음 <b>${L.length}</b></summary><ul class="hl-list">${L.map(e=>`<li><span class="hl-t">${esc(e.t)}</span><button class="hl-x" data-hlk="${esc(hlId(e.t))}">지우기</button><span class="hl-m">${esc(e.wt||'')}${e.q?' · '+esc(e.q):''}</span></li>`).join('')}</ul></details>`}
@@ -2425,10 +2451,10 @@ function reconcileProg(){
 function applyWeeks(list){
   const nw=list.filter(w=>w.monday&&Array.isArray(w.sentences));
   /* 내용이 화면과 같으면(내가 방금 저장한 것 등) 다시 그리지 않음 → 화면 튐 방지 */
-  try{if(loaded&&!dbFailed&&JSON.stringify(nw)===JSON.stringify(weeks)){weeks=nw;return}}catch(_){}
-  weeks=nw;loaded=true;dbFailed=false;reconcileProg();try{window.__weekTitles=Object.fromEntries(nw.map(w=>[w.id,w.title]))}catch(_){}
+  try{if(loaded&&!dbFailed&&JSON.stringify(nw)===JSON.stringify(allWeeks)){allWeeks=nw;weeks=nw.filter(w=>progOf(w)===curProg);return}}catch(_){}
+  allWeeks=nw;weeks=nw.filter(w=>progOf(w)===curProg);loaded=true;dbFailed=false;reconcileProg();try{window.__weekTitles=Object.fromEntries(nw.map(w=>[w.id,w.title]))}catch(_){}
   if(!weeks.find(w=>w.id===curId)){
-    const last=ls.get('lastWeek',null), thisMon=ymd(mondayOf(today()));
+    const last=ls.get(lastKey(),null), thisMon=weekIdFor(ymd(mondayOf(today())));
     curId=(weeks.find(w=>w.id===last)||weeks.find(w=>w.id===thisMon)||weeks[0]||{}).id||null;
     view=curId?todayView(weeks.find(w=>w.id===curId)):null;
   }
