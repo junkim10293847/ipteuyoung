@@ -8,6 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="입트영">
 <meta name="theme-color" content="#1f7a80">
+<script>try{if(JSON.parse(localStorage.getItem('prog')||'"ipt"')==='gtv'){document.documentElement.dataset.prog='gtv';document.querySelector('meta[name=theme-color]').content='#5146a8'}}catch(e){}</script>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -29,6 +30,13 @@
 :root[data-theme="dark"]{
   --bg:#111a1b; --surface:#192526; --fg:#e4eef0; --muted:#93a8ab; --line:#283a3c;
   --accent:#5cc1c6; --accent-soft:#1b3537; --done:#f0aa4a; --done-soft:#3a2d1a; --warn:#e78a72; color-scheme:dark}
+/* 귀트영: 보라(인디고) 계열로 구분 — 입트영(청록)과 한눈에 다르게 */
+:root{--c-ipt:#1f7a80;--c-gtv:#5146a8}
+:root[data-prog="gtv"]{--bg:#ecebf6;--line:#d9d6ee;--accent:#5146a8;--accent-soft:#e3e0f7;--muted:#5d5a72;--fg:#1f1d2e}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--c-ipt:#5cc1c6;--c-gtv:#a59cf2}
+  :root[data-prog="gtv"]:not([data-theme="light"]){--bg:#14131d;--surface:#1d1c2a;--line:#302e45;--accent:#a59cf2;--accent-soft:#2a2747;--muted:#a19dba;--fg:#ebe9f5}}
+:root[data-theme="dark"]{--c-ipt:#5cc1c6;--c-gtv:#a59cf2}
+:root[data-theme="dark"][data-prog="gtv"]{--bg:#14131d;--surface:#1d1c2a;--line:#302e45;--accent:#a59cf2;--accent-soft:#2a2747;--muted:#a19dba;--fg:#ebe9f5}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:.9375rem;line-height:1.55}
 html{font-size:16px}
@@ -57,7 +65,9 @@ html{font-size:16px}
 /* 입트영·귀트영 고르기: 고른 쪽은 꽉 찬 동그라미, 다른 쪽은 작은 테두리 동그라미 */
 .progsw{display:flex;align-items:center;gap:6px;flex:none}
 .progsw .brand-mark{border:0;padding:0;cursor:pointer;font:inherit;font-family:var(--display);font-weight:800;font-size:1.7rem;transition:all .15s}
-.progsw .brand-mark[aria-pressed="false"]{width:38px;height:38px;font-size:1.15rem;background:var(--surface);color:var(--accent);border:2px solid var(--accent);box-shadow:none;opacity:.85}
+.progsw .brand-mark[data-prog="ipt"]{--pc:var(--c-ipt)}.progsw .brand-mark[data-prog="gtv"]{--pc:var(--c-gtv)}
+.progsw .brand-mark[aria-pressed="true"]{background:var(--pc)}
+.progsw .brand-mark[aria-pressed="false"]{width:38px;height:38px;font-size:1.15rem;background:var(--surface);color:var(--pc);border:2px solid var(--pc);box-shadow:none;opacity:.9}
 .brand-t{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,7vw,2.6rem);line-height:1.1;color:var(--accent);letter-spacing:-.01em}
 .gate-brand{margin-bottom:18px}
 .brand-s{color:var(--muted);font-size:.84rem;margin-top:3px;text-wrap:balance}
@@ -514,7 +524,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v139</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v140</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -678,7 +688,7 @@ const progOf=w=>w&&w.prog==='gtv'?'gtv':'ipt';
 const weekIdFor=mon=>curProg==='gtv'?ymd(addDays(parse(mon),-1)):mon;
 const lastKey=()=>curProg==='gtv'?'lastWeekGtv':'lastWeek';
 const otherProg=wid=>{const w=allWeeks.find(x=>x.id===wid);return !!w&&progOf(w)!==curProg};
-function renderBrand(){const P=PROGS[curProg];const t=$('brandT'),sb=$('brandS'),ap=$('addProg');if(ap)ap.textContent=P.t.replace(' 스터디','');if(t)t.textContent=P.t;if(sb)sb.textContent=P.s;document.title=P.doc;
+function renderBrand(){const P=PROGS[curProg];document.documentElement.dataset.prog=curProg;{const m=document.querySelector('meta[name=theme-color]');if(m)m.content=curProg==='gtv'?'#5146a8':'#1f7a80'}const t=$('brandT'),sb=$('brandS'),ap=$('addProg');if(ap)ap.textContent=P.t.replace(' 스터디','');if(t)t.textContent=P.t;if(sb)sb.textContent=P.s;document.title=P.doc;
   document.querySelectorAll('#progSw .brand-mark').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.prog===curProg)));
   /* 고른 쪽 동그라미가 앞(왼쪽)에 오게 */
   const sw=$('progSw'),a=sw&&sw.querySelector(`[data-prog="${curProg}"]`);if(sw&&a&&sw.firstElementChild!==a)sw.insertBefore(a,sw.firstElementChild)}
