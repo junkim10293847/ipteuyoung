@@ -1,1 +1,0 @@
-{"res":{"items":[{"n":0,"ch":"The government announced / on Monday / that it will expand / financial support / for small businesses / struggling with / rising interest rates."},{"n":1,"ch":"Experts say / the measure could ease / the burden on owners, / but some raised concerns / about the long-term cost / to taxpayers."}]}}
