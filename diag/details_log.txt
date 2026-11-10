@@ -1,1 +1,32 @@
-설명이 없는 단어·숙어 0개 (이번에 최대 40개)
+설명이 없는 단어·숙어 25개 (이번에 최대 40개)
+  2026-11-08 #4 slip: 완료 (4초)
+  2026-11-08 #4 major currency: 완료 (4초)
+  2026-11-08 #4 dispute: 완료 (32초)
+  2026-11-08 #5 PART: 완료 (4초)
+  2026-11-08 #6 trade blame: 완료 (18초)
+  → 5개 저장
+  2026-11-08 #6 breakdown: 완료 (12초)
+  2026-11-08 insist: 실패 upstream_error: busy
+  2026-11-08 #6 concession: 완료 (8초)
+  2026-11-08 #7 fire back: 완료 (30초)
+  2026-11-08 #7 give up: 완료 (4초)
+  2026-11-08 #7 sovereignty: 완료 (10초)
+  → 5개 저장
+  2026-11-08 #7 vital industry: 완료 (7초)
+  2026-11-08 sticking point: 실패 The read operation timed out
+  2026-11-08 PART: 실패 upstream_error: busy
+  2026-11-08 #9 economist: 완료 (17초)
+  2026-11-08 #9 have much to lose: 완료 (10초)
+  2026-11-08 #9 face: 완료 (10초)
+  2026-11-08 #9 devastation: 완료 (8초)
+  → 5개 저장
+  2026-11-08 #10 a small share of: 완료 (5초)
+  2026-11-08 #10 escalation: 완료 (18초)
+  2026-11-08 #10 GDP growth: 완료 (7초)
+  2026-11-08 #10 recession: 완료 (18초)
+  2026-11-08 #11 polling: 완료 (10초)
+  → 5개 저장
+  2026-11-08 #11 be in favor of: 완료 (15초)
+  2026-11-08 #11 firm stance: 완료 (12초)
+  → 2개 저장
+설명 22개 저장
