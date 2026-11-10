@@ -35,7 +35,7 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--c-ipt:#a59cf2;--c-gtv:#f08cb4}
 }
 :root[data-theme="dark"]{--c-ipt:#a59cf2;--c-gtv:#f08cb4}
-/* 🎨 색 고르기: 14가지 팔레트 (data-pal). 프로그램마다 따로 기억 */
+/* 🎨 색 고르기: 16가지 팔레트 (data-pal). 프로그램마다 따로 기억 */
 :root[data-pal="indigo"]{--bg:#ecebf6;--line:#d9d6ee;--accent:#5146a8;--accent-soft:#e3e0f7;--muted:#5d5a72;--fg:#1f1d2e}
 @media (prefers-color-scheme: dark){:root[data-pal="indigo"]:not([data-theme="light"]){--bg:#14131d;--surface:#1d1c2a;--line:#302e45;--accent:#a59cf2;--accent-soft:#2a2747;--muted:#a19dba;--fg:#ebe9f5}}
 :root[data-theme="dark"][data-pal="indigo"]{--bg:#14131d;--surface:#1d1c2a;--line:#302e45;--accent:#a59cf2;--accent-soft:#2a2747;--muted:#a19dba;--fg:#ebe9f5}
@@ -78,10 +78,16 @@
 :root[data-pal="cocoa"]{--bg:#f4eee9;--line:#e6dacf;--accent:#7a4f31;--accent-soft:#efe3d8;--muted:#6b5d52;--fg:#2a1f17}
 @media (prefers-color-scheme: dark){:root[data-pal="cocoa"]:not([data-theme="light"]){--bg:#19140f;--surface:#231c16;--line:#3b2f25;--accent:#e0b48d;--accent-soft:#3a2b1d;--muted:#b6a594;--fg:#f3ebe3}}
 :root[data-theme="dark"][data-pal="cocoa"]{--bg:#19140f;--surface:#231c16;--line:#3b2f25;--accent:#e0b48d;--accent-soft:#3a2b1d;--muted:#b6a594;--fg:#f3ebe3}
+:root[data-pal="pink"]{--bg:#fbeef5;--line:#f3d5e5;--accent:#c93c86;--accent-soft:#fbe0ee;--muted:#735a67;--fg:#2e1824}
+@media (prefers-color-scheme: dark){:root[data-pal="pink"]:not([data-theme="light"]){--bg:#1d1219;--surface:#281923;--line:#422a3a;--accent:#ff8fc8;--accent-soft:#42213a;--muted:#c1a1b4;--fg:#f8e9f1}}
+:root[data-theme="dark"][data-pal="pink"]{--bg:#1d1219;--surface:#281923;--line:#422a3a;--accent:#ff8fc8;--accent-soft:#42213a;--muted:#c1a1b4;--fg:#f8e9f1}
+:root[data-pal="sakura"]{--bg:#fdf1f3;--line:#f5dbe0;--accent:#c25b7a;--accent-soft:#fbe5ea;--muted:#765f66;--fg:#2e1b21}
+@media (prefers-color-scheme: dark){:root[data-pal="sakura"]:not([data-theme="light"]){--bg:#1c1316;--surface:#271b1f;--line:#412e34;--accent:#f7a8bd;--accent-soft:#3e2630;--muted:#c2a7af;--fg:#f8ecef}}
+:root[data-theme="dark"][data-pal="sakura"]{--bg:#1c1316;--surface:#271b1f;--line:#412e34;--accent:#f7a8bd;--accent-soft:#3e2630;--muted:#c2a7af;--fg:#f8ecef}
 .pal-btn{flex:none;align-self:flex-start;margin-left:auto;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-size:1.05rem;cursor:pointer;display:grid;place-items:center;padding:0}
-.pal-pop{display:grid;grid-template-columns:repeat(7,1fr);gap:10px 4px;align-items:center;margin:-4px 0 12px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.pal-pop{display:grid;grid-template-columns:repeat(8,1fr);gap:10px 2px;align-items:center;margin:-4px 0 12px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
 .pal-pop[hidden]{display:none}
-.pal-pop button{display:grid;justify-items:center;gap:3px;border:0;background:none;padding:0;cursor:pointer;font:inherit;font-size:.72rem;color:var(--muted)}
+.pal-pop button{display:grid;justify-items:center;gap:3px;border:0;background:none;padding:0;cursor:pointer;font:inherit;font-size:.68rem;white-space:nowrap;letter-spacing:-.02em;color:var(--muted)}
 .pal-pop i{width:30px;height:30px;border-radius:50%;display:block;border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--line)}
 .pal-pop button[aria-pressed="true"] i{box-shadow:0 0 0 2.5px var(--fg)}
 .pal-pop button[aria-pressed="true"]{color:var(--fg);font-weight:700}
@@ -579,7 +585,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v145</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v146</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -750,7 +756,7 @@ const canGtv=()=>{try{return GTV_USERS.includes(String(nick||'').trim())}catch(_
 function ensureProg(){if(curProg!=='gtv'||canGtv())return;
   curProg='ipt';ls.set('prog','ipt');weeks=allWeeks.filter(w=>progOf(w)===curProg);
   const last=ls.get(lastKey(),null);if(!weeks.find(w=>w.id===curId)){curId=(weeks.find(w=>w.id===last)||weeks[0]||{}).id||null;view=curId?todayView(weeks.find(w=>w.id===curId)):null}}
-const PALS={"indigo": ["인디고", "#5146a8", "#a59cf2"], "lavender": ["라벤더", "#7552bd", "#c3a8f5"], "navy": ["남색", "#26407a", "#93aaf0"], "ocean": ["바다", "#1f5fa8", "#7fb2f0"], "sky": ["하늘", "#2a7fb8", "#82c4f0"], "teal": ["청록", "#1f7a80", "#5cc1c6"], "mint": ["민트", "#12806a", "#5fd4b5"], "forest": ["숲", "#2e7a4b", "#7ccf97"], "olive": ["올리브", "#5f6e1f", "#c2d36e"], "rose": ["로즈", "#b03a6a", "#f08cb4"], "wine": ["와인", "#8c2a43", "#ec8ea4"], "sunset": ["노을", "#b4492b", "#f29a7a"], "cocoa": ["코코아", "#7a4f31", "#e0b48d"], "ink": ["먹", "#3a4556", "#aab6c8"]};
+const PALS={"indigo": ["인디고", "#5146a8", "#a59cf2"], "lavender": ["라벤더", "#7552bd", "#c3a8f5"], "navy": ["남색", "#26407a", "#93aaf0"], "ocean": ["바다", "#1f5fa8", "#7fb2f0"], "sky": ["하늘", "#2a7fb8", "#82c4f0"], "teal": ["청록", "#1f7a80", "#5cc1c6"], "mint": ["민트", "#12806a", "#5fd4b5"], "forest": ["숲", "#2e7a4b", "#7ccf97"], "olive": ["올리브", "#5f6e1f", "#c2d36e"], "sakura": ["벚꽃", "#c25b7a", "#f7a8bd"], "pink": ["핑크", "#c93c86", "#ff8fc8"], "rose": ["로즈", "#b03a6a", "#f08cb4"], "wine": ["와인", "#8c2a43", "#ec8ea4"], "sunset": ["노을", "#b4492b", "#f29a7a"], "cocoa": ["코코아", "#7a4f31", "#e0b48d"], "ink": ["먹", "#3a4556", "#aab6c8"]};
 const PAL_DEF={ipt:'indigo',gtv:'rose'};
 const palOf=pr=>{const v=(prog&&prog.theme&&prog.theme[pr])||ls.get('pal_'+pr,null);return PALS[v]?v:PAL_DEF[pr]};
 function applyPal(){const r=document.documentElement,k=palOf(curProg);r.dataset.pal=k;
