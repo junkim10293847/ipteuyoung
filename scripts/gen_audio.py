@@ -63,6 +63,45 @@ def vkey(t):
 
 
 TEXTS = os.path.join(AUDIO, 'texts.json')
+LONGMAP = os.path.join(AUDIO, 'longmap.json')   # 연속 듣기 파일 안에서 문장마다 몇 초인지(화면이 지금 읽는 문장을 정확히 표시)
+ALL_LONGS = []
+
+
+def load_longmap():
+    try:
+        return json.load(open(LONGMAP, encoding='utf-8'))
+    except Exception:
+        return {}
+
+
+def longmap_missing(have):
+    lm = load_longmap()
+    return [ln for ln, src in ALL_LONGS if ln in have and lm.get(ln, {}).get('sig') != '|'.join(src)]
+
+
+def dur(path):
+    r = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', path],
+                       capture_output=True, text=True)
+    try:
+        return round(float(r.stdout.strip()), 3)
+    except ValueError:
+        return 0.0
+
+
+def update_longmap():
+    lm, changed = load_longmap(), False
+    for ln, src in ALL_LONGS:
+        sig = '|'.join(src)
+        if not os.path.exists(os.path.join(AUDIO, ln)) or lm.get(ln, {}).get('sig') == sig:
+            continue
+        files = [os.path.join(AUDIO, n) for n in src]
+        if not all(os.path.exists(f) for f in files):
+            continue
+        lm[ln] = {'sig': sig, 'd': [dur(f) for f in files], 'total': dur(os.path.join(AUDIO, ln))}
+        changed = True
+    if changed:
+        json.dump(lm, open(LONGMAP, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'), sort_keys=True)
+        print('연속 듣기 문장 시간표 갱신')
 WEEKS = os.path.join(os.path.dirname(AUDIO), 'data', 'weeks.json')
 
 
@@ -141,6 +180,8 @@ def plan(weeks, have, texts=None):
                     texts[n] = tkey(t)
         ln = name(w.get('longAudio'), f'{wk}-long2.mp3')
         sig = '|'.join(src)
+        if src:
+            ALL_LONGS.append((ln, src))
         if src and (ln not in have or any(n in jobs for n in src) or stale(ln, sig)):
             longs.append((ln, src))
         elif src and ln not in texts:
@@ -187,7 +228,7 @@ def main():
     print(f'만들 음성 {len(jobs)}개, 연속 듣기 {len(longs)}개')
     out('todo', todo)
     if '--plan' in sys.argv:
-        if not todo and (write_index() | save_texts(texts)):
+        if not todo and (write_index() | save_texts(texts) | bool(longmap_missing(have))):
             out('todo', 1)
         return
     sys.path.insert(0, os.path.dirname(__file__))
@@ -210,6 +251,7 @@ def main():
         texts[ln] = '|'.join(src)
         print('연속 듣기:', ln)
     save_texts(texts)
+    update_longmap()
     write_index()
 
 

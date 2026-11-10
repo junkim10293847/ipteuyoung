@@ -590,7 +590,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v148</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v149</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -639,7 +639,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   /* 음성 목록(audio/index.json): GitHub Actions가 새 음성을 만들 때마다 갱신 */
   let ix=new Set();window.__ixHas=n=>ix.has(n);
-  async function loadIndex(){try{const r=await fetch('audio/index.json?t='+Date.now(),{cache:'no-store'});if(r.ok)ix=new Set(await r.json())}catch(e){}}
+  async function loadIndex(){try{const r=await fetch('audio/index.json?t='+Date.now(),{cache:'no-store'});if(r.ok)ix=new Set(await r.json())}catch(e){}
+    try{const r=await fetch('audio/longmap.json?t='+Date.now(),{cache:'no-store'});if(r.ok)window.LONGMAP=await r.json()}catch(e){}}
   const clean=t=>String(t||'').replace(/\(.*?\)/g,'').replace(/[가-힣~]+/g,'').replace(/\+.*$/,'').trim()||String(t||'');
   const vkey=t=>clean(t).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'x';
   function attach(all){
@@ -1716,7 +1717,8 @@ document.addEventListener('click',e=>{
   const b=e.target.closest&&e.target.closest('#longBtn');
   if(b){e.preventDefault();e.stopPropagation();const w=weeks.find(x=>x.id===curId),a=$('longAudio');if(!w||!a)return;
     if(longPlaying()){a.pause();return}
-    const src=new URL(w.longAudio,location.href).href;if(a.src!==src){a.src=src}
+    const lm=longSig(w);let h=0;for(const c of (lm?lm.sig:w.sentences.map(s=>s.en).join('|')))h=(h*31+c.charCodeAt(0))>>>0;
+    const src=new URL(w.longAudio+'?v='+h.toString(36),location.href).href;if(a.src!==src){a.src=src}
     a.playbackRate=+longRate();a.defaultPlaybackRate=+longRate();
     const box=$('psBox');if(box&&!box.open){box.open=true;psOpen=true}
     a.play().catch(()=>toast('재생하지 못했어요. 다시 눌러 주세요'));return}
@@ -1907,7 +1909,13 @@ document.addEventListener('play',e=>{if(e.target.id==='longAudio')stop()},true);
 const durCache={};
 function durOf(u){if(!u)return Promise.resolve(0);if(durCache[u]!=null)return Promise.resolve(durCache[u]);return new Promise(res=>{const a=new Audio();a.preload='metadata';a.onloadedmetadata=()=>{durCache[u]=isFinite(a.duration)?a.duration:0;res(durCache[u])};a.onerror=()=>res(0);a.src=u})}
 let longMap=null,longMapFor='';
-async function buildLongMap(w){const key=w.id+'|'+w.longAudio;if(longMapFor===key)return longMap;longMapFor=key;const ds=await Promise.all(w.sentences.map(s=>durOf(s.audio)));let t=0;longMap=ds.map((d,j)=>{const r=[t,t+d,j];t+=d;return r});return longMap}
+/* 연속 듣기 파일 안 문장별 시간: 음성을 만들 때 잰 정확한 시간표(audio/longmap.json)를 우선 사용.
+   휴대폰이 mp3 길이를 어림짐작하면 뒤로 갈수록 표시가 어긋나던 문제 방지 */
+const longName=w=>String(w.longAudio||'').split('/').pop().split('?')[0];
+function longSig(w){const lm=window.LONGMAP&&window.LONGMAP[longName(w)];return lm&&Array.isArray(lm.d)&&lm.d.length===w.sentences.filter(s=>(s.en||'').trim()).length?lm:null}
+async function buildLongMap(w){const key=w.id+'|'+w.longAudio+'|'+!!longSig(w);if(longMapFor===key)return longMap;longMapFor=key;
+  const lm=longSig(w);if(lm){let t=0;const sum=lm.d.reduce((x,y)=>x+y,0),f=lm.total&&sum?lm.total/sum:1;const idx=w.sentences.map((s,j)=>j).filter(j=>(w.sentences[j].en||'').trim());longMap=lm.d.map((d,k)=>{const r=[t,t+d*f,idx[k]];t+=d*f;return r});return longMap}
+  const ds=await Promise.all(w.sentences.map(s=>durOf(s.audio)));let t=0;longMap=ds.map((d,j)=>{const r=[t,t+d,j];t+=d;return r});return longMap}
 document.addEventListener('timeupdate',async e=>{
   if(e.target.id!=='longAudio')return;const w=weeks.find(x=>x.id===curId);if(!w)return;
   const map=await buildLongMap(w),t=e.target.currentTime;const hit=map&&map.find(r=>t>=r[0]&&t<r[1]);
