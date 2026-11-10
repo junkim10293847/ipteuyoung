@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="입트영">
 <meta name="theme-color" content="#5146a8">
-<script>try{var pr=JSON.parse(localStorage.getItem('prog')||'"ipt"')==='gtv'?'gtv':'ipt',pl=JSON.parse(localStorage.getItem('pal_'+pr)||'null')||(pr==='gtv'?'rose':'indigo');document.documentElement.dataset.prog=pr;document.documentElement.dataset.pal=pl}catch(e){}</script>
+<script>try{var pr=JSON.parse(localStorage.getItem('prog')||'"ipt"')==='gtv'?'gtv':'ipt',pl=JSON.parse(localStorage.getItem('pal_'+pr)||'null')||(pr==='gtv'?'rose':'indigo');if(pl==='random'){var K=["indigo", "lavender", "navy", "ocean", "sky", "teal", "mint", "forest", "olive", "sakura", "pink", "rose", "wine", "sunset", "cocoa", "ink"],d=new Date(),day=Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/864e5),h=function(n){var x=(n*2654435761+(pr==='gtv'?97:13))>>>0;x=(x^(x>>>15))>>>0;x=Math.imul(x,2246822519)>>>0;x=(x^(x>>>13))>>>0;return x%K.length},i=h(day);if(i===h(day-1))i=(i+1)%K.length;pl=K[i]}document.documentElement.dataset.prog=pr;document.documentElement.dataset.pal=pl}catch(e){}</script>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -87,6 +87,11 @@
 .pal-btn{flex:none;align-self:flex-start;margin-left:auto;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-size:1.05rem;cursor:pointer;display:grid;place-items:center;padding:0}
 .pal-pop{display:grid;grid-template-columns:repeat(8,1fr);gap:10px 2px;align-items:center;margin:-4px 0 12px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
 .pal-pop[hidden]{display:none}
+.pal-mode{grid-column:1/-1;display:flex;gap:6px;margin-bottom:2px}
+.pal-mode button{flex:1;display:block!important;padding:8px 6px!important;border-radius:999px!important;border:1.5px solid var(--line)!important;background:var(--bg)!important;font-size:.85rem!important;color:var(--fg)!important;font-weight:600}
+.pal-mode button[aria-pressed="true"]{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--surface)!important}
+.pal-pop button.today i{box-shadow:0 0 0 2.5px var(--accent)}
+.pal-note{grid-column:1/-1;margin:2px 0 0;font-size:.78rem;color:var(--muted)}
 .pal-pop button{display:grid;justify-items:center;gap:3px;border:0;background:none;padding:0;cursor:pointer;font:inherit;font-size:.68rem;white-space:nowrap;letter-spacing:-.02em;color:var(--muted)}
 .pal-pop i{width:30px;height:30px;border-radius:50%;display:block;border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--line)}
 .pal-pop button[aria-pressed="true"] i{box-shadow:0 0 0 2.5px var(--fg)}
@@ -585,7 +590,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v147</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v148</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -758,17 +763,27 @@ function ensureProg(){if(curProg!=='gtv'||canGtv())return;
   const last=ls.get(lastKey(),null);if(!weeks.find(w=>w.id===curId)){curId=(weeks.find(w=>w.id===last)||weeks[0]||{}).id||null;view=curId?todayView(weeks.find(w=>w.id===curId)):null}}
 const PALS={"indigo": ["인디고", "#5146a8", "#a59cf2"], "lavender": ["라벤더", "#7552bd", "#c3a8f5"], "navy": ["남색", "#26407a", "#93aaf0"], "ocean": ["바다", "#1f5fa8", "#7fb2f0"], "sky": ["하늘", "#2a7fb8", "#82c4f0"], "teal": ["청록", "#1f7a80", "#5cc1c6"], "mint": ["민트", "#12806a", "#5fd4b5"], "forest": ["숲", "#2e7a4b", "#7ccf97"], "olive": ["올리브", "#5f6e1f", "#c2d36e"], "sakura": ["벚꽃", "#c25b7a", "#f7a8bd"], "pink": ["핑크", "#c93c86", "#ff8fc8"], "rose": ["로즈", "#b03a6a", "#f08cb4"], "wine": ["와인", "#8c2a43", "#ec8ea4"], "sunset": ["노을", "#b4492b", "#f29a7a"], "cocoa": ["코코아", "#7a4f31", "#e0b48d"], "ink": ["먹", "#3a4556", "#aab6c8"]};
 const PAL_DEF={ipt:'indigo',gtv:'rose'};
-const palOf=pr=>{const v=(prog&&prog.theme&&prog.theme[pr])||ls.get('pal_'+pr,null);return PALS[v]?v:PAL_DEF[pr]};
+/* 🎲 매일 바뀜: 날짜로 그날의 색을 정함(하루 동안 같고, 어제와는 다르게) */
+const PAL_KEYS=["indigo", "lavender", "navy", "ocean", "sky", "teal", "mint", "forest", "olive", "sakura", "pink", "rose", "wine", "sunset", "cocoa", "ink"];
+function dailyPal(pr,d){d=d||new Date();const day=Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/864e5);
+  const h=n=>{let x=(n*2654435761+(pr==='gtv'?97:13))>>>0;x=(x^(x>>>15))>>>0;x=Math.imul(x,2246822519)>>>0;x=(x^(x>>>13))>>>0;return x%PAL_KEYS.length};
+  let i=h(day);const y=h(day-1);if(i===y)i=(i+1)%PAL_KEYS.length;return PAL_KEYS[i]}
+const palRaw=pr=>(prog&&prog.theme&&prog.theme[pr])||ls.get('pal_'+pr,null);
+const palOf=pr=>{const v=palRaw(pr);if(v==='random')return dailyPal(pr);return PALS[v]?v:PAL_DEF[pr]};
 function applyPal(){const r=document.documentElement,k=palOf(curProg);r.dataset.pal=k;
   const dark=r.dataset.theme==='dark'||(r.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches),ix=dark?2:1;
   r.style.setProperty('--c-ipt',PALS[palOf('ipt')][ix]);r.style.setProperty('--c-gtv',PALS[palOf('gtv')][ix]);
   const m=document.querySelector('meta[name=theme-color]');if(m)m.content=PALS[k][1];palPopRender()}
-function palPopRender(){const pp=$('palPop');if(!pp||pp.hidden)return;const k=palOf(curProg);
-  pp.innerHTML=Object.entries(PALS).map(([id,[n,c]])=>`<button type="button" data-pal="${id}" aria-pressed="${id===k}"><i style="background:${c}"></i>${n}</button>`).join('')}
+function palPopRender(){const pp=$('palPop');if(!pp||pp.hidden)return;const rnd=palRaw(curProg)==='random',k=palOf(curProg);
+  pp.innerHTML=`<div class="pal-mode"><button type="button" data-pal="random" aria-pressed="${rnd}">🎲 매일 바뀜</button><button type="button" data-pal="${rnd?k:(PALS[palRaw(curProg)]?palRaw(curProg):k)}" class="pm-pick" aria-pressed="${!rnd}">🎨 직접 고르기</button></div>`+
+  Object.entries(PALS).map(([id,[n,c]])=>`<button type="button" data-pal="${id}" aria-pressed="${!rnd&&id===k}"${rnd&&id===k?' class="today"':''}><i style="background:${c}"></i>${n}</button>`).join('')+
+  (rnd?`<p class="pal-note">오늘의 색: <b>${PALS[k][0]}</b> · 내일은 다른 색으로 바뀌어요. 색을 누르면 직접 고르기로 바뀌어요.</p>`:'')}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#palBtn,#palPop [data-pal]');if(!b)return;e.preventDefault();
   const pp=$('palPop');if(b.id==='palBtn'){pp.hidden=!pp.hidden;palPopRender();return}
-  const id=b.dataset.pal;if(!PALS[id])return;ls.set('pal_'+curProg,id);prog.theme={...(prog.theme||{}),[curProg]:id};try{saveProg()}catch(_){}
-  applyPal();toast('🎨 '+PALS[id][0]+' 색으로 바꿨어요')});
+  const id=b.dataset.pal;if(!PALS[id]&&id!=='random')return;ls.set('pal_'+curProg,id);prog.theme={...(prog.theme||{}),[curProg]:id};try{saveProg()}catch(_){}
+  applyPal();toast(id==='random'?'🎲 매일 색이 바뀌어요 · 오늘은 '+PALS[palOf(curProg)][0]:'🎨 '+PALS[id][0]+' 색으로 바꿨어요')});
+/* 자정이 지나거나 다시 열었을 때 오늘의 색으로 */
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&palRaw(curProg)==='random')applyPal()});
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>applyPal())}catch(_){}
 function renderBrand(){ensureProg();const P=PROGS[curProg];{const g=document.querySelector('#progSw [data-prog="gtv"]');if(g)g.hidden=!canGtv()}document.documentElement.dataset.prog=curProg;applyPal();const t=$('brandT'),sb=$('brandS'),ap=$('addProg');if(ap)ap.textContent=P.t.replace(' 스터디','');if(t)t.textContent=P.t;if(sb)sb.textContent=P.s;document.title=P.doc;
   document.querySelectorAll('#progSw .brand-mark').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.prog===curProg)));
