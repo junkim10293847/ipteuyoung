@@ -585,7 +585,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v146</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v147</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1671,6 +1671,7 @@ async function prefetchDetails(){
       if(document.visibilityState!=='visible'||!sample||readOnly||!(window.__features||{}).ai)break;
       const w=weeks.find(x=>x.id===curId);if(!w)break;
       if(missing0(w)){if(!autoTried[w.id])await autoEnrich(w);break}
+      if(needFix(w)&&!fixTried[w.id]&&canWrite){await fixWeek(w);continue}
       if(!w.koChk&&!koTried[w.id]&&canWrite){await koCheck(w);continue}
       if(progOf(w)==='gtv'&&!w.chunked&&!chTried[w.id]&&canWrite){await chunkWeek(w);continue}
       const today=(()=>{try{const d=plan(w),v=todayView(w);return v&&v[0]==='d'?(d[+v.slice(1)]||[]):[]}catch(_){return []}})();
@@ -1918,16 +1919,37 @@ function openAdd(){
   p.scrollIntoView({block:'start',behavior:'smooth'});
 }
 $('fCancel').onclick=()=>{$('addPanel').hidden=true};
+/* 교재 표시 정리: 'PART 01' 같은 부(部) 제목 줄은 문장이 아니라 문단 나누기로, 단어 번호 위첨자(¹²³)는 지움 */
+const PART_RE=/^(part|파트)\s*0*\d+\s*[.:]?$|^제?\s*\d+\s*부$/i;
+const SUP_RE=/\s?[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g;
+const unSup=t=>String(t||'').replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g,'').replace(/\s{2,}/g,' ').trim();
+const needFix=w=>w.sentences.some(x=>!x.isTitle&&PART_RE.test(String(x.en||'').trim())||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.en||'')||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.ch||''));
+const fixTried={};
+async function fixWeek(w){fixTried[w.id]=1;const cur=weeks.find(y=>y.id===w.id)||w;
+  const hasPart=cur.sentences.some(x=>!x.isTitle&&PART_RE.test(String(x.en||'').trim()));
+  const out=[];let nextStart=false;
+  cur.sentences.forEach(x=>{if(!x.isTitle&&PART_RE.test(String(x.en||'').trim())){nextStart=true;return}
+    const o={...x,en:unSup(x.en)};if(o.ch)o.ch=unSup(o.ch);
+    if(!o.isTitle&&hasPart){if(nextStart&&out.some(y=>!y.isTitle))o.pStart=true;else delete o.pStart}
+    if(!o.isTitle&&nextStart)nextStart=false;out.push(o)});
+  /* 문장이 바뀐 것은 음성을 새로 만들도록 기존 음성 연결을 뗌 */
+  out.forEach(o=>{const orig=cur.sentences.find(y=>y.en&&unSup(y.en)===o.en&&y.en!==o.en);if(orig){delete o.audio;delete o.alt}});
+  [w,cur].forEach(y=>{y.sentences=out});
+  try{await db.doc('weeks/'+w.id).update({sentences:JSON.parse(JSON.stringify(out))})}catch(e){}
+  if(w.id===curId)full()}
 function splitText(raw,title){
-  const lines=raw.replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);
+  /* PART 줄은 빼고, 그 다음 줄부터 새 문단(PART가 있으면 PART 기준으로만 문단을 나눔) */
+  const L=[];let mark=false;
+  raw.replace(/\r/g,'').split('\n').map(x=>unSup(x)).filter(Boolean).forEach(l=>{if(PART_RE.test(l)){mark=true;return}L.push({l,p:mark});mark=false});
+  const hasPart=/\n\s*(part|파트)\s*0*\d+|\n\s*제?\s*\d+\s*부\s*\n/i.test('\n'+raw.replace(/\r/g,''));
   let t=title.trim(), out=[];
-  if(lines.length&&!/[.!?"”]$/.test(lines[0])&&lines[0].split(' ').length<=10){if(!t)t=lines[0];lines.shift()}
+  if(L.length&&!L[0].p&&!/[.!?"”]$/.test(L[0].l)&&L[0].l.split(' ').length<=10){if(!t)t=L[0].l;L.shift()}
   const starts=new Set();
-  for(const l of lines){starts.add(out.length);out.push(...l.split(/(?<=[.!?]["”]?)\s+(?=[A-Z"“])/).map(x=>x.trim()).filter(Boolean))}
+  for(const x of L){if(!hasPart||x.p)starts.add(out.length);out.push(...x.l.split(/(?<=[.!?]["”]?)\s+(?=[A-Z"“])/).map(y=>y.trim()).filter(Boolean))}
   const sentences=[];
   if(t)sentences.push({en:t,ko:'',vocab:[],isTitle:true});
   /* 붙여 넣은 글의 줄바꿈(문단)을 기억해 전체 지문을 문단으로 나눠 보여 줌 */
-  out.forEach((en,n)=>sentences.push(n>0&&starts.has(n)&&lines.length>1?{en,ko:'',vocab:[],pStart:true}:{en,ko:'',vocab:[]}));
+  out.forEach((en,n)=>sentences.push(n>0&&starts.has(n)&&(L.length>1)?{en,ko:'',vocab:[],pStart:true}:{en,ko:'',vocab:[]}));
   return {title:t||'제목 없음',sentences};
 }
 async function enrich(sentences,onStatus){
