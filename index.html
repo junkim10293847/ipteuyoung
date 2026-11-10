@@ -292,6 +292,11 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 :root[data-theme="dark"] .vdet{background:#3a3418;border-color:#7a6a2a}.vdet .d-use{--sec:var(--done)}.vdet .d-ex{--sec:#3b7dd8}.vdet .d-sim{--sec:#8a6fc7}.vdet .d-tip{--sec:var(--warn)}
 .vdet h4{display:inline-block;width:max-content;max-width:100%;justify-self:start;margin:0 0 6px;font-size:.74rem;letter-spacing:.02em;color:#fff;background:var(--sec,var(--accent));border-radius:999px;padding:2px 10px}
 .vdet p{margin:0}
+.en .cut{font-style:normal;font-weight:700;color:var(--accent);opacity:.55;margin-left:1px}
+.wr-ko.dict{font-size:.88rem;color:var(--muted)}.wr-ko.dict b{color:var(--fg)}
+.sum-res{display:grid;gap:8px;margin-top:10px}.sum-res .sc{font-weight:800;color:var(--accent);font-size:1.05rem}
+.sum-res ul{margin:0;padding-left:1.1em;display:grid;gap:3px}.sum-res .ok li::marker{content:'✓ ';color:var(--accent)}.sum-res .miss li::marker{content:'· ';color:var(--warn)}
+.sum-res .box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}.sum-res .box b{display:block;font-size:.8rem;color:var(--muted);margin-bottom:2px}
 .vdet .d-pron{border-left:0;padding:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:.92rem}
 .d-pron .ipa{font-family:"Lucida Sans Unicode","Arial Unicode MS","Segoe UI",sans-serif;color:var(--muted)}
 .d-pron .kp{font-weight:700}.d-pron .kp b{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
@@ -525,7 +530,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v142</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v143</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -686,6 +691,7 @@ const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}
 const PROGS={ipt:{mark:'입',t:'입트영 스터디',s:'EBS 입이 트이는 영어 · 듣고 쓰고 외우기',doc:'입트영 주간 암기'},gtv:{mark:'귀',t:'귀트영 스터디',s:'EBS 귀가 트이는 영어 · 듣고 쓰고 외우기',doc:'귀트영 주간 암기'}};
 let curProg=PROGS[ls.get('prog','ipt')]?ls.get('prog','ipt'):'ipt', allWeeks=[];
 const progOf=w=>w&&w.prog==='gtv'?'gtv':'ipt';
+const isG=()=>curProg==='gtv';
 const weekIdFor=mon=>curProg==='gtv'?ymd(addDays(parse(mon),-1)):mon;
 const lastKey=()=>curProg==='gtv'?'lastWeekGtv':'lastWeek';
 const otherProg=wid=>{const w=allWeeks.find(x=>x.id===wid);return !!w&&progOf(w)!==curProg};
@@ -735,7 +741,7 @@ async function attachProgRef(){
   try{
     const ref=db.collection('data/users/'+me).doc('progress-'+hashNick(nick));
     const snap=await ref.get();
-    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})},cel:{...(d.cel||{}),...(prog.cel||{})},dq:{...(d.dq||{}),...(prog.dq||{})},hl:mergeWb(d.hl,prog.hl)}}
+    if(snap.exists){const d=snap.data();prog={done:{...prog.done,...(d.done||{})},pace:{...prog.pace,...(d.pace||{})},qa:{...(d.qa||{}),...(prog.qa||{})},marks:{...(d.marks||{}),...(prog.marks||{})},weak:{...(d.weak||{}),...(prog.weak||{})},tests:{...(d.tests||{}),...(prog.tests||{})},sig:{...(d.sig||{}),...(prog.sig||{})},wb:mergeWb(d.wb,prog.wb),mine:{...(d.mine||{}),...(prog.mine||{})},cel:{...(d.cel||{}),...(prog.cel||{})},dq:{...(d.dq||{}),...(prog.dq||{})},hl:mergeWb(d.hl,prog.hl),sum:{...(d.sum||{}),...(prog.sum||{})}}}
     progRef=ref;reconcileProg();render();
     if(snap.exists||Object.keys(prog.done||{}).length)saveProg();   /* 오프라인·다른 기기에서 쌓인 기록을 합친 결과를 서버에 다시 저장 */
   }catch(e){progRef=null}
@@ -794,7 +800,7 @@ function stampOn(el){
 function saveProg(){checkWeekDone();checkSmallWins();
   try{localStorage.setItem(progKey(),JSON.stringify(prog))}catch(e){}
   if(!progRef)return;clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},cel:prog.cel||{},dq:prog.dq||{},hl:prog.hl||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
+  progTimer=setTimeout(()=>{progRef.set({done:prog.done,pace:prog.pace,qa:prog.qa||{},marks:prog.marks||{},weak:prog.weak||{},tests:prog.tests||{},sig:prog.sig||{},wb:prog.wb||{},mine:prog.mine||{},cel:prog.cel||{},dq:prog.dq||{},hl:prog.hl||{},sum:prog.sum||{},nick:nick,updated:Date.now()}).catch(()=>{progRef=null})},600);
 }
 const doneOf=id=>prog.done[id]||{};
 /* 공부 가능한 날: 배정 다음 날(일) ~ 테스트 전날(금) = 6일 */
@@ -1011,7 +1017,7 @@ function foldWriteSmooth(w,i,done){
 function patchWriteOpen(w,i){
   const c=$('c'+i),acts=c&&c.querySelector('.acts'),wb=acts&&acts.querySelector('.write');if(!wb)return false;
   const open=writeOpen.has(i);
-  wb.setAttribute('aria-pressed',open);wb.textContent=open?'✍ 접기':'✍ 써보기';
+  wb.setAttribute('aria-pressed',open);wb.textContent=open?'✍ 접기':isG()?'🎧 받아쓰기':'✍ 써보기';
   acts.querySelectorAll('.wr-check,.wr-clear').forEach(x=>x.remove());
   const old=c.querySelector('.wr');if(old)old.remove();
   if(open){wb.insertAdjacentHTML('afterend',`<button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button>`);acts.insertAdjacentHTML('afterend',writeHtml(w,i))}
@@ -1065,8 +1071,8 @@ function patchWriteRes(w,i){
 function writeHtml(w,i){
   const key=curId+'|'+i, r=writeRes[key];
   return `<div class="wr">
-    <div class="wr-ko"><span>한글</span>${esc(w.sentences[i].ko||'(해석 없음)')}</div>
-    <textarea id="wr-${i}" data-i="${i}" rows="2" placeholder="뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
+    ${isG()&&!r?`<div class="wr-ko dict"><span>🎧</span>▶ 듣기·천천히로 몇 번이든 듣고, <b>들리는 대로</b> 받아쓰세요. 모르는 곳은 비워도 돼요.</div>`:`<div class="wr-ko"><span>한글</span>${esc(w.sentences[i].ko||'(해석 없음)')}</div>`}
+    <textarea id="wr-${i}" data-i="${i}" rows="2" placeholder="${isG()?'들리는 대로 영어로 받아쓰기':'뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)'}" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
     ${r?`<div class="wr-res${r.perfect?' perfect':r.almost?' almost':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':r.almost?'거의 완벽! 단어는 모두 맞았어요 👍':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':r.almost?`<span class="al-note">쉼표 ${r.cmiss?r.cmiss+'곳 빠짐':''}${r.cmiss&&r.cbad?', ':''}${r.cbad?r.cbad+'곳 더 씀':''} — 표시된 자리만 고치면 완벽이에요</span>`:[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       ${diffHtml(r)}
 </div>`:''}
@@ -1131,9 +1137,14 @@ function vocItems(w,i){const s=w.sentences[i],out=[],seen=new Set();const T=ttlO
   (s.vocab||[]).forEach((x,j)=>{const k=cleanTerm(x.t).toLowerCase();if(!seen.has(k)){seen.add(k);out.push({x,ii:i,j})}});
   return out}
 function ttlHtml(T,i){const hid=hiddenEn.has(i);return `<div class="ttl">${T.en.split(' ').map(x=>`<span class="w${hid?' hid':''}">${esc(x)}</span>`).join(' ')}${T.ko?`<span class="ttl-ko">${esc(T.ko)}</span>`:''}</div>`}
+/* 귀트영 끊어 읽기: 문장마다 AI가 의미 덩어리로 나눈 s.ch("A / B / C")를 보고 덩어리 끝 단어 뒤에 / 표시 */
+function chunkEnds(t,ch){if(!ch||!isG())return null;const ws=t.split(' ');const parts=String(ch).split(/\s*\/\s*/).filter(Boolean);
+  const norm=x=>x.toLowerCase().replace(/[^a-z0-9']/g,'');if(parts.join(' ').split(/\s+/).map(norm).join('|')!==ws.map(norm).join('|'))return null;
+  const E=new Set();let n=0;parts.slice(0,-1).forEach(pt=>{n+=pt.split(/\s+/).length;E.add(n-1)});return E}
 function wordsHtml(t,i){
   const hid=hiddenEn.has(i), m=marksOf(curId,i);
-  return t.split(' ').map((w,k)=>`<span class="w${hid?' hid':''}" data-w="${k}">${esc(w)}</span>`).join(' ');
+  const wk=isG()&&weeks.find(x=>x.id===curId),E=!hid&&wk&&wk.sentences[i]&&wk.sentences[i].en===t?chunkEnds(t,wk.sentences[i].ch):null;
+  return t.split(' ').map((w,k)=>`<span class="w${hid?' hid':''}" data-w="${k}">${esc(w)}</span>${E&&E.has(k)?'<i class="cut"> /</i>':''}`).join(' ');
 }
 function render(){
   const main=$('main');
@@ -1186,7 +1197,7 @@ function render(){
     if(tIdx.length){
       todoHtml=left.length
         ?`<div class="todo"><div class="todo-h"><b>📖 오늘 할 일</b><span>${tName} · ${left.length}문장 남음</span></div>
-           <div class="todo-steps">① 듣기 → ② 떠올리기 → ③ ✍ 써보기 <small>· 완벽하면 자동 외움</small></div>
+           <div class="todo-steps">${isG()?'① ▶ 듣기 → ② 🎧 받아쓰기 → ③ / 끊어 읽기로 확인 <small>· 완벽하면 자동 외움 · 다 끝나면 🗣 요약해 말하기</small>':'① 듣기 → ② 떠올리기 → ③ ✍ 써보기 <small>· 완벽하면 자동 외움</small>'}</div>
            <button class="todo-go" id="todoGo">▶ 오늘 문장 시작하기</button></div>`
         :`<div class="todo done"><div class="todo-h"><b>🎉 오늘 분량 끝!</b><span>${tName}</span></div>
            <div class="todo-steps">${tv==='sat'?'테스트 잘 보세요!':'내일 분량을 미리 보거나 📝 모의 테스트로 전체를 점검해 보세요.'}</div></div>`;
@@ -1228,17 +1239,18 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
          ${s.audio?`<button class="play" data-i="${i}">▶ 듣기</button>`:`<button class="play" data-i="${i}">▶ 듣기</button>`}
          <button class="slow" data-i="${i}">▶ 천천히</button>
          <button class="hideen" data-i="${i}" aria-pressed="${hiddenEn.has(i)}">${hiddenEn.has(i)?"영어 보기":"영어 가리기"}</button>
-         <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✍ 접기":"✍ 써보기"}</button>${writeOpen.has(i)?`<button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button>`:''}
+         <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✍ 접기":isG()?"🎧 받아쓰기":"✍ 써보기"}</button>${writeOpen.has(i)?`<button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button>`:''}
          <button class="mark" data-i="${i}" aria-pressed="${!!done[i]}">${done[i]?'✓ 외움':'☐ 외움'}</button>
        </div>
        ${writeOpen.has(i)?writeHtml(w,i):''}
      </li>`}).join('')}
    </ol>
-   <details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
-   <details class="tool" id="qqBox"${toolOpen.qqBox?' open':''}><summary><span class="t-title">❓ 질문에 답하기</span><span class="t-sub">질문을 듣고 외운 문장으로 대답하기</span></summary><div id="qqBody">${qqHtml(w)}</div></details>
+   ${isG()?`<details class="tool" id="sumBox"${toolOpen.sumBox?' open':''}><summary><span class="t-title">🗣 듣고 요약해 말하기</span><span class="t-sub">지문을 듣고 영어 3문장으로 요약 · 놓친 내용과 표현 첨삭</span></summary><div id="sumBody">${sumHtml(w)}</div></details>`:''}
+   ${isG()?'':`<details class="tool" id="seqBox"${toolOpen.seqBox?' open':''}><summary><span class="t-title">🔗 순서 연결 연습</span><span class="t-sub">앞 문장을 보고 다음 문장 떠올리기</span></summary>${seqHtml(w)}</details>
+   <details class="tool" id="qqBox"${toolOpen.qqBox?' open':''}><summary><span class="t-title">❓ 질문에 답하기</span><span class="t-sub">질문을 듣고 외운 문장으로 대답하기</span></summary><div id="qqBody">${qqHtml(w)}</div></details>`}
    <details class="tool" id="mkBox"${toolOpen.mkBox?' open':''}><summary><span class="t-title">✏️ 숙어로 문장 만들기</span><span class="t-sub">이번 주 핵심 표현 10개로 내 문장 말하고 첨삭 받기</span></summary><div id="mkBody">${mkHtml(w)}</div></details>
    <details class="tool" id="gsBox"${toolOpen.gsBox?' open':''}><summary><span class="t-title">🎯 영어로 설명하고 맞히기</span><span class="t-sub">핵심 표현 10개 · 설명 듣고 맞히기 / 내가 설명하기</span></summary><div id="gsBody">${gsHtml(w)}</div></details>
-   <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">한글만 보고 처음부터 끝까지 써 보고 총점 받기</span></summary>${mockHtml(w)}</details>
+   <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">${isG()?'음성만 듣고 처음부터 끝까지 받아쓰고 총점 받기':'한글만 보고 처음부터 끝까지 써 보고 총점 받기'}</span></summary>${mockHtml(w)}</details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
    <p class="note">외움 표시와 하루 분량은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
@@ -1591,6 +1603,7 @@ async function prefetchDetails(){
       const w=weeks.find(x=>x.id===curId);if(!w)break;
       if(missing0(w)){if(!autoTried[w.id])await autoEnrich(w);break}
       if(!w.koChk&&!koTried[w.id]&&canWrite){await koCheck(w);continue}
+      if(progOf(w)==='gtv'&&!w.chunked&&!chTried[w.id]&&canWrite){await chunkWeek(w);continue}
       const today=(()=>{try{const d=plan(w),v=todayView(w);return v&&v[0]==='d'?(d[+v.slice(1)]||[]):[]}catch(_){return []}})();
       const order=[...new Set([...today,...w.sentences.map((_,i)=>i)])];
       let job=null;
@@ -1767,7 +1780,12 @@ document.addEventListener('click',async e=>{
     if(loopIdx===i){stop();return}
   }
   if(t.classList.contains('mark')){const d={...doneOf(w.id)};if(d[i]){delete d[i];hiddenEn.delete(i);doneSeen.delete(i)}else{d[i]=true;doneSeen.add(i)}prog.done[w.id]=d;saveProg();if(!patchCardState(w,i))stay(i,render);return}
-  if(t.classList.contains('write')){writeOpen.has(i)?writeOpen.delete(i):writeOpen.add(i);if(!patchWriteOpen(w,i))stay(i,render);return}
+  if(t.classList.contains('write')){writeOpen.has(i)?writeOpen.delete(i):writeOpen.add(i);
+    /* 귀트영 받아쓰기: 열 때 영어를 가리고 바로 한 번 들려줌 */
+    if(isG()&&writeOpen.has(i)&&!hiddenEn.has(i)){hiddenEn.add(i);const c=$('c'+i),en=c&&c.querySelector('.en'),hb=c&&c.querySelector('.hideen');if(en)en.innerHTML=wordsHtml(w.sentences[i].en,i);if(hb){hb.setAttribute('aria-pressed','true');hb.textContent='영어 보기'}}
+    if(!patchWriteOpen(w,i))stay(i,render);
+    if(isG()&&writeOpen.has(i)){stop();const my=token;playOne(w.sentences[i],i,+$('rate').value,my,true)}
+    return}
   if(t.classList.contains('wr-clear')){const key=curId+'|'+i;delete writeDraft[key];delete writeRes[key];
     /* 다시 쓰기: 글과 결과만 그 자리에서 지움 (화면 다시 그리지 않음) */
     const ta=$('wr-'+i),cd=$('c'+i);if(ta&&cd){ta.value='';const rr=cd.querySelector('.wr-res');if(rr)rr.remove();ta.focus({preventScroll:true});return}
@@ -1848,7 +1866,7 @@ async function enrich(sentences,onStatus){
   const prompt=`다음은 한국인 성인 학습자가 일주일 동안 암기할 영어 지문의 문장 목록(JSON 배열, 순서대로)이다.
 각 문장마다:
 - "ko": 자연스러운 한국어 해석 한 문장. 원문에 있는 뜻만 옮긴다. 원문에 없는 대조('~이 아니라'), 강조, 추측, 설명을 덧붙이지 않고, 원문의 내용을 빼지도 않는다. 숫자·기간·고유명사는 원문 그대로.
-- "vocab": 외워야 할 핵심 단어·숙어·문법 패턴 2~6개. 각 항목은 {"t": 영어 표현(문형이면 '사역동사 make + 사람 + 동사원형'처럼 써도 됨), "m": 한국어 뜻과 필요한 경우 괄호 안 짧은 설명}
+- "vocab": 외워야 할 핵심 단어·숙어·문법 패턴 2~6개.${curProg==='gtv'?' (이 지문은 뉴스·시사 듣기 교재다. 시사 어휘와 자주 함께 쓰이는 단어 묶음(예: raise concerns, in a bid to, impose sanctions) 위주로 고른다.)':''} 각 항목은 {"t": 영어 표현(문형이면 '사역동사 make + 사람 + 동사원형'처럼 써도 됨), "m": 한국어 뜻과 필요한 경우 괄호 안 짧은 설명}
 첫 항목이 제목이면 제목도 똑같이 처리한다. 입력과 같은 순서, 같은 개수로 답한다.
 Reply with only JSON in this shape: {"items":[{"ko":"...","vocab":[{"t":"...","m":"..."}]}]}
 
@@ -1901,7 +1919,22 @@ async function regenCore(w,onStatus){
 const autoTried={};
 /* 해석 점검: 주차마다 한 번, 영어 원문과 한국어 해석을 대조해 원문에 없는 말을 덧붙였거나(예: '두 달이 아니라 두 주')
    빠뜨리거나 뜻이 틀린 해석만 고쳐 저장 → 모든 멤버에게 고친 해석이 보임 */
-const koTried={};
+const koTried={},chTried={};
+/* 귀트영 끊어 읽기 만들기: 주차마다 한 번, 모든 문장을 의미 덩어리로 나눠 s.ch에 저장 */
+async function chunkWeek(w){
+  chTried[w.id]=1;const list=w.sentences.map((x,n)=>({n,en:x.en})).filter(x=>x.en);if(!list.length)return;
+  const prompt=`영어 뉴스 듣기를 연습하는 한국인 학습자를 위해, 각 문장을 앞에서부터 순서대로 이해할 수 있는 의미 덩어리(sense group)로 나눈다.
+규칙: 원문 단어와 문장부호를 하나도 바꾸거나 빼거나 더하지 말고, 덩어리 사이에만 " / "를 넣는다. 한 덩어리는 보통 2~6단어. 주어부 / 동사부 / 목적어·보어 / 전치사구 / 접속사·관계사절 앞에서 끊는다. 아주 짧은 문장은 그대로 둬도 된다.
+${JSON.stringify(list)}
+{"items":[{"n":번호,"ch":"덩어리 / 덩어리 / ..."}]} 형태의 JSON으로만 답한다.`;
+  try{const r=await sample.json(prompt,{modelTier:'default'});const it=(r&&Array.isArray(r.items))?r.items:[];
+    const cur=weeks.find(y=>y.id===w.id)||w;let got=0;
+    it.forEach(o=>{const n=+o.n,ch=String(o.ch||'').trim();const sn=cur.sentences[n];if(!sn||!ch||!chunkEnds(sn.en,ch)&&ch.indexOf('/')>=0)return;[w,cur].forEach(y=>{if(y.sentences[n])y.sentences[n].ch=ch});got++});
+    if(!got)return;w.chunked=cur.chunked=Date.now();
+    try{await db.doc('weeks/'+w.id).update({sentences:JSON.parse(JSON.stringify(cur.sentences)),chunked:w.chunked})}catch(e){}
+    if(w.id===curId&&!wbView)cur.sentences.forEach((sn,n)=>{const c=$('c'+n),en=c&&c.querySelector('.en');if(en)en.innerHTML=wordsHtml(sn.en,n)});
+  }catch(e){}
+}
 async function koCheck(w){
   koTried[w.id]=1;const list=w.sentences.map((x,n)=>({n,en:x.en,ko:x.ko||''})).filter(x=>x.en&&x.ko);if(!list.length)return;
   const prompt=`너는 꼼꼼한 영한 번역 검수자다. 아래는 영어 원문과 한국어 해석 쌍이다.
@@ -2095,7 +2128,7 @@ const key10Busy={};
 async function makeKey10(w){
   if(Array.isArray(w.key10)&&w.key10.length||key10Busy[w.id]||!sample)return;const A=allItems(w);if(A.length<=10)return;key10Busy[w.id]=1;
   try{const j=await sample.json(`한국인 초보 영어 학습자가 이번 주 지문에서 꼭 외워야 할 핵심 단어·숙어 10개를 고른다.
-기준: 일상 회화에서 자주 쓰고 다른 문장에도 활용하기 좋은 숙어·구동사·덩어리 표현 우선, 너무 쉬운 단어(예: yesterday, daughter)나 지문에만 쓰이는 고유한 단어는 제외.
+기준: ${progOf(w)==='gtv'?'뉴스·시사에서 자주 나오는 어휘와 함께 쓰이는 단어 묶음(collocation) 우선,':'일상 회화에서 자주 쓰고 다른 문장에도 활용하기 좋은 숙어·구동사·덩어리 표현 우선,'} 너무 쉬운 단어(예: yesterday, daughter)나 지문에만 쓰이는 고유한 단어는 제외.
 번호 목록 중 10개의 번호만 중요한 순서대로 고른다.
 ${A.map((x,n)=>n+'. '+x.v.t+' — '+(x.v.m||'')).join('\n')}
 JSON만: {"pick":[번호,...]}`,{modelTier:'default'});
@@ -2293,6 +2326,46 @@ function gradeMock(w,partial){
   prog.tests=prog.tests||{};prog.tests[w.id]=((prog.tests[w.id]||[]).concat([{at:Date.now(),score:avg,n,of:b.length}])).slice(-20);
   saveProg();render();setTimeout(()=>{const m=$('mockBox');if(m)m.scrollIntoView({block:'start',behavior:'smooth'})},40);
 }
+/* 🗣 듣고 요약해 말하기 (귀트영): 지문 전체를 듣고 영어 3문장 요약 → AI가 내용(핵심을 잡았는지)·표현을 첨삭 */
+let sumBusy=0;
+function sumHtml(w){prog.sum=prog.sum||{};const z=prog.sum[w.id]||{},r=z.res,bb=busyBtn(sumBusy||0,'첨삭 받기');
+  return `<div class="mock"><p>① 위의 <b>▶ 연속 듣기</b>로 지문 전체를 들어요 (영어는 안 보고). ② 기억나는 내용을 <b>영어 3문장</b>으로 요약해 써 보거나 🎤로 말해요. ③ 첨삭 받기 → 놓친 핵심과 더 자연스러운 표현을 알려 줘요.</p>
+    <textarea id="sumIn" rows="4" placeholder="예: The article is about ... / It says that ... / In the end, ..." autocapitalize="sentences" spellcheck="false">${esc(z.u||'')}</textarea>
+    <div class="seq-act">${micBtn('sumIn')}<button type="button" class="primary" id="sumGo"${bb.dis}${sumBusy?` data-busy0="${sumBusy}"`:''}>${bb.txt}</button><button type="button" class="ghost" id="sumRe">↺ 다시 하기</button></div>
+    ${z.err?`<p class="hint">${esc(z.err)}</p>`:''}
+    ${r?`<div class="sum-res"><div class="sc">내용 ${esc(String(r.score||0))}점 · ${esc(r.verdict||'')}</div>
+      ${(r.got||[]).length?`<div><b>잡은 핵심</b><ul class="ok">${r.got.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+      ${(r.miss||[]).length?`<div><b>놓친 핵심</b><ul class="miss">${r.miss.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+      ${r.fixed?`<div class="box"><b>내 요약 고친 문장</b>${esc(r.fixed)}</div>`:''}
+      ${r.model?`<div class="box hl-zone"><b>모범 요약 <button class="vplay" data-t="${esc(r.model)}" data-a="" aria-label="모범 요약 듣기">🔊</button></b>${esc(r.model)}</div>`:''}
+      ${r.tip?`<p class="hint">💡 ${esc(r.tip)}</p>`:''}</div>`:''}
+  </div>`}
+function sumPatch(){const b=$('sumBody'),w=weeks.find(x=>x.id===curId);if(b&&w)b.innerHTML=sumHtml(w)}
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('#sumGo,#sumRe');if(!t)return;e.preventDefault();
+  const w=weeks.find(x=>x.id===curId);if(!w)return;prog.sum=prog.sum||{};
+  if(t.id==='sumRe'){if(sumBusy)return;delete prog.sum[w.id];saveProg();sumPatch();return}
+  const u=($('sumIn')||{}).value||'';if(!u.trim()){toast('먼저 써 보거나 🎤로 말해 보세요');return}
+  if(sumBusy&&Date.now()-sumBusy<BUSY_RETRY)return;
+  try{micStop()}catch(_){}const myT=Date.now();sumBusy=myT;prog.sum[w.id]={u};sumPatch();
+  const passage=w.sentences.filter(x=>!x.isTitle).map(x=>x.en).join(' ');
+  try{const j=await sample.json(`너는 한국인 초중급 영어 학습자를 다정하게 가르치는 영어 듣기 강사다.
+학습자가 아래 뉴스 지문을 듣고 영어로 요약했다.
+지문 제목: ${w.title}
+지문: ${passage}
+학습자 요약: ${u}
+할 일:
+- 지문의 핵심 내용 3~5개를 정하고, 학습자가 잡은 것(got)과 놓친 것(miss)을 한국어로 짧게 적는다.
+- score: 내용을 얼마나 잡았는지 0~100.
+- verdict: 한 줄 한국어 평가(칭찬 먼저).
+- fixed: 학습자 요약의 문법·표현만 자연스럽게 고친 영어(내용은 학습자 것 유지). 고칠 게 없으면 원문 그대로.
+- model: 초중급 학습자가 말할 수 있는 쉬운 영어 3문장 모범 요약.
+- tip: 다음에 더 잘 듣기 위한 한국어 팁 한 문장.
+JSON만: {"score":0,"verdict":"...","got":["..."],"miss":["..."],"fixed":"...","model":"...","tip":"..."}`,{modelTier:'default',limit:60000});
+    if(sumBusy!==myT)return;prog.sum[w.id]={u,res:j||{},at:Date.now()};
+  }catch(err){if(sumBusy!==myT)return;prog.sum[w.id]={u,err:err&&err.code==='network'?'답이 늦어 멈췄어요. [첨삭 받기]를 다시 눌러 주세요.':'첨삭을 받지 못했어요. 다시 눌러 주세요.'}}
+  sumBusy=0;try{saveProg()}catch(_){}sumPatch();
+  const r=prog.sum[w.id].res;if(r&&+r.score>=80){const box=document.querySelector('#sumBody .sum-res');if(box)celebrateBox(box)}
+});
 function mockHtml(w){
   const b=bodyOf(w), hist=((prog.tests||{})[w.id]||[]).slice(-3).reverse();
   const histHtml=hist.length?`<div class="mk-hist">최근 기록: ${hist.map(h=>`<span>${new Date(h.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})} <b>${h.score}점</b></span>`).join(' ')}</div>`:'';
@@ -2306,7 +2379,7 @@ function mockHtml(w){
   }
   const k=mock.pos, j=b[k];
   return `<div class="mock"><div class="seq-step">${k+1} / ${b.length}</div>
-    <div class="mk-ko">${esc(w.sentences[j].ko||'(해석 없음)')}</div>
+    ${isG()?`<div class="mk-ko"><button class="play" data-i="${j}">▶ 듣기</button> <button class="slow" data-i="${j}">▶ 천천히</button> <small>들리는 대로 받아쓰기</small></div>`:`<div class="mk-ko">${esc(w.sentences[j].ko||'(해석 없음)')}</div>`}
     <textarea id="mockIn" rows="3" placeholder="영어 문장을 써 보세요" autocapitalize="sentences" spellcheck="false">${esc(mock.ans[k]||'')}</textarea>
     <div class="seq-act">${micBtn('mockIn')}</div>
     <div class="seq-act"><button class="ghost" id="mockPrev"${k===0?' disabled':''}>◀ 이전</button>
