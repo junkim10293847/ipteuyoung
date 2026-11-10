@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="입트영">
-<meta name="theme-color" content="#1f7a80">
-<script>try{if(JSON.parse(localStorage.getItem('prog')||'"ipt"')==='gtv'){document.documentElement.dataset.prog='gtv';document.querySelector('meta[name=theme-color]').content='#5146a8'}}catch(e){}</script>
+<meta name="theme-color" content="#5146a8">
+<script>try{if(JSON.parse(localStorage.getItem('prog')||'"ipt"')==='gtv'){document.documentElement.dataset.prog='gtv';document.querySelector('meta[name=theme-color]').content='#b03a6a'}}catch(e){}</script>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -20,23 +20,23 @@
 [hidden]{display:none!important}
 /* Layout: week chips → week header with Mon–Sat plan → day tabs → sentence cards; sticky audio dock at bottom */
 :root{
-  --bg:#e6f1f2; --surface:#ffffff; --fg:#1b2a2c; --muted:#56696c; --line:#cfe0e2;
-  --accent:#1f7a80; --accent-soft:#d6ecee; --done:#c9771a; --done-soft:#fdeed6; --warn:#b4432e;
+  --bg:#ecebf6; --surface:#ffffff; --fg:#1f1d2e; --muted:#5d5a72; --line:#d9d6ee;
+  --accent:#5146a8; --accent-soft:#e3e0f7; --done:#c9771a; --done-soft:#fdeed6; --warn:#b4432e;
   --display:'Fraunces',Georgia,serif; --body:'Noto Sans KR',system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111a1b; --surface:#192526; --fg:#e4eef0; --muted:#93a8ab; --line:#283a3c;
-  --accent:#5cc1c6; --accent-soft:#1b3537; --done:#f0aa4a; --done-soft:#3a2d1a; --warn:#e78a72; color-scheme:dark}}
+  --bg:#14131d; --surface:#1d1c2a; --fg:#ebe9f5; --muted:#a19dba; --line:#302e45;
+  --accent:#a59cf2; --accent-soft:#2a2747; --done:#f0aa4a; --done-soft:#3a2d1a; --warn:#e78a72; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111a1b; --surface:#192526; --fg:#e4eef0; --muted:#93a8ab; --line:#283a3c;
-  --accent:#5cc1c6; --accent-soft:#1b3537; --done:#f0aa4a; --done-soft:#3a2d1a; --warn:#e78a72; color-scheme:dark}
-/* 귀트영: 보라(인디고) 계열로 구분 — 입트영(청록)과 한눈에 다르게 */
-:root{--c-ipt:#1f7a80;--c-gtv:#5146a8}
-:root[data-prog="gtv"]{--bg:#ecebf6;--line:#d9d6ee;--accent:#5146a8;--accent-soft:#e3e0f7;--muted:#5d5a72;--fg:#1f1d2e}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--c-ipt:#5cc1c6;--c-gtv:#a59cf2}
-  :root[data-prog="gtv"]:not([data-theme="light"]){--bg:#14131d;--surface:#1d1c2a;--line:#302e45;--accent:#a59cf2;--accent-soft:#2a2747;--muted:#a19dba;--fg:#ebe9f5}}
-:root[data-theme="dark"]{--c-ipt:#5cc1c6;--c-gtv:#a59cf2}
-:root[data-theme="dark"][data-prog="gtv"]{--bg:#14131d;--surface:#1d1c2a;--line:#302e45;--accent:#a59cf2;--accent-soft:#2a2747;--muted:#a19dba;--fg:#ebe9f5}
+  --bg:#14131d; --surface:#1d1c2a; --fg:#ebe9f5; --muted:#a19dba; --line:#302e45;
+  --accent:#a59cf2; --accent-soft:#2a2747; --done:#f0aa4a; --done-soft:#3a2d1a; --warn:#e78a72; color-scheme:dark}
+/* 입트영: 보라(인디고), 귀트영: 산딸기(로즈) 계열로 구분 */
+:root{--c-ipt:#5146a8;--c-gtv:#b03a6a}
+:root[data-prog="gtv"]{--bg:#f6ecf1;--line:#ecd3de;--accent:#b03a6a;--accent-soft:#f7e0ea;--muted:#6e5763;--fg:#2c1c23}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--c-ipt:#a59cf2;--c-gtv:#f08cb4}
+  :root[data-prog="gtv"]:not([data-theme="light"]){--bg:#1c1317;--surface:#261b20;--line:#3d2b33;--accent:#f08cb4;--accent-soft:#3a2230;--muted:#bba1ad;--fg:#f4e8ee}}
+:root[data-theme="dark"]{--c-ipt:#a59cf2;--c-gtv:#f08cb4}
+:root[data-theme="dark"][data-prog="gtv"]{--bg:#1c1317;--surface:#261b20;--line:#3d2b33;--accent:#f08cb4;--accent-soft:#3a2230;--muted:#bba1ad;--fg:#f4e8ee}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:.9375rem;line-height:1.55}
 html{font-size:16px}
@@ -525,7 +525,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v141</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v142</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -695,7 +695,7 @@ const canGtv=()=>{try{return GTV_USERS.includes(String(nick||'').trim())}catch(_
 function ensureProg(){if(curProg!=='gtv'||canGtv())return;
   curProg='ipt';ls.set('prog','ipt');weeks=allWeeks.filter(w=>progOf(w)===curProg);
   const last=ls.get(lastKey(),null);if(!weeks.find(w=>w.id===curId)){curId=(weeks.find(w=>w.id===last)||weeks[0]||{}).id||null;view=curId?todayView(weeks.find(w=>w.id===curId)):null}}
-function renderBrand(){ensureProg();const P=PROGS[curProg];{const g=document.querySelector('#progSw [data-prog="gtv"]');if(g)g.hidden=!canGtv()}document.documentElement.dataset.prog=curProg;{const m=document.querySelector('meta[name=theme-color]');if(m)m.content=curProg==='gtv'?'#5146a8':'#1f7a80'}const t=$('brandT'),sb=$('brandS'),ap=$('addProg');if(ap)ap.textContent=P.t.replace(' 스터디','');if(t)t.textContent=P.t;if(sb)sb.textContent=P.s;document.title=P.doc;
+function renderBrand(){ensureProg();const P=PROGS[curProg];{const g=document.querySelector('#progSw [data-prog="gtv"]');if(g)g.hidden=!canGtv()}document.documentElement.dataset.prog=curProg;{const m=document.querySelector('meta[name=theme-color]');if(m)m.content=curProg==='gtv'?'#b03a6a':'#5146a8'}const t=$('brandT'),sb=$('brandS'),ap=$('addProg');if(ap)ap.textContent=P.t.replace(' 스터디','');if(t)t.textContent=P.t;if(sb)sb.textContent=P.s;document.title=P.doc;
   document.querySelectorAll('#progSw .brand-mark').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.prog===curProg)));
   /* 고른 쪽 동그라미가 앞(왼쪽)에 오게 */
   const sw=$('progSw'),a=sw&&sw.querySelector(`[data-prog="${curProg}"]`);if(sw&&a&&sw.firstElementChild!==a)sw.insertBefore(a,sw.firstElementChild)}
