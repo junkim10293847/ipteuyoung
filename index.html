@@ -590,7 +590,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v149</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v150</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1036,8 +1036,14 @@ function alignWords(ans,usr){
   return out.reverse();
 }
 function gradeText(ansT,usrT){
-  const ans=tokenize(ansT), usr=tokenize(usrT);
-  if(!usr.length)return null;
+  const ans=tokenize(ansT), usr0=tokenize(usrT);
+  if(!usr0.length)return null;
+  /* 하이픈 없이 띄어 쓴 경우(14 month old)도 14-month-old 와 같게 */
+  const hk=new Set(ans.filter(o=>/-/.test(o.t)).map(o=>o.k)),usr=[];
+  for(let i=0;i<usr0.length;i++){let hit=null;
+    if(hk.size)for(let n=2;n<=4&&i+n<=usr0.length&&!hit;n++){const seg=usr0.slice(i,i+n);if(seg.some(o=>o.k===','))break;
+      const tk=tokenize(seg.map(o=>o.t.replace(/[.,!?;:]+$/,'')).join('-'));if(tk.length===1&&hk.has(tk[0].k))hit={t:seg.map(o=>o.t).join(' '),k:tk[0].k,n}}
+    if(hit){usr.push({t:hit.t,k:hit.k});i+=hit.n-1}else usr.push(usr0[i])}
   const d=alignWords(ans,usr), isC=o=>o[4]===',';
   const total=ans.length;
   const sub=d.filter(x=>x[0]==='sub'&&!x[3]).length, spell=d.filter(x=>x[0]==='sub'&&x[3]).length;
@@ -1051,10 +1057,17 @@ function gradeText(ansT,usrT){
   return {d,score,sub,spell,miss,bad,cmiss,cbad,perfect,almost};
 }
 function grade(w,i){const T=ttlOf(w,i);return gradeText((T?T.en+' ':'')+w.sentences[i].en,writeDraft[curId+'|'+i]||'')}
+/* 하이픈 낱말(fourteen-month-year ↔ 14-month-old)은 조각별로 비교해 틀린 조각만 표시 (숫자 단어 = 숫자) */
+function hyDiff(x,y){if(!/-/.test(x)||!/-/.test(y))return '';
+  const tail=String(x).match(/[^A-Za-z0-9'-]*$/)[0],xs=String(x).slice(0,x.length-tail.length).split('-'),ys=String(y).replace(/[^A-Za-z0-9'-]+$/,'').split('-');
+  if(xs.length!==ys.length)return '';
+  const key=p=>{const c=p.toLowerCase().replace(/[^a-z0-9']/g,'');return isNumWord(c)?String(numVal([c]).v):c};
+  if(!xs.some((p,i)=>key(p)===key(ys[i])))return '';
+  return xs.map((p,i)=>key(p)===key(ys[i])?`<span class="ok">${esc(p)}</span>`:`<span class="sub"><s>${esc(p)}</s>→<b>${esc(ys[i])}</b></span>`).join('<span class="ok">-</span>')+(tail?`<span class="ok">${esc(tail)}</span>`:'')}
 /* 쉼표는 앞 단어에 붙여서 표시, 빠진 쉼표는 눈에 띄게 */
 const diffHtml=r=>`<div class="wr-diff">${r.d.map(([t,x,y,s,k],n)=>{const sp=n&&k!==','?' ':'';
   if(k===','&&t!=='ok')return `<span class="${t} pun" title="${t==='miss'?'쉼표 빠짐':'쉼표 더 씀'}">,</span>`;
-  return sp+(t==='sub'?`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`:`<span class="${t}">${esc(x)}</span>`)}).join('')}</div>`;
+  return sp+(t==='sub'?(hyDiff(x,y)||`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`):`<span class="${t}">${esc(x)}</span>`)}).join('')}</div>`;
 const errCount=r=>[r.spell?`철자 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠짐 ${r.miss}`:'',r.bad?`더 씀 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).join(' · ');
 /* 4. 약점 기록: 써보기·모의 테스트 결과를 닉네임별로 누적 */
 function recordWeak(wid,i,r,save=true){
