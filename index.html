@@ -590,7 +590,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v151</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v152</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -709,8 +709,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   /* AI: Apps Script에 넣어 둔 Gemini 무료 키로 답함 */
   const flat=i=>typeof i==='string'?i:i.map(m=>(m.role==='assistant'?'[이전 답변] ':'')+m.content).join('\n\n');
-  const sample=async(input,opts={})=>{nextLim=opts.limit||0;const text=await run('aiText',flat(input));if(opts.onText)opts.onText({text,delta:text});return{text,truncated:false}};
-  sample.json=async(input,opts={})=>{nextLim=opts.limit||0;return run('aiJson',flat(input))};
+  /* 내가 누른 요청(질문·첨삭)이 먼저: 뒤에서 도는 자동 작업(설명 미리 만들기·발음·해석 점검·끊어 읽기)은
+     내 요청이 진행 중이거나 끝난 직후 20초 동안 쉬었다가 이어감 → AI 무료 한도를 서로 다투다 답이 늦던 문제 완화 */
+  const fg={n:0,until:0};window.__fg=fg;
+  const fgIdle=async()=>{while(fg.n>0||Date.now()<fg.until)await new Promise(z=>setTimeout(z,1000))};
+  const prio=async(opts,fn)=>{if(opts.bg){await fgIdle();nextLim=opts.limit||0;return fn()}
+    fg.n++;try{nextLim=opts.limit||0;return await fn()}finally{fg.n--;fg.until=Date.now()+20000}};
+  const sample=async(input,opts={})=>{const text=await prio(opts,()=>run('aiText',flat(input)));if(opts.onText)opts.onText({text,delta:text});return{text,truncated:false}};
+  sample.json=async(input,opts={})=>prio(opts,()=>run('aiJson',flat(input)));
 
   const user={isOwner:async()=>adminPw?!!(await run('checkAdmin',adminPw).catch(()=>false)):false,id:async()=>'m',can:async()=>true,profiles:async()=>({})};
   window.claude={use:async n=>n==='db'?db:n==='user'?user:n==='sample'?sample:null};
@@ -1485,7 +1491,11 @@ Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.
   try{
     const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
     /* 60초 넘게 답이 없으면 끊고 다시 질문하게 안내 (예전엔 최대 4분까지 '생각하는 중…'에 머묾) */
-    let {text}=await sample(prompt,{cache:false,onText,limit:60000});
+    let text;
+    try{({text}=await sample(prompt,{cache:false,onText,limit:45000}))}
+    catch(e1){if(!(e1&&e1.code==='network'))throw e1;   /* 45초 안에 답이 없으면 알아서 한 번 더 물어봄 */
+      qaLive[key].a='';qaLive[key].t0=Date.now();{const el=$('qaLive-'+k);if(el)el.innerHTML=`한 번 더 물어보는 중… <span class="det-t" data-t0="${Date.now()}">0초</span>`}
+      ({text}=await sample(prompt,{cache:false,onText,limit:45000}))}
     if((!/[A-Za-z]{3,}/.test(text)||text.length<60)&&Date.now()-t0<25000){const r2=await sample(prompt+'\n\n[주의] 직전 답에 영어 예문이 없거나 너무 짧았다. 규칙대로 다시 답한다.',{cache:false,onText,limit:30000}).catch(()=>null);if(r2&&r2.text)text=r2.text}
     prog.qa=prog.qa||{};const arr=(prog.qa[key]||[]).concat([{q,a:text}]).slice(-8);prog.qa[key]=arr;qaJust[key]=1;saveProg();
   }catch(err){
@@ -1620,7 +1630,7 @@ async function loadPron(w){
 ${items.map((x,n)=>`${n+1}. ${x.t}`).join('\n')}
 
 {"items":[{"n":1,"ipa":"...","ko":"..."}, ...]} 형태의 JSON으로만 답한다.`;
-  try{let r=await sample.json(prompt,{modelTier:'default'});const arr=Array.isArray(r)?r:(r&&r.items)||[];
+  try{let r=await sample.json(prompt,{modelTier:'default',bg:true});const arr=Array.isArray(r)?r:(r&&r.items)||[];
     let got=0;arr.forEach(o=>{const x=items[(+o.n||0)-1];if(!x)return;const pr={ipa:String(o.ipa||'').trim(),ko:String(o.ko||'').trim()};
       [w,weeks.find(y=>y.id===w.id)].forEach(y=>{const v=y&&y.sentences[x.i]&&y.sentences[x.i].vocab[x.j];if(v&&v.t===x.t)v.pron=pr});got++});
     if(!got)throw 0;
@@ -1674,7 +1684,7 @@ ${DETAIL_EXAMPLE}
     const put=async det=>{const cur=weeks.find(x=>x.id===w.id)||w;const sents=JSON.parse(JSON.stringify(cur.sentences));
       if(sents[i]&&sents[i].vocab[j]&&sents[i].vocab[j].t===v.t){sents[i].vocab[j].detail=det;w.sentences[i].vocab[j].detail=det;if(cur!==w&&cur.sentences[i]&&cur.sentences[i].vocab[j])cur.sentences[i].vocab[j].detail=det}
       try{await db.doc('weeks/'+w.id).update({sentences:sents})}catch(e){}};
-    let det=normDet(await sample.json(basePrompt,{modelTier:'default'}));
+    let det=normDet(await sample.json(basePrompt,{modelTier:'default',bg:!!quiet}));
     const pr=probs(det);
     /* 먼저 받은 설명을 바로 보여 주고, 빠진 항목이 있으면 뒤에서 한 번 더 받아 보완 */
     if(det.core||det.usage||det.examples.length){
@@ -2055,7 +2065,7 @@ async function chunkWeek(w){
 규칙: 원문 단어와 문장부호를 하나도 바꾸거나 빼거나 더하지 말고, 덩어리 사이에만 " / "를 넣는다. 한 덩어리는 보통 2~6단어. 주어부 / 동사부 / 목적어·보어 / 전치사구 / 접속사·관계사절 앞에서 끊는다. 아주 짧은 문장은 그대로 둬도 된다.
 ${JSON.stringify(list)}
 {"items":[{"n":번호,"ch":"덩어리 / 덩어리 / ..."}]} 형태의 JSON으로만 답한다.`;
-  try{const r=await sample.json(prompt,{modelTier:'default'});const it=(r&&Array.isArray(r.items))?r.items:[];
+  try{const r=await sample.json(prompt,{modelTier:'default',bg:true});const it=(r&&Array.isArray(r.items))?r.items:[];
     const cur=weeks.find(y=>y.id===w.id)||w;let got=0;
     it.forEach(o=>{const n=+o.n,ch=String(o.ch||'').trim();const sn=cur.sentences[n];if(!sn||!ch||!chunkEnds(sn.en,ch)&&ch.indexOf('/')>=0)return;[w,cur].forEach(y=>{if(y.sentences[n])y.sentences[n].ch=ch});got++});
     if(!got)return;w.chunked=cur.chunked=Date.now();
@@ -2074,7 +2084,7 @@ async function koCheck(w){
 문제없는 항목은 답에 넣지 않는다. 고칠 때는 원문 뜻 그대로 자연스러운 한국어 한 문장으로.
 ${JSON.stringify(list)}
 {"fix":[{"n":번호,"ko":"고친 해석","why":"짧은 이유"}]} 형태의 JSON으로만 답한다. 고칠 것이 없으면 {"fix":[]}.`;
-  try{const r=await sample.json(prompt,{modelTier:'default'});const fx=(r&&Array.isArray(r.fix))?r.fix:[];
+  try{const r=await sample.json(prompt,{modelTier:'default',bg:true});const fx=(r&&Array.isArray(r.fix))?r.fix:[];
     const cur=weeks.find(y=>y.id===w.id)||w;const changed=[];
     fx.forEach(o=>{const n=+o.n,ko=String(o.ko||'').trim();if(!ko||!cur.sentences[n]||ko===cur.sentences[n].ko)return;
       [w,cur].forEach(y=>{if(y.sentences[n])y.sentences[n].ko=ko});changed.push(n)});
