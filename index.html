@@ -590,7 +590,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v150</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v151</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -709,7 +709,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   /* AI: Apps Script에 넣어 둔 Gemini 무료 키로 답함 */
   const flat=i=>typeof i==='string'?i:i.map(m=>(m.role==='assistant'?'[이전 답변] ':'')+m.content).join('\n\n');
-  const sample=async(input,opts={})=>{const text=await run('aiText',flat(input));if(opts.onText)opts.onText({text,delta:text});return{text,truncated:false}};
+  const sample=async(input,opts={})=>{nextLim=opts.limit||0;const text=await run('aiText',flat(input));if(opts.onText)opts.onText({text,delta:text});return{text,truncated:false}};
   sample.json=async(input,opts={})=>{nextLim=opts.limit||0;return run('aiJson',flat(input))};
 
   const user={isOwner:async()=>adminPw?!!(await run('checkAdmin',adminPw).catch(()=>false)):false,id:async()=>'m',can:async()=>true,profiles:async()=>({})};
@@ -1436,7 +1436,7 @@ function qaHtml(k,title,ph){
   const tg=old.length?`<button type="button" class="vmore qa-tg" data-qk="${esc(key)}">${op?'기록 접기 ▴':`${just.length?'이전 ':''}질문 기록 ${old.length} ▾`}</button>`:'';
   const items=(old.length&&op?`<div class="qa-old">${old.map(one).join('')}</div>`:'')+just.map(one).join('')
     +(detErr['qa'+key]?`<p class="load" style="color:var(--bad,#b3261e)">${esc(detErr['qa'+key])}</p>`:'')
-    +(live?`<div class="qa-item"><div class="qa-q">Q. ${esc(live.q)}</div><div class="qa-a" id="qaLive-${esc(k)}">${esc(live.a||'생각하는 중…')}</div></div>`:'');
+    +(live?`<div class="qa-item"><div class="qa-q">Q. ${esc(live.q)}</div><div class="qa-a" id="qaLive-${esc(k)}">${live.a?esc(live.a):`생각하는 중… <span class="det-t" data-t0="${live.t0||Date.now()}">0초</span>`}</div></div>`:'');
   const off=!sample||readOnly;
   return `<div class="qa" data-k="${esc(k)}" data-t="${esc(title||'')}" data-p="${esc(ph||'')}"><div class="qa-hd"><h4>${title||'궁금한 점 바로 묻기'}</h4>${tg}</div>${items}
     ${off?`<p class="load">AI 질문 기능은 관리자가 Gemini 키를 넣으면 쓸 수 있습니다.</p>`:
@@ -1481,14 +1481,15 @@ Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.
 확인 퀴즈: '설탕 한 스푼을 계량해 덜어 두세요'를 영어로 말해 보세요.
 
 위 예시처럼 질문에 정확히 답하되, 예시의 내용을 그대로 베끼지 않는다.`;
-  delete detErr['qa'+key];qaLive[key]={q,a:''};qaDraft[key]='';rc();
+  delete detErr['qa'+key];const t0=Date.now();qaLive[key]={q,a:'',t0};qaDraft[key]='';rc();
   try{
     const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
-    let {text}=await sample(prompt,{cache:false,onText});
-    if(!/[A-Za-z]{3,}/.test(text)||text.length<60){const r2=await sample(prompt+'\n\n[주의] 직전 답에 영어 예문이 없거나 너무 짧았다. 규칙대로 다시 답한다.',{cache:false,onText}).catch(()=>null);if(r2&&r2.text)text=r2.text}
+    /* 60초 넘게 답이 없으면 끊고 다시 질문하게 안내 (예전엔 최대 4분까지 '생각하는 중…'에 머묾) */
+    let {text}=await sample(prompt,{cache:false,onText,limit:60000});
+    if((!/[A-Za-z]{3,}/.test(text)||text.length<60)&&Date.now()-t0<25000){const r2=await sample(prompt+'\n\n[주의] 직전 답에 영어 예문이 없거나 너무 짧았다. 규칙대로 다시 답한다.',{cache:false,onText,limit:30000}).catch(()=>null);if(r2&&r2.text)text=r2.text}
     prog.qa=prog.qa||{};const arr=(prog.qa[key]||[]).concat([{q,a:text}]).slice(-8);prog.qa[key]=arr;qaJust[key]=1;saveProg();
   }catch(err){
-    const msg=err&&err.code==='not_granted'?'AI 키가 설정되지 않아 답할 수 없습니다. 관리자에게 알려 주세요.':err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'인터넷 연결이 불안정해 서버에 닿지 못했습니다. 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요. ('+String(err&&err.message||'').slice(0,60)+')';
+    const msg=err&&err.code==='not_granted'?'AI 키가 설정되지 않아 답할 수 없습니다. 관리자에게 알려 주세요.':err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'답이 늦어 멈췄어요. [질문]을 다시 눌러 주세요. (질문은 그대로 남겨 뒀어요)':'답을 만들지 못했습니다. 다시 질문해 주세요. ('+String(err&&err.message||'').slice(0,60)+')';
     qaDraft[key]=q;detErr['qa'+key]=msg;
   }
   delete qaLive[key];rc();
@@ -1511,13 +1512,13 @@ ${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):
 5. 영어 예문과 표현은 반드시 영어 알파벳으로 쓰고, 바로 뒤 괄호에 자연스러운 한국어 해석을 붙인다. 영어를 한글 발음으로 옮겨 적지 않는다(발음을 물었을 때만 발음 표기).
 6. 실제로 쓰는 자연스러운 예문 1~2개를 준다.
 7. 전체 4~8줄, 한 줄에 한 가지 내용. 마크다운 기호(#, *, -, **)와 번호 목록 없이 줄바꿈만 사용한다. 인사말 없이 존댓말로 쓴다.`;
-  delete detErr['qa'+key];qaLive[key]={q,a:''};qaDraft[key]='';patchAskAll();
+  delete detErr['qa'+key];qaLive[key]={q,a:'',t0:Date.now()};qaDraft[key]='';patchAskAll();
   try{
     const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
-    const {text}=await sample(prompt,{cache:false,onText});
+    const {text}=await sample(prompt,{cache:false,onText,limit:60000});
     delete qaLive[key];prog.qa=prog.qa||{};prog.qa[key]=((prog.qa[key]||[]).concat([{q,a:text}])).slice(-20);qaJust[key]=1;saveProg();
   }catch(err){
-    qaDraft[key]=q;detErr['qa'+key]=err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'인터넷 연결이 불안정합니다. 다시 질문해 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요.';
+    qaDraft[key]=q;detErr['qa'+key]=err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'답이 늦어 멈췄어요. [질문]을 다시 눌러 주세요.':'답을 만들지 못했습니다. 다시 질문해 주세요.';
   }
   delete qaLive[key];patchAskAll();
 }
