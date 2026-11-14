@@ -1,2 +1,10 @@
-설명이 없는 단어·숙어 0개 (이번에 최대 40개), 퀴즈가 없는 설명 84개
-확인 퀴즈 40개 저장
+설명이 없는 단어·숙어 0개 (이번에 최대 40개), 퀴즈가 없는 설명 44개
+Traceback (most recent call last):
+  File "/home/runner/work/ipteuyoung/ipteuyoung/scripts/gen_details.py", line 224, in <module>
+    main()
+  File "/home/runner/work/ipteuyoung/ipteuyoung/scripts/gen_details.py", line 195, in main
+    make_quizzes(url, weeks, qjobs[:40])
+  File "/home/runner/work/ipteuyoung/ipteuyoung/scripts/gen_details.py", line 163, in make_quizzes
+    got = {int(x.get('n', -1)): x for x in (r or {}).get('items', []) if isinstance(x, dict) and x.get('quiz')}
+                                           ^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'get'
