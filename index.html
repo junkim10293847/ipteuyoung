@@ -351,6 +351,11 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 :root[data-theme="dark"] .vdet{background:#3a3418;border-color:#7a6a2a}.vdet .d-use{--sec:var(--done)}.vdet .d-ex{--sec:#3b7dd8}.vdet .d-sim{--sec:#8a6fc7}.vdet .d-tip{--sec:var(--warn)}
 .vdet h4{display:inline-block;width:max-content;max-width:100%;justify-self:start;margin:0 0 6px;font-size:.74rem;letter-spacing:.02em;color:#fff;background:var(--sec,var(--accent));border-radius:999px;padding:2px 10px}
 .vdet p{margin:0}
+.gs-clue i{font-style:normal;font-weight:600;color:var(--muted)}
+.gs-h{display:block;margin-top:6px}.gs-h span{display:inline-block;font-style:normal;font-weight:700;font-size:.78rem;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:1px 8px;margin-right:4px}
+.gs-note{margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:8px}
+.gs-note .gs-nh{font-size:.9rem}.gs-note i{font-style:normal;font-size:.75rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:4px}
+.gs-note span{display:block;font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:2px}.gs-note p{margin:2px 0;line-height:1.55}.gs-note small{color:var(--muted)}.gs-note em{font-size:.75rem;color:var(--muted)}
 .en .cut{font-style:normal;font-weight:700;color:var(--accent);opacity:.55;margin-left:1px}
 .wr-ko.dict{font-size:.88rem;color:var(--muted)}.wr-ko.dict b{color:var(--fg)}
 .sum-res{display:grid;gap:8px;margin-top:10px}.sum-res .sc{font-weight:800;color:var(--accent);font-size:1.05rem}
@@ -590,7 +595,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v152</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v153</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -2339,23 +2344,49 @@ JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
    맞히기: AI가 만든 쉬운 영어 설명을 듣고 어떤 표현인지 맞힘 / 설명하기: 표현을 쓰지 않고 영어로 설명하면 AI가 듣는 사람이 되어 맞혀 봄 */
 const gsSeen=new Set(),gsGot=new Set();let gsAuto=null;let gsMode='guess',gsPos=0,gsOrder=null,gsHint=0,gsShow=false,gsRes=null,gsBusy=false,gsErr='',gsScore={ok:0,tried:0},gsClueBusy={},gsClueErr={},gsTimer=null,gsLeft=0;const gsDraft={};
 function gsItems(w){const L=mkItems(w);if(!gsOrder||gsOrder.wid!==w.id||gsOrder.n!==L.length){const idx=L.map((_,k)=>k);for(let k=idx.length-1;k>0;k--){const r=Math.floor(Math.random()*(k+1));[idx[k],idx[r]]=[idx[r],idx[k]]}gsOrder={wid:w.id,n:L.length,idx}}return gsOrder.idx.map(k=>L[k])}
-async function makeClues(w){
+/* 🎯 게임용 영어 설명 (v2): 학습자 사전(옥스퍼드·롱맨·케임브리지 학습자용) 방식으로 깊이 있게
+   def 사전식 정의 · use 쓰는 상황 · ex 빈칸 예문 · syn 비슷한 말/반대말 · pos 품사 · reg 말투 · col 함께 쓰는 말 · nu 뉘앙스(한국어) · ex2 예문 2개
+   4개씩 나눠 만들어 주차에 저장(w.clue2) — 예전 한 줄 설명(w.clues)은 새 설명이 생기기 전까지만 사용 */
+const clueOf=(w,k)=>{const c2=(w.clue2||{})[k];if(c2&&c2.def)return c2;const c=(w.clues||{})[k];return c?{def:c,old:true}:null};
+async function makeClues(w,force){
   if(gsClueBusy[w.id]||!sample)return;gsClueBusy[w.id]=1;delete gsClueErr[w.id];gsPatch();
-  const L=mkItems(w);
-  try{const res=await sample.json(`한국인 초보 영어 학습자 모임에서 '영어로 설명하고 맞히기' 게임을 한다. 아래 표현 목록(JSON 배열, 순서대로)마다 듣는 사람이 그 표현을 맞힐 수 있는 쉬운 영어 설명을 만든다.
-- 1~2문장, 쉬운 단어(초등~중학 수준), 15~30단어.
-- 표현에 들어 있는 단어(관사·전치사 제외)는 절대 쓰지 않는다.
-- 뜻 설명 + 언제 쓰는지 상황 하나. 예: "cram for" → "It means studying a lot in a very short time, usually the night before a test."
+  const all=mkItems(w),L=all.filter(x=>force||!((w.clue2||{})[x.i+'-'+x.j]||{}).def);
+  try{
+    for(let b=0;b<L.length;b+=4){const part=L.slice(b,b+4);
+      const res=await sample.json(`한국인 영어 학습자 모임에서 '영어로 설명하고 맞히기' 게임을 한다. 설명을 듣고 표현을 맞혀야 하므로, 학습자용 영영사전(Oxford Learner's, Longman, Cambridge 학습자 사전) 수준으로 정확하고 섬세하게 풀어 준다. 사전 문장을 그대로 베끼지 말고 쉬운 말로 다시 쓴다.
+표현마다 아래 항목을 만든다.
+- "def": 영영사전식 정의 2~3문장(25~45단어). 핵심 의미 → 어떤 느낌·정도인지 → 주로 누가/무엇이 하는지까지. 중학~고1 수준 단어.
+- "use": 이 표현을 쓰는 구체적인 상황 한 문장(영어). 예: "You might say this when ..."
+- "ex": 표현 자리를 ____ 로 비운 자연스러운 영어 예문 하나.
+- "syn": 비슷한 말 1~2개와(있으면) 반대말 1개. 예: "similar: resume, go back / opposite: quit"
+- "pos": 품사·형태 (예: "phrasal verb", "idiom", "noun phrase", "verb + to-infinitive")
+- "reg": 말투 (예: "informal, spoken", "neutral", "formal, news")
+- "col": 자주 함께 쓰는 말 2~3개 배열 (예: ["return to work after maternity leave","be ready to return to work"])
+- "nu": 한국어 2~3문장. 비슷한 표현과의 차이, 한국인이 자주 틀리는 점(전치사·관사·시제 등).
+- "ex2": 실제로 쓰는 예문 2개 [{"en":"...","ko":"..."}]
+규칙: def·use·syn·ex 에는 표현에 들어 있는 단어(관사·전치사·대명사 제외)를 절대 쓰지 않는다. ex2·col 에는 써도 된다.
 입력과 같은 순서, 같은 개수로 답한다.
-JSON만: {"items":["...","..."]}
-표현 목록: ${JSON.stringify(L.map(x=>x.v.t+' ('+(x.v.m||'')+')'))}`,{modelTier:'default'});
-    const it=Array.isArray(res?.items)?res.items:[];const clues={};L.forEach((x,n)=>{const c=String(it[n]||'').trim();if(c)clues[x.i+'-'+x.j]=c});
-    if(!Object.keys(clues).length)throw{code:'invalid_json'};
-    Object.assign(clues,{...(w.clues||{}),...clues});w.clues=clues;{const cur=weeks.find(x=>x.id===w.id);if(cur)cur.clues=clues}
-    try{await db.doc('weeks/'+w.id).update({clues})}catch(_){}
+JSON만: {"items":[{"def":"...","use":"...","ex":"...","syn":"...","pos":"...","reg":"...","col":["..."],"nu":"...","ex2":[{"en":"...","ko":"..."}]}]}
+표현 목록: ${JSON.stringify(part.map(x=>x.v.t+' ('+(x.v.m||'')+')'))}
+${part.some(x=>w.sentences[x.i])?'참고(지문 속 문장): '+JSON.stringify(part.map(x=>(w.sentences[x.i]||{}).en||'')):''}`,{modelTier:'default',limit:90000});
+      const it=Array.isArray(res?.items)?res.items:[];const add={};
+      part.forEach((x,n)=>{const o=it[n];if(o&&o.def)add[x.i+'-'+x.j]={def:String(o.def).trim(),use:String(o.use||'').trim(),ex:String(o.ex||'').trim(),syn:String(o.syn||'').trim(),pos:String(o.pos||'').trim(),reg:String(o.reg||'').trim(),col:Array.isArray(o.col)?o.col.slice(0,3).map(String):[],nu:String(o.nu||'').trim(),ex2:Array.isArray(o.ex2)?o.ex2.slice(0,2).filter(e=>e&&e.en):[]}});
+      if(!Object.keys(add).length)throw{code:'invalid_json'};
+      const cur=weeks.find(x=>x.id===w.id)||w;const c2={...(cur.clue2||{}),...add};[w,cur].forEach(y=>y.clue2=c2);
+      try{await db.doc('weeks/'+w.id).update({clue2:c2})}catch(_){}
+      gsPatch()}
   }catch(e){gsClueErr[w.id]='설명을 만들지 못했어요. 아래 버튼으로 다시 시도해 주세요.'}
   delete gsClueBusy[w.id];gsPatch();
 }
+/* 힌트는 쉬운 순서가 아니라 '점점 결정적인' 순서: 상황 → 빈칸 예문 → 비슷한 말 → 한국어 뜻 → 글자 모양 */
+function gsHints(C,it){const H=[];if(C&&C.use)H.push(['상황',C.use]);if(C&&C.ex)H.push(['빈칸 예문',C.ex]);if(C&&C.syn)H.push(['비슷한 말',C.syn]);H.push(['뜻',it.v.m||'']);H.push(['모양',gsMask(it.v.t)]);return H}
+/* 📖 사전 노트: 맞히거나 정답을 보면 펼쳐짐 */
+function gsNote(C,it){if(!C||C.old)return '';
+  return `<div class="gs-note hl-zone"><div class="gs-nh">📖 사전 노트 · <b>${esc(it.v.t)}</b>${C.pos?` <i>${esc(C.pos)}</i>`:''}${C.reg?` <i>${esc(C.reg)}</i>`:''}</div>
+    ${C.col&&C.col.length?`<div><span>자주 함께 쓰는 말</span>${C.col.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
+    ${C.nu?`<div><span>뉘앙스 · 주의할 점</span><p>${esc(C.nu)}</p></div>`:''}
+    ${C.ex2&&C.ex2.length?`<div><span>예문</span>${C.ex2.map(e=>`<p><button class="vplay" data-t="${esc(e.en)}" data-a="" aria-label="예문 듣기">🔊</button> ${esc(e.en)}${e.ko?`<br><small>${esc(e.ko)}</small>`:''}</p>`).join('')}</div>`:''}
+    <em>다 읽었으면 [다음 ▶]을 눌러 넘어가요</em></div>`}
 function gsPatch(){const b=$('gsBody'),w=weeks.find(x=>x.id===curId);if(b&&w)b.innerHTML=gsHtml(w)}
 const gsNorm=t=>cleanTerm(String(t||'')).toLowerCase().replace(/\b(someone|something|somebody|sb|sth|one's|ones)\b/g,' ').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
 function gsMatch(term,ans){const T=gsNorm(term).split(' ').filter(x=>x.length>2||gsNorm(term).split(' ').length===1),A=gsNorm(ans).split(' ');if(!T.length)return false;
@@ -2367,19 +2398,22 @@ function gsHtml(w){
   const p=Math.max(0,Math.min(gsPos,L.length-1)),it=L[p],key=w.id+'|'+it.i+'-'+it.j;
   const nav=`<div class="seq-act"><button class="ghost" id="gsPrev"${p===0?' disabled':''}>◀ 이전</button><button class="primary" id="gsNext">${p===L.length-1?'처음부터':'다음 ▶'}</button></div>`;
   if(gsMode==='guess'){
-    const clue=(w.clues||{})[it.i+'-'+it.j];
+    const C=clueOf(w,it.i+'-'+it.j),clue=C&&C.def;
+    if(C&&C.old&&!gsClueBusy[w.id]&&!gsClueErr[w.id]&&sample)setTimeout(()=>makeClues(w),0);   /* 예전 한 줄 설명 → 깊이 있는 설명으로 자동 새로 만들기 */
     if(!clue){
       if(gsClueBusy[w.id])return tabs+`<p class="load" style="margin-top:10px">게임용 영어 설명을 만드는 중… (20~60초)</p>`;
       return tabs+`<div class="seq">${gsClueErr[w.id]?`<p class="load">${esc(gsClueErr[w.id])}</p>`:'<p class="hint">이 주차의 게임용 영어 설명을 먼저 만들어요.</p>'}<div class="seq-act"><button class="primary" id="gsMake"${sample?'':' disabled'}>설명 만들기</button></div></div>`}
     const res=gsRes&&gsRes.key===key?gsRes:null;
     return tabs+`<div class="seq">
       <div class="seq-step">${p+1} / ${L.length}${gsScore.tried?` · 맞힘 ${gsScore.ok}/${gsScore.tried}`:''}</div>
-      <div class="seq-q gs-clue"><span>영어 설명 <button class="vplay" id="gsSay" aria-label="설명 듣기">🔊</button></span><b>${esc(clue)}</b>
-        ${gsHint>=1?`<em>힌트 ① 뜻: ${esc(it.v.m||'')}</em>`:''}${gsHint>=2?`<em>힌트 ② 모양: ${esc(gsMask(it.v.t))}</em>`:''}</div>
+      <div class="seq-q gs-clue"><span>영어 설명${C.pos?` · <i>${esc(C.pos)}</i>`:''} <button class="vplay" id="gsSay" aria-label="설명 듣기">🔊</button></span><b>${esc(clue)}</b>
+        ${gsHints(C,it).slice(0,gsHint).map((h,n)=>`<em class="gs-h"><span>힌트 ${'①②③④⑤'[n]} ${h[0]}</span> ${esc(h[1])}</em>`).join('')}
+        ${C.old&&gsClueBusy[w.id]?'<em class="load">더 자세한 설명으로 새로 만드는 중…</em>':''}</div>
       <input class="qz-in" id="gsIn" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="어떤 표현일까요? (영어로)" value="${esc(gsDraft[key]||'')}">
-      <div class="seq-act">${micBtn('gsIn')}<button class="primary" id="gsCheck"${gsGot.has(key)?' disabled':''}>${gsGot.has(key)?'✓ 맞힘':'정답 확인'}</button>${gsHint<2?`<button class="ghost" id="gsHintBtn">💡 힌트</button>`:''}<button class="ghost" id="gsShowBtn">정답 보기</button></div>
-      ${res?`<div class="seq-r ${res.ok?'ok':''}"><b>${res.ok?'🎉 정답!':'🤔 아쉬워요, 다시 해 보세요'}</b>${res.ok?`<div class="wr-diff">${esc(it.v.t)} · ${esc(it.v.m||'')}</div><em>잠시 뒤 다음 문제로 넘어가요</em>`:''}</div>`:''}
+      <div class="seq-act">${micBtn('gsIn')}<button class="primary" id="gsCheck"${gsGot.has(key)?' disabled':''}>${gsGot.has(key)?'✓ 맞힘':'정답 확인'}</button>${gsHint<gsHints(C,it).length?`<button class="ghost" id="gsHintBtn">💡 힌트 ${gsHint+1}/${gsHints(C,it).length}</button>`:''}<button class="ghost" id="gsShowBtn">정답 보기</button></div>
+      ${res?`<div class="seq-r ${res.ok?'ok':''}"><b>${res.ok?'🎉 정답!':'🤔 아쉬워요, 다시 해 보세요'}</b>${res.ok?`<div class="wr-diff">${esc(it.v.t)} · ${esc(it.v.m||'')}</div>`:''}</div>`:''}
       ${gsShow&&!(res&&res.ok)?`<div class="seq-q"><span>정답</span><b>${esc(it.v.t)}</b><em>${esc(it.v.m||'')}</em></div>`:''}
+      ${(gsShow||(res&&res.ok))?gsNote(C,it):''}
       ${nav}</div>`;
   }
   const res=gsRes&&gsRes.key===key?gsRes:null;
@@ -2400,13 +2434,13 @@ document.addEventListener('click',async e=>{
   e.preventDefault();e.stopPropagation();const w=weeks.find(x=>x.id===curId);if(!w)return;
   const L=gsItems(w),p=Math.max(0,Math.min(gsPos,L.length-1)),it=L[p],key=it?w.id+'|'+it.i+'-'+it.j:'';
   const reset=()=>{gsHint=0;gsShow=false;gsRes=null;gsErr='';clearInterval(gsTimer);gsLeft=0;clearTimeout(gsAuto);micStop()};
-  if(t.id==='gsTabG'||t.id==='gsTabE'){gsMode=t.id==='gsTabG'?'guess':'explain';reset();gsScore={ok:0,tried:0};gsSeen.clear();gsGot.clear();gsPatch();if(gsMode==='guess'&&!w.clues)makeClues(w);return}
+  if(t.id==='gsTabG'||t.id==='gsTabE'){gsMode=t.id==='gsTabG'?'guess':'explain';reset();gsScore={ok:0,tried:0};gsSeen.clear();gsGot.clear();gsPatch();if(gsMode==='guess'&&!w.clue2)makeClues(w);return}
   if(t.id==='gsMake'){makeClues(w);return}
   if(!it)return;
   if(t.id==='gsPrev'||t.id==='gsNext'){gsPos=t.id==='gsPrev'?Math.max(0,p-1):(p>=L.length-1?0:p+1);reset();gsPatch();
-    if(gsMode==='guess'){const n2=gsItems(w)[gsPos],c=n2&&(w.clues||{})[n2.i+'-'+n2.j];if(c){stop();ttsSpeak(c,+$('rate').value*0.95)}}return}
-  if(t.id==='gsSay'){const c=(w.clues||{})[it.i+'-'+it.j];if(c){stop();ttsSpeak(c,+$('rate').value*0.95)}return}
-  if(t.id==='gsHintBtn'){gsHint=Math.min(2,gsHint+1);gsPatch();return}
+    if(gsMode==='guess'){const n2=gsItems(w)[gsPos],c=n2&&clueOf(w,n2.i+'-'+n2.j);if(c&&c.def){stop();ttsSpeak(c.def,+$('rate').value*0.95)}}return}
+  if(t.id==='gsSay'){const c=clueOf(w,it.i+'-'+it.j);if(c&&c.def){stop();ttsSpeak(c.def,+$('rate').value*0.95)}return}
+  if(t.id==='gsHintBtn'){gsHint=Math.min(gsHints(clueOf(w,it.i+'-'+it.j),it).length,gsHint+1);gsPatch();return}
   if(t.id==='gsShowBtn'){gsShow=!gsShow;gsPatch();return}
   if(t.id==='gsCheck'){if(gsGot.has(key))return;const v=(($('gsIn')||{}).value||'').trim();if(!v){toast('먼저 써 보거나 🎤로 말해 보세요');return}
     micStop();const ok=gsMatch(it.v.t,v);
@@ -2414,7 +2448,7 @@ document.addEventListener('click',async e=>{
     if(ok){gsGot.add(key);gsScore.ok++}
     gsRes={key,ok};gsPatch();
     const rb=document.querySelector('#gsBody .seq-r');
-    if(ok){celebrateBox(rb);clearTimeout(gsAuto);gsAuto=setTimeout(()=>{const nb=$('gsNext');if(nb&&gsRes&&gsRes.key===key)nb.click()},2600)}   // 맞히면 잠시 뒤 다음 문제로
+    if(ok){celebrateBox(rb);clearTimeout(gsAuto);const C0=clueOf(w,it.i+'-'+it.j);if(!C0||C0.old)gsAuto=setTimeout(()=>{const nb=$('gsNext');if(nb&&gsRes&&gsRes.key===key)nb.click()},2600)}   // 사전 노트가 있으면 다 읽고 직접 넘어감
     else{perfRun=0;const inp=$('gsIn');if(inp)inp.select()}return}
   if(t.id==='gsTime'){clearInterval(gsTimer);gsLeft=60;gsPatch();gsTimer=setInterval(()=>{gsLeft--;const b=$('gsTime');if(b)b.textContent=gsLeft>0?`⏱ ${gsLeft}초`:'⏰ 시간 끝!';if(gsLeft<=0){clearInterval(gsTimer);try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(_){}}},1000);return}
   if(t.id==='gsExRe'){micStop();gsDraft['ex|'+key]='';gsRes=null;gsErr='';gsPatch();return}
