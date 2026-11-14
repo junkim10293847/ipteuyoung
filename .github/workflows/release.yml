@@ -1,0 +1,55 @@
+name: 배포 전 자동 점검
+
+# 고친 내용은 dev 가지에 먼저 올림 → 여기서 휴대폰 화면으로 주요 기능을 자동으로 눌러 봄
+# → 모두 통과해야만 main(실제 사이트)에 합침. 하나라도 실패하면 사이트는 그대로(예전 버전 유지).
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  check-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: dev, fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: 점검 도구 설치
+        run: |
+          npm i --no-save --silent playwright@1.48.2
+          npx playwright install --with-deps chromium > /dev/null
+      - name: 1. 코드 문법 점검
+        run: |
+          node -e "
+            const s=require('fs').readFileSync('index.html','utf8');
+            const js=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join('\n');
+            require('fs').writeFileSync('/tmp/app.js',js)"
+          node --check /tmp/app.js
+          node --check sw.js
+      - name: 2. 주요 기능 눌러 보기
+        run: |
+          python3 -m http.server 8765 > /dev/null 2>&1 &
+          sleep 1
+          node tests/smoke.js 8765 | tee /tmp/smoke.txt
+      - name: 점검 결과 요약
+        if: always()
+        run: |
+          echo "## 배포 전 자동 점검" >> $GITHUB_STEP_SUMMARY
+          cat /tmp/smoke.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "점검을 끝까지 하지 못함" >> $GITHUB_STEP_SUMMARY
+      - name: 3. 통과 → 실제 사이트(main)에 합치기
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin main
+          git checkout -q -B main origin/main
+          git merge -q --no-edit -m "점검 통과: dev 합침 ($(git log -1 --format=%s origin/dev | cut -c1-60))" origin/dev
+          git push -q origin main
