@@ -1,5 +1,0 @@
-첨삭 #1: 2.0s {"res":{"ok":false,"fixed":"I'm returning to work tomorrow.","better":"I go back to work tomorrow.","tip":"가까운 미래의 일정이나 계획을 말할 때는 현재진행형(I'm returning)이나 단순현재(I 
-첨삭 #2: 1.8s {"res":{"ok":true,"fixed":"I return to work tomorrow.","better":"I go back to work tomorrow.","tip":"'return to work'도 문법적으로 맞지만, 원어민들은 일상 회화에서 'go back to work
-첨삭 #3: 2.1s {"res":{"ok":true,"fixed":"I return to work tomorrow.","better":"I'm returning to work tomorrow. 또는 I go back to work tomorrow.","tip":"가까운 미래에 예정된 개인적인 일정을 말할 
-첨삭 #4: 2.8s {"res":{"ok":true,"fixed":"I return to work tomorrow.","better":"I'm returning to work tomorrow. 또는 I go back to work tomorrow.","tip":"가까운 미래의 확정된 개인 일정은 현재진행형
-features: 0.6s {"res":{"ai":true,"tts":true}}
