@@ -299,6 +299,7 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card.done .en .hid{background:rgba(255,255,255,.14)}}
 .card.done .ko{color:color-mix(in srgb,var(--fg) 80%,var(--accent))}
 .card.done.playing{box-shadow:inset 4px 0 0 var(--done),0 0 0 2px var(--accent-soft)}
+.tdot{display:block;width:8px;height:8px;border-radius:50%;background:var(--done);margin:6px auto 0}.tdot.got{background:transparent;box-shadow:inset 0 0 0 2px var(--done)}
 .num{font-family:var(--display);font-weight:700;color:var(--accent);font-size:1.1rem;font-variant-numeric:tabular-nums;grid-column:1;grid-row:1 / span 4}
 .card > :not(.num){grid-column:2;min-width:0}
 .en .mk-y{background:#ffe066;color:#1f2620;border-radius:3px;box-shadow:0 0 0 2px #ffe066}
@@ -597,7 +598,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v157</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v158</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1284,6 +1285,8 @@ function render(){
   const dayAll=[...new Set([...rev,...idx])];
   const seq=(view&&view[0]==='d'&&dayAll.length)?bodyIdx.filter(j=>j>=Math.min(...dayAll)&&j<=Math.max(...dayAll)):idx;
   const roleOf=j=>idx.includes(j)?'today':rev.includes(j)?'rev':'skip';
+  /* 전체 문장 화면: 오늘 외울 문장은 번호 옆에 작은 점 (외운 문장은 속이 빈 점) */
+  const tvw=(view==='all'||view==='sat')?todayView(w):null,todaySet=new Set(tvw&&tvw[0]==='d'?(days[+tvw.slice(1)]||[]):[]);
   const nRev=seq.filter(j=>roleOf(j)==='rev').length,nSkip=seq.filter(j=>roleOf(j)==='skip').length,behind=idx.filter(j=>j<prevMax).length;
   const listIdx=(view&&view[0]==='d'&&(rev.length||nSkip))?['__H',...seq]:seq;
   const total=bodyIdx.length, nDone=bodyIdx.filter(i=>done[i]).length;
@@ -1342,7 +1345,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    <ol id="list">
     ${listIdx.map(i=>{if(i==='__H')return `<li class="revhead"><b>📖 오늘 ${idx.length}문장${nRev?` · 🔁 어제 복습 ${nRev}`:''}${nSkip?` · ✓ 이미 외움 ${nSkip}`:''}</b><span>번호 순서대로 이어서 보여 줘요.${nRev?' 어제 복습 문장은 영어를 가려 두었어요.':''}${behind?` 앞에서 아직 못 외운 ${behind}문장도 오늘 분량에 넣었어요.`:''}</span></li>`;if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__S')return skipHtml;if(i==='__T'){const behind=idx.filter(j=>j<prevMax).length;return `<li class="revhead today"><b>📖 오늘 문장 · ${idx.length}문장</b>${behind?`<span>앞에서 아직 못 외운 ${behind}문장을 먼저 넣었어요.</span>`:''}</li>`+skipHtml};const s=w.sentences[i];const v=s.vocab||[];return `
      <li class="card${done[i]?' done':''}" id="c${i}">
-       <span class="num">${numLabel(w,i)}</span>
+       <span class="num">${numLabel(w,i)}${todaySet.has(i)?`<i class="tdot${done[i]?' got':''}" title="오늘 외울 문장"></i>`:''}</span>
        ${(view&&view[0]==='d'&&listIdx[0]==='__H')?(r=>r==='rev'?'<span class="ctag rev">🔁 어제 복습</span>':r==='skip'?'<span class="ctag skip">✓ 이미 외움</span>':'<span class="ctag today">📖 오늘</span>')(roleOf(i)):''}${(T=>T?`<div class="enw">${ttlHtml(T,i)}<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div></div>`:`<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div>`)(ttlOf(w,i))}
        <div class="ko${s.ko?'':' empty'}">${(T=>T&&T.ko?`<b class="ttl-k">${esc(T.ko)}</b> · `:'')(ttlOf(w,i))}${s.ko?esc(s.ko):'해석 없음'}</div>
        ${(()=>{const e=weakOf(w.id,i);return e?`<div class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</div>`:''})()}
