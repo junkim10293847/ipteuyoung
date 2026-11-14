@@ -568,7 +568,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <form class="gate-card" id="gateForm">
     <div class="brand gate-brand"><span class="brand-mark" aria-hidden="true">입</span><div><div class="brand-t">입트영 스터디</div><div class="brand-s">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div></div>
     <h2>닉네임을 입력하세요</h2>
-    <p>외움 표시와 하루 분량이 이 이름으로 따로 저장됩니다. 다른 멤버와 겹치지 않는 이름을 써 주세요.</p>
+    <p>외움 표시와 써보기 기록이 이 이름으로 따로 저장됩니다. 다른 멤버와 겹치지 않는 이름을 써 주세요.</p>
     <label for="nickInput" class="sr">닉네임</label>
     <input id="nickInput" maxlength="20" autocomplete="nickname" placeholder="예: 홍길동">
     <div id="nickList" class="nick-list"></div>
@@ -605,7 +605,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v167</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v168</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -943,11 +943,8 @@ function plan(w){
   for(let d=0;d<a.left;d++)days.push(a.per?a.rem.slice(d*a.per,(d+1)*a.per):[]);
   return days;
 }
-function todayView(w){
-  const t=today(), diff=Math.round((t-startOf(w))/864e5), n=plan(w).length;
-  if(+t===+studyOf(w))return 'sat';
-  if(diff>=0&&diff<n)return 'd'+diff; return 'all';
-}
+/* 2026-11-15: 하루 분량 나눠 외우기 없앰 — 늘 전체 문장 화면 */
+function todayView(w){return 'all'}
 const WD=['일','월','화','수','목','금','토'];
 const mdw=d=>`${md(d)}(${WD[d.getDay()]})`;
 function numLabel(w,i){const s=w.sentences;if(s[i].isTitle)return 'T';return s[0]?.isTitle?i:i+1}
@@ -1281,7 +1278,7 @@ function render(){
   const w=weeks.find(x=>x.id===curId);
   if(!w){main.innerHTML=`<div class="empty-state"><b>아직 등록된 주차가 없습니다</b>위의 '+ 새 주차'를 눌러 지문을 붙여 넣으면 월~금 분량이 자동으로 나뉩니다.</div>`;return}
   const days=plan(w), start=startOf(w), sat=studyOf(w), prev=prevStudyOf(w), tv=todayView(w), pace=paceOf(w), per=perDay(w);
-  if(view&&view[0]==='d'&&+view.slice(1)>=days.length)view='all';
+  view='all';
   const done=doneOf(w.id);
   const by=(w.addedBy&&names[w.addedBy])||w.addedByName||'';
   const bodyIdx=w.sentences.map((_,i)=>i).filter(i=>!w.sentences[i].isTitle);
@@ -1319,7 +1316,7 @@ function render(){
    </details>`;
   /* 오늘 할 일: 처음 온 사람도 무엇을 하면 되는지 한눈에 — 버튼 하나로 오늘 첫 문장부터 시작 */
   let todoHtml='';
-  if(dTo>=0){
+  if(false){
     const tIdx=tv==='sat'?bodyIdx:tv[0]==='d'?(days[+tv.slice(1)]||[]):[];
     const left=tIdx.filter(j=>!done[j]);
     const tName=tv==='sat'?'테스트 날 · 전체 복습':tv[0]==='d'?`${+tv.slice(1)+1}일차 · ${rng(tIdx)}번`:'';
@@ -1341,16 +1338,6 @@ function render(){
      ${todoHtml}
      ${psHtml}
      ${askAllHtml()}
-     <div class="pace">
-       <span>하루 분량</span>
-       ${[['auto','남은 기간 맞춤'],['1','1개'],['2','2개'],['3','3개'],['4','4개'],['5','5개']].map(([v,l])=>{const ok=v==='auto'||paceOk(w,+v);return `<button class="chip${ok?'':' off'}" data-pace="${v}" aria-pressed="${pace===v}"${ok?'':' disabled title="테스트 전까지 다 못 끝내는 분량이에요"'}>${l}</button>`}).join('')}
-     </div>
-     <div class="scroller"><div class="row plan">
-       <button class="day" data-view="all" aria-pressed="${view==='all'}"><div class="d">전체</div><div class="r">${total}문장</div><div class="r">모두 보기</div></button>
-       ${days.map((d,i)=>{const dt=addDays(start,i);return `<button class="day${tv==='d'+i?' today':''}" data-view="d${i}" aria-pressed="${view==='d'+i}"><div class="d">${i+1}일차</div><div class="r">${mdw(dt)}</div><div class="r">${rng(d)}</div></button>`}).join('')}
-       <button class="day sat${tv==='sat'?' today':''}" data-view="sat" aria-pressed="${view==='sat'}"><div class="d">테스트</div><div class="r">${mdw(sat)}</div><div class="r">전체 복습</div></button>
-     </div></div>
-     ${(()=>{const a=autoInfo(w);if(pace!=='auto')return '';if(!a)return `<p class="hint">남은 기간 맞춤: 배정 다음 날부터 금요일까지 6일에 고르게 나눕니다.</p>`;return a.rem.length?`<p class="hint auto">📅 오늘부터 금요일까지 <b>${a.left}일</b> 남았어요. 아직 안 외운 <b>${a.rem.length}문장</b>을 하루 <b>${a.per}개</b>씩 나눴어요.</p>`:`<p class="hint auto">🎉 모든 문장을 암기 체크했어요! 남은 날은 복습·모의 테스트로 마무리하세요.</p>`})()}
    </header>
 ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은 이 기기에 저장되고, 새 주차 추가는 Claude에 로그인한 멤버가 할 수 있습니다.</p>`:''}
    <div class="sumrow"><b>${viewName}</b><span class="pc">${nDone}/${total} 암기</span><div class="bar"><i style="width:${total?nDone/total*100:0}%"></i></div><button class="alllink" id="hideAll">${idx.every(j=>hiddenEn.has(j))?"영어 모두 보기":"영어 모두 가리기"}</button></div>
@@ -1383,7 +1370,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    <details class="tool" id="mockBox"${toolOpen.mockBox?' open':''}><summary><span class="t-title">📝 모의 테스트</span><span class="t-sub">${isG()?'음성만 듣고 처음부터 끝까지 받아쓰고 총점 받기':'한글만 보고 처음부터 끝까지 써 보고 총점 받기'}</span></summary>${mockHtml(w)}</details>
    <details class="tool" id="weakBox"${toolOpen.weakBox?' open':''}><summary><span class="t-title">📌 내 약점</span><span class="t-sub">자주 틀린 문장·단어 모아 보기</span></summary>${weakHtml(w)}</details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
-   <p class="note">외움 표시와 하루 분량은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
+   <p class="note">외움 표시와 써보기 기록은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
    <p class="note">${(()=>{const vm=w.sentences.reduce((n,x)=>n+(x.vocab||[]).filter(v=>!v.audio).length,0),sOk=!!w.longAudio&&w.sentences.every(x=>x.audio&&x.alt);return sOk&&vm?`문장 음성은 준비돼 있습니다. 새로 정리된 단어·숙어 ${vm}개의 원어민 음성은 15~20분 안에 자동으로 만들어지고, 그동안은 기기 음성으로 재생됩니다.`:''})()||(hasAudio(w)?'원어민 스타일 음성 파일로 재생됩니다. 소리가 작으면 미디어 볼륨을 올려 주세요.':w.audioRequested?'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다.':'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다. 다 만들어지면 새로고침 시 자동으로 바뀝니다.')}</p>
    <p class="status" id="wStatus"></p>
    ${(isOwner||(me&&w.addedBy===me&&missing))?`<details class="admin"><summary>⚙ 관리</summary><div class="tools">
