@@ -595,7 +595,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v154</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v155</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1374,6 +1374,11 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
      <span id="delConfirm" class="confirm" hidden>이 주차를 모두의 학습장에서 지웁니다. <button id="delYes" class="danger">삭제 확인</button> <button id="delNo">취소</button></span>
    </div></details>`:''}`;
 }
+/* 화면 붙잡기: 지정한 요소가 화면에서 보이는 위치를 ms 동안 그대로 유지 (키보드가 내려가거나 내용이 바뀌어도) */
+function holdAnchor(el,ms){if(!el)return;const y0=el.getBoundingClientRect().top,end=Date.now()+(ms||800);
+  const fix=()=>{if(!el.isConnected)return;const d=el.getBoundingClientRect().top-y0;if(Math.abs(d)>1)window.scrollBy(0,d)};
+  const vv=window.visualViewport,on=()=>fix();if(vv){vv.addEventListener('resize',on);vv.addEventListener('scroll',on)}window.addEventListener('resize',on);
+  const loop=()=>{fix();if(Date.now()<end)requestAnimationFrame(loop);else{if(vv){vv.removeEventListener('resize',on);vv.removeEventListener('scroll',on)}window.removeEventListener('resize',on)}};requestAnimationFrame(loop);return fix}
 function stay(i,fn,after){const id=typeof i==='string'?i:'c'+i;const c=$(id);const top=c?c.getBoundingClientRect().top:null;const a=document.activeElement;if(a&&a.blur&&a!==document.body)a.blur();fn();const fix=()=>{const n=$(id);if(n&&top!=null){const d=n.getBoundingClientRect().top-top;if(Math.abs(d)>1)window.scrollBy(0,d)}};fix();requestAnimationFrame(fix);setTimeout(()=>{fix();if(after)after()},350);setTimeout(fix,700)}
 function full(){if(curProg==='gtv'&&!canGtv())ensureProg();renderBrand();renderWeeks();render();if(typeof prefetchDetails==='function')prefetchDetails()}
 const missing0=w=>w.sentences.some(x=>!x.ko);
@@ -1910,18 +1915,20 @@ document.addEventListener('click',async e=>{
     stay(i,render);return}
   if(t.classList.contains('wr-check')){
     const key=curId+'|'+i, r=grade(w,i);if(!r){const ta=$('wr-'+i);if(ta)ta.focus();return}
+    /* 바뀌기 전에 쓰기 칸 위치를 붙잡음 (위에 '최근 써보기' 줄이 새로 생기거나 키보드가 내려가도 칸이 제자리) */
+    const holdFix=holdAnchor($('wr-'+i)||$('c'+i),1100)||(()=>{});
     writeRes[key]=r;recordWeak(w.id,i,r,false);saveProg();
     if(r.perfect&&!doneOf(w.id)[i]){prog.done[w.id]={...doneOf(w.id),[i]:true};doneSeen.add(i);saveProg()}
     if(r.perfect)hiddenEn.add(i);
     /* 채점 결과만 그 자리 아래에 끼워 넣음 (화면 전체를 다시 그리지 않아 흔들림 없음) */
     const showRes=()=>{};   /* 화면은 움직이지 않음: 결과는 쓰기 칸 바로 아래에 나타남 */
-    if(patchWriteRes(w,i)&&patchCardState(w,i)){
+    if(patchWriteRes(w,i)&&patchCardState(w,i)){holdFix();
       /* 키보드에 가려 결과가 안 보이는 문제: 채점하면 키보드를 내리고, 결과가 화면 아래(또는 아래 재생 막대 뒤)에 숨어 있으면 보이는 만큼만 살짝 올림 */
+      /* 채점: 키보드를 내리되, 쓴 글 칸이 화면의 같은 자리에 그대로 있게 붙잡아 둠(키보드가 내려가며 화면이 튀지 않게).
+         결과가 아래 재생 막대 뒤에 완전히 숨었을 때만, 결과 첫 줄이 보이는 만큼만 살짝 올림 */
       {const ta=$('wr-'+i);if(ta&&document.activeElement===ta)ta.blur();
-        const reveal=()=>{const c=$('c'+i),rb=c&&c.querySelector('.wr-res');if(!rb)return;const vv=window.visualViewport,vb=vv?vv.offsetTop+vv.height:innerHeight;
-          const dk=document.querySelector('.dock'),dt=dk?Math.min(vb,dk.getBoundingClientRect().top):vb,r=rb.getBoundingClientRect(),need=r.bottom-(dt-12);
-          if(need>4)window.scrollBy({top:Math.min(need,Math.max(0,r.top-70)),behavior:'smooth'})};
-        setTimeout(reveal,350);setTimeout(reveal,750)}
+        setTimeout(()=>{const c=$('c'+i),rb=c&&c.querySelector('.wr-res');if(!rb)return;const dk=document.querySelector('.dock'),dt=dk?dk.getBoundingClientRect().top:innerHeight,r=rb.getBoundingClientRect();
+          if(r.top>dt-40)window.scrollBy({top:r.top-(dt-90),behavior:'smooth'})},950)}
       /* 100%면 '완벽해요'를 잠깐 보여 준 뒤 써보기를 자동으로 접음 (외움 체크는 이미 됨) */
       if(!r.perfect){perfRun=0;if(r.almost){const c=$('c'+i),bx=c&&c.querySelector('.wr-res');if(bx)cheer(bx,'close')}}
       if(r.perfect){celebrate(i);stampCard(i);setTimeout(()=>{if(!writeOpen.has(i))return;foldWriteSmooth(w,i,()=>{writeOpen.delete(i);delete writeDraft[key];delete writeRes[key];patchWriteOpen(w,i)})},3000)}
@@ -1929,7 +1936,8 @@ document.addEventListener('click',async e=>{
     stay(i,render,showRes);return}
   if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);if(!patchCardState(w,i))stay(i,render);return}
   stop();const my=token;
-  await playOne(s,i,t.classList.contains('slow')?0.7:+$('rate').value,my);
+  /* 카드 안의 듣기·천천히: 지금 보고 있는 카드라 화면을 옮기지 않음 (전체 듣기만 읽는 카드를 따라감) */
+  await playOne(s,i,t.classList.contains('slow')?0.7:+$('rate').value,my,true);
   if(my===token)hl(null);
 });
 $('stop').onclick=()=>{stop();const la=$('longAudio');if(la)la.pause()};
