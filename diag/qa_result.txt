@@ -1,5 +1,0 @@
-첨삭 #1: 47.7s {"res":{"ok":true,"fixed":"I return to work tomorrow.","better":"I'm going back to work tomorrow.","tip":"'return to work'도 문법적으로 맞고 의미가 잘 통하지만, 일상 회화에서는 가까운 미래
-첨삭 #2: 17.0s {"res":{"ok":true,"fixed":"I return to work tomorrow.","better":"I'm going back to work tomorrow.","tip":"'I return to work tomorrow'도 완벽하고 자연스러운 표현입니다. 구어체에서는 
-첨삭 #3: 180.1s EXC TimeoutError('The read operation timed out')
-첨삭 #4: 2.0s {"res":{"ok":false,"fixed":"I am returning to work tomorrow.","better":"I go back to work tomorrow.","tip":"가까운 미래의 일정이나 계획을 말할 때는 현재진행형(I'm returning)이나 현재시제(I
-features: 0.8s {"res":{"ai":true,"tts":true}}
