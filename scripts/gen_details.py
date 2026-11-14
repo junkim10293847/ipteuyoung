@@ -62,7 +62,7 @@ def prompt(s, v, ex):
 - examples: 일상·업무 상황의 짧고 자연스러운 영어 예문 3개. en은 영어 알파벳으로, ko는 자연스러운 한국어 해석.
 - similar: 비슷한 영어 표현 최대 3개. m에는 뜻과 함께 이 표현과의 차이(뉘앙스·격식·쓰임)를 한국어 1~2문장으로.
 - tip: 외우는 요령과 학습자가 자주 하는 실수를 한국어 2문장으로.
-- quizzes: 이 표현을 직접 써 보게 하는 확인 퀴즈 3개를 난이도 순서로 [{{"q":"...","a":"..."}}]. q 형식: "'(한국어 문장)'을 영어로 말해 보세요." a는 그 표현을 꼭 쓰는 영어 정답 한 문장. ① 쉬움: 지문과 비슷한 상황의 짧은 문장(8~15자), 기본 시제. ② 보통: 다른 일상 상황에서 주어나 시제를 바꾼 문장(12~25자). ③ 도전: 질문·부정·이유(because)·조건(if) 중 하나를 넣은 긴 문장(20~35자).
+- quizzes: 이 표현을 직접 써 보게 하는 확인 퀴즈 3개를 난이도 순서로 [{{"q":"...","a":"..."}}]. q는 한국어 지시, a는 영어 정답 한 문장. 세 문제는 문제 모양·주어·시제·장면이 모두 서로 달라야 한다(같은 틀 반복 금지). ① 쉬움(바로 말하기): 짧은 한국어 문장(8~15자)을 영어로. 주어 I, 현재나 과거 평서문. q 예: "'(한국어)'를 영어로 말해 보세요." ② 보통(대화 속 대답): 짧은 상황과 상대의 말을 주고 이 표현으로 대답하게 한다. 주어는 he/she/we/they 중 하나, 시제는 미래(will·be going to)나 현재완료. q 예: "친구가 '요즘 회사 다시 나가?'라고 물어요. 이 표현을 써서 '응, 다음 달부터 다시 나가'라고 대답해 보세요." ③ 도전(응용): 다음 중 하나를 골라 바꿔 가며 낸다 — 상대에게 묻는 질문 만들기 / 부정문으로 말하기 / because·when·if 로 두 생각을 이어 한 문장 / 내 경험을 이 표현으로 한 문장. 20~35자 분량의 한국어 지시로 주고, a는 그에 맞는 영어 한 문장. a(정답)에는 표현을 반드시 넣고, 지문 문장을 그대로 베끼지 않는다.
 - 영어를 한글 발음으로 적지 않는다. 존댓말(~입니다, ~합니다)로 쓴다.
 
 [좋은 답의 예시] 지문 문장 "To make rice in a pot, first measure out 240 grams of rice for a family of four."의 표현 "To + 동사원형, ..."에 대한 답:
@@ -94,7 +94,7 @@ def qlist(d):
 def qfields(d):
     qz = qlist(d)
     if qz:
-        return {'quiz': qz[0]['q'], 'quizAns': qz[0]['a'], 'quizzes': qz}
+        return {'quiz': qz[0]['q'], 'quizAns': qz[0]['a'], 'quizzes': qz, 'quizV': 2}
     return {'quiz': str(d['quiz']).strip(), 'quizAns': str(d.get('quizAns') or d.get('answer') or '').strip()} if d.get('quiz') else {}
 
 
@@ -139,6 +139,9 @@ def flush(url, pend):
     return n
 
 
+LEVELS = '세 문제는 문제 모양·주어·시제·장면이 모두 서로 달라야 한다(같은 틀 반복 금지). ① 쉬움(바로 말하기): 짧은 한국어 문장(8~15자)을 영어로. 주어 I, 현재나 과거 평서문. q 예: "\'(한국어)\'를 영어로 말해 보세요." ② 보통(대화 속 대답): 짧은 상황과 상대의 말을 주고 이 표현으로 대답하게 한다. 주어는 he/she/we/they 중 하나, 시제는 미래(will·be going to)나 현재완료. q 예: "친구가 \'요즘 회사 다시 나가?\'라고 물어요. 이 표현을 써서 \'응, 다음 달부터 다시 나가\'라고 대답해 보세요." ③ 도전(응용): 다음 중 하나를 골라 바꿔 가며 낸다 — 상대에게 묻는 질문 만들기 / 부정문으로 말하기 / because·when·if 로 두 생각을 이어 한 문장 / 내 경험을 이 표현으로 한 문장. 20~35자 분량의 한국어 지시로 주고, a는 그에 맞는 영어 한 문장. a(정답)에는 표현을 반드시 넣고, 지문 문장을 그대로 베끼지 않는다.'
+
+
 def quiz_todo(weeks):
     """설명은 있는데 확인 퀴즈가 3단계(쉬움·보통·도전)로 갖춰지지 않은 단어·숙어 (최근 2주)"""
     since = (datetime.date.today() - datetime.timedelta(days=14)).isoformat()
@@ -149,7 +152,7 @@ def quiz_todo(weeks):
         for i, s in enumerate(w.get('sentences') or []):
             for j, v in enumerate(s.get('vocab') or []):
                 d = v.get('detail') or {}
-                if v.get('t') and d.get('core') and len(d.get('quizzes') or []) < 3:
+                if v.get('t') and d.get('core') and (len(d.get('quizzes') or []) < 3 or (d.get('quizV') or 0) < 2):
                     out.append((wid, i, j))
     return out
 
@@ -162,8 +165,8 @@ def make_quizzes(url, weeks, jobs):
         items = [{'n': n, 't': weeks[w]['sentences'][i]['vocab'][j].get('t', ''), 'm': weeks[w]['sentences'][i]['vocab'][j].get('m', ''),
                   'sentence': weeks[w]['sentences'][i].get('en', '')} for n, (w, i, j) in enumerate(part)]
         p = ('한국인 영어 학습자가 아래 표현들을 외웠다. 표현마다 직접 써 보게 하는 확인 퀴즈를 난이도별로 3개씩 만든다.\n'
-             '규칙: q 형식은 "\'(한국어 문장)\'을 영어로 말해 보세요." a는 그 표현을 꼭 쓰는 영어 정답 한 문장. 지문 문장을 그대로 베끼지 않는다.\n'
-             '① 쉬움: 지문과 비슷한 상황의 짧은 문장(8~15자), 기본 시제. ② 보통: 다른 일상 상황에서 주어나 시제를 바꾼 문장(12~25자). ③ 도전: 질문·부정·이유(because)·조건(if) 중 하나를 넣은 긴 문장(20~35자).\n' + json.dumps(items, ensure_ascii=False) +
+             '규칙: q는 학습자에게 주는 한국어 지시, a는 그 표현을 꼭 쓰는 영어 정답 한 문장.\n'
+             + LEVELS + '\n' + json.dumps(items, ensure_ascii=False) +
              '\nJSON만: {"items":[{"n":번호,"quizzes":[{"q":"...","a":"..."},{"q":"...","a":"..."},{"q":"...","a":"..."}]}]}')
         try:
             r = call(url, 'aiJson', p)
@@ -182,11 +185,11 @@ def make_quizzes(url, weeks, jobs):
             except Exception:
                 continue
             d = fv.get('detail') or {}
-            if not x or fv.get('t') != items[n]['t'] or not d.get('core') or len(d.get('quizzes') or []) >= 3:
+            if not x or fv.get('t') != items[n]['t'] or not d.get('core') or (len(d.get('quizzes') or []) >= 3 and (d.get('quizV') or 0) >= 2):
                 continue
             if d.get('quiz'):   # 이미 있던 퀴즈는 ① 쉬움으로 그대로 둠
                 x = [{'q': d['quiz'], 'a': d.get('quizAns', '')}] + x[1:]
-            d['quizzes'] = x; d['quiz'] = x[0]['q']; d['quizAns'] = x[0]['a']; fv['detail'] = d
+            d['quizzes'] = x; d['quiz'] = x[0]['q']; d['quizAns'] = x[0]['a']; d['quizV'] = 2; fv['detail'] = d
             touched.add(wid); made += 1
         for wid in touched:
             call(url, 'saveWeek', wid, {'sentences': fresh[wid]['sentences']}, True)
