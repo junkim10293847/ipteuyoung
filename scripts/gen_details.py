@@ -56,19 +56,22 @@ def prompt(s, v, ex):
 [간단한 뜻] {v.get('m', '')}
 
 작성 규칙
-- 모든 항목(core, usage, examples, similar, tip, quizzes)을 빠짐없이 채운다.
+- 모든 항목(core, usage, examples, similar, tip, quizzes, pos, etym, senses)을 채운다.
 - core: 핵심 의미와 뉘앙스, 주로 쓰이는 상황을 한국어 2문장으로.
 - usage: 이 지문 문장 안에서 어떤 구조로, 무엇과 연결되어, 어떤 뜻으로 쓰였는지 문장 일부를 작은따옴표로 인용해 한국어 2문장으로.
 - examples: 일상·업무 상황의 짧고 자연스러운 영어 예문 3개. en은 영어 알파벳으로, ko는 자연스러운 한국어 해석.
 - similar: 비슷한 영어 표현 최대 3개. m에는 뜻과 함께 이 표현과의 차이(뉘앙스·격식·쓰임)를 한국어 1~2문장으로.
 - tip: 외우는 요령과 학습자가 자주 하는 실수를 한국어 2문장으로.
+- pos: 품사·형태를 한국어로 짧게(예: "동사", "명사", "형용사", "구동사(동사+부사)", "숙어(관용구)", "문법 패턴"). 동사면 자동사/타동사도.
+- etym: 어원을 한국어 1~2문장으로. 단어는 뿌리(라틴어·고대 영어·프랑스어 등)와 원래 뜻, 숙어는 구성 단어의 원래 뜻에서 지금 뜻이 된 흐름. 확실히 아는 것만 쓰고, 확실하지 않으면 빈 문자열.
+- senses: 이 표현(또는 핵심 단어)의 다른 뜻 1~3개 [{{"m":"다른 뜻(한국어)","en":"짧은 영어 예문","ko":"해석"}}]. 지문에서 쓰인 뜻은 빼고, 다른 뜻이 없으면 [].
 - quizzes: 이 표현을 직접 써 보게 하는 확인 퀴즈 3개를 난이도 순서로 [{{"q":"...","a":"..."}}]. q는 한국어 지시, a는 영어 정답 한 문장. 세 문제는 문제 모양·주어·시제·장면이 모두 서로 달라야 한다(같은 틀 반복 금지). ① 쉬움(바로 말하기): 표현의 뜻만 묻지 말고, 표현이 들어간 완전한 짧은 한국어 문장(8~15자, 예: \'나는 다음 주에 복직해요\')을 영어로. 주어 I, 현재나 과거 평서문. q 예: "'(한국어)'를 영어로 말해 보세요." ② 보통(대화 속 대답): 짧은 상황과 상대의 말을 주고 이 표현으로 대답하게 한다. 주어는 he/she/we/they 중 하나, 시제는 미래(will·be going to)나 현재완료. q 예: "친구가 '요즘 회사 다시 나가?'라고 물어요. 이 표현을 써서 '응, 다음 달부터 다시 나가'라고 대답해 보세요." ③ 도전(응용): 다음 중 하나를 골라 바꿔 가며 낸다 — 상대에게 묻는 질문 만들기 / 부정문으로 말하기 / because·when·if 로 두 생각을 이어 한 문장 / 내 경험을 이 표현으로 한 문장. 20~35자 분량의 한국어 지시로 주고, a는 그에 맞는 영어 한 문장. a(정답)에는 표현을 반드시 넣고, 지문 문장을 그대로 베끼지 않는다.
 - 영어를 한글 발음으로 적지 않는다. 존댓말(~입니다, ~합니다)로 쓴다.
 
 [좋은 답의 예시] 지문 문장 "To make rice in a pot, first measure out 240 grams of rice for a family of four."의 표현 "To + 동사원형, ..."에 대한 답:
 {ex}
 
-위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태에 quizzes 항목을 더해 답한다."""
+위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태에 quizzes·pos·etym·senses 항목을 더해 답한다."""
 
 
 def norm(d):
@@ -82,7 +85,19 @@ def norm(d):
     return {'core': pick('core', 'meaning'), 'usage': pick('usage', 'in_sentence', 'usage_in_sentence'), 'tip': pick('tip', 'tips', 'memory_tip'),
             'examples': [{'en': str(x.get('en', '')), 'ko': str(x.get('ko', ''))} for x in ex[:3] if isinstance(x, dict)],
             'similar': [{'t': str(x.get('t', x.get('expression', ''))), 'm': str(x.get('m', x.get('meaning', '')))} for x in sim[:3] if isinstance(x, dict)],
-            **qfields(d)}
+            **qfields(d), **winfo(d)}
+
+
+def winfo(d):
+    o = {}
+    if isinstance(d.get('pos'), str):
+        o['pos'] = d['pos'].strip()
+    if isinstance(d.get('etym'), str):
+        o['etym'] = d['etym'].strip()
+    if isinstance(d.get('senses'), list):
+        o['senses'] = [{'m': str(x.get('m') or x.get('meaning') or '').strip(), 'en': str(x.get('en') or '').strip(), 'ko': str(x.get('ko') or '').strip()}
+                       for x in d['senses'][:3] if isinstance(x, dict) and (x.get('m') or x.get('meaning'))]
+    return o
 
 
 def qlist(d):
@@ -140,6 +155,59 @@ def flush(url, pend):
 
 
 LEVELS = '세 문제는 문제 모양·주어·시제·장면이 모두 서로 달라야 한다(같은 틀 반복 금지). ① 쉬움(바로 말하기): 표현의 뜻만 묻지 말고, 표현이 들어간 완전한 짧은 한국어 문장(8~15자, 예: \'나는 다음 주에 복직해요\')을 영어로. 주어 I, 현재나 과거 평서문. q 예: "\'(한국어)\'를 영어로 말해 보세요." ② 보통(대화 속 대답): 짧은 상황과 상대의 말을 주고 이 표현으로 대답하게 한다. 주어는 he/she/we/they 중 하나, 시제는 미래(will·be going to)나 현재완료. q 예: "친구가 \'요즘 회사 다시 나가?\'라고 물어요. 이 표현을 써서 \'응, 다음 달부터 다시 나가\'라고 대답해 보세요." ③ 도전(응용): 다음 중 하나를 골라 바꿔 가며 낸다 — 상대에게 묻는 질문 만들기 / 부정문으로 말하기 / because·when·if 로 두 생각을 이어 한 문장 / 내 경험을 이 표현으로 한 문장. 20~35자 분량의 한국어 지시로 주고, a는 그에 맞는 영어 한 문장. a(정답)에는 표현을 반드시 넣고, 지문 문장을 그대로 베끼지 않는다.'
+
+
+WINFO_RULE = '- pos: 품사·형태를 한국어로 짧게(예: "동사", "명사", "형용사", "구동사(동사+부사)", "숙어(관용구)", "문법 패턴"). 동사면 자동사/타동사도.\n- etym: 어원을 한국어 1~2문장으로. 단어는 뿌리(라틴어·고대 영어·프랑스어 등)와 원래 뜻, 숙어는 구성 단어의 원래 뜻에서 지금 뜻이 된 흐름. 확실히 아는 것만 쓰고, 확실하지 않으면 빈 문자열.\n- senses: 이 표현(또는 핵심 단어)의 다른 뜻 1~3개 [{"m":"다른 뜻(한국어)","en":"짧은 영어 예문","ko":"해석"}]. 지문에서 쓰인 뜻은 빼고, 다른 뜻이 없으면 [].'
+
+
+def winfo_todo(weeks):
+    """설명은 있는데 품사·어원·다른 뜻이 없는 단어·숙어 (최근 2주)"""
+    since = (datetime.date.today() - datetime.timedelta(days=14)).isoformat()
+    out = []
+    for wid, w in sorted(weeks.items(), reverse=True):
+        if not isinstance(w, dict) or wid < since:
+            continue
+        for i, s in enumerate(w.get('sentences') or []):
+            for j, v in enumerate(s.get('vocab') or []):
+                d = v.get('detail') or {}
+                if v.get('t') and d.get('core') and 'pos' not in d:
+                    out.append((wid, i, j))
+    return out
+
+
+def make_winfo(url, weeks, jobs):
+    made = 0
+    for b in range(0, len(jobs), 6):
+        part = jobs[b:b + 6]
+        items = [{'n': n, 't': weeks[w]['sentences'][i]['vocab'][j].get('t', ''), 'm': weeks[w]['sentences'][i]['vocab'][j].get('m', ''),
+                  'sentence': weeks[w]['sentences'][i].get('en', '')} for n, (w, i, j) in enumerate(part)]
+        p = ('영어 학습자용 사전처럼, 아래 표현마다 품사·어원·다른 뜻을 정리한다.\n' + WINFO_RULE + '\n' + json.dumps(items, ensure_ascii=False) +
+             '\nJSON만: {"items":[{"n":번호,"pos":"...","etym":"...","senses":[{"m":"...","en":"...","ko":"..."}]}]}')
+        try:
+            r = call(url, 'aiJson', p)
+        except Exception as e:
+            print(f'  품사·어원 실패 {e}')
+            if 'rate_limited' in str(e):
+                break
+            continue
+        got = {int(x.get('n', -1)): winfo(x) for x in (r or {}).get('items', []) if isinstance(x, dict) and isinstance(x.get('pos'), str)}
+        fresh = call(url, 'getWeeks') or {}
+        touched = set()
+        for n, (wid, i, j) in enumerate(part):
+            x = got.get(n)
+            try:
+                fv = fresh[wid]['sentences'][i]['vocab'][j]
+            except Exception:
+                continue
+            d = fv.get('detail') or {}
+            if not x or fv.get('t') != items[n]['t'] or not d.get('core') or 'pos' in d:
+                continue
+            x.setdefault('etym', ''); x.setdefault('senses', [])
+            d.update(x); fv['detail'] = d; touched.add(wid); made += 1
+        for wid in touched:
+            call(url, 'saveWeek', wid, {'sentences': fresh[wid]['sentences']}, True)
+        weeks.update({k: fresh[k] for k in touched})
+    print(f'품사·어원·다른 뜻 {made}개 저장')
 
 
 def quiz_todo(weeks):
@@ -210,6 +278,10 @@ def main():
         return
     if qjobs:
         make_quizzes(url, weeks, qjobs[:40])
+    wjobs = winfo_todo(weeks)
+    print(f'품사·어원이 없는 설명 {len(wjobs)}개')
+    if wjobs:
+        make_winfo(url, weeks, wjobs[:60])
     if not jobs:
         return
     ex = example()

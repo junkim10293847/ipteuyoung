@@ -351,6 +351,9 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .vdet{grid-column:1/-1;background:#fff8d6;border:1.5px solid #e9cf6a;border-radius:12px;padding:12px 12px;margin:4px 0 8px;display:grid;gap:12px;font-size:.86rem;color:var(--fg)}
 .vdet>div{border-left:3px solid var(--sec,var(--accent));padding:1px 0 1px 10px}
 .vdet .d-core{--sec:var(--accent)}
+.vdet .d-sen{--sec:#2f8f6f}.vdet .d-ety{--sec:#a0703a}
+.vdet .d-sen ul{margin:0;padding-left:1.1em;display:grid;gap:6px}.vdet .d-sen li b{font-weight:700}
+.d-pos{font-size:.88rem;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.d-pos span{font-size:.72rem;font-weight:700;color:var(--surface);background:var(--muted);border-radius:999px;padding:1px 8px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .vdet{background:#3a3418;border-color:#7a6a2a}}
 :root[data-theme="dark"] .vdet{background:#3a3418;border-color:#7a6a2a}.vdet .d-use{--sec:var(--done)}.vdet .d-ex{--sec:#3b7dd8}.vdet .d-sim{--sec:#8a6fc7}.vdet .d-tip{--sec:var(--warn)}
 .vdet h4{display:inline-block;width:max-content;max-width:100%;justify-self:start;margin:0 0 6px;font-size:.74rem;letter-spacing:.02em;color:#fff;background:var(--sec,var(--accent));border-radius:999px;padding:2px 10px}
@@ -605,7 +608,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v168</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v169</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1634,14 +1637,36 @@ JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'defau
   delete dqBusy[L.key];try{saveProg()}catch(_){}dqRefresh(k);
   if(ok){const el=document.querySelector(`.dq-go[data-dk="${CSS.escape(k)}"][data-lv="${lv}"]`);const box=el&&el.closest('.d-quiz').querySelector('.seq-r');if(box)celebrateBox(box)}
 },true);
+/* 단어·숙어 정보: 품사(pos)·어원(etym)·다른 뜻(senses) */
+function wordInfo(d){if(!d||typeof d!=='object')return {};const o={};
+  if(typeof d.pos==='string')o.pos=d.pos.trim();if(typeof d.etym==='string')o.etym=d.etym.trim();
+  if(Array.isArray(d.senses))o.senses=d.senses.slice(0,3).map(x=>({m:String(x&&(x.m||x.meaning)||'').trim(),en:String(x&&x.en||'').trim(),ko:String(x&&x.ko||'').trim()})).filter(x=>x.m);
+  return o}
+const wiTried=new Set();
+/* 예전에 만든 설명에 품사·어원·다른 뜻이 없으면, 열었을 때 한 번만 뒤에서 채움 */
+async function enrichWord(k,wbQ){const L=dqLoc(wbQ||k);if(!L||!sample||readOnly||!L.v.detail||'pos' in L.v.detail||wiTried.has(L.key))return;wiTried.add(L.key);
+  try{const j=await sample.json(`영어 학습자용 사전처럼, 아래 표현의 품사·어원·다른 뜻을 정리한다.
+[표현] ${L.v.t} — ${L.v.m||''}
+[지문 문장] ${L.w.sentences[L.i].en}
+- pos: 품사·형태를 한국어로 짧게(예: "동사", "명사", "형용사", "구동사(동사+부사)", "숙어(관용구)", "문법 패턴"). 동사면 자동사/타동사도.
+- etym: 어원을 한국어 1~2문장으로. 단어는 뿌리(라틴어·고대 영어·프랑스어 등)와 원래 뜻, 숙어는 구성 단어의 원래 뜻에서 지금 뜻이 된 흐름. 확실히 아는 것만 쓰고, 확실하지 않으면 빈 문자열.
+- senses: 이 표현(또는 핵심 단어)의 다른 뜻 1~3개 [{"m":"다른 뜻(한국어)","en":"짧은 영어 예문","ko":"해석"}]. 지문에서 쓰인 뜻은 빼고, 다른 뜻이 없으면 [].
+JSON만: {"pos":"...","etym":"...","senses":[{"m":"...","en":"...","ko":"..."}]}`,{modelTier:'default',limit:60000,bg:true});
+    const add=wordInfo(j||{});if(!('pos' in add))return;add.senses=add.senses||[];add.etym=add.etym||'';
+    L.v.detail={...L.v.detail,...add};const cur=weeks.find(x=>x.id===L.w.id);if(cur&&cur.sentences[L.i]&&cur.sentences[L.i].vocab[L.j])cur.sentences[L.i].vocab[L.j].detail=L.v.detail;
+    try{await db.doc('weeks/'+L.w.id).update({sentences:JSON.parse(JSON.stringify((cur||L.w).sentences))})}catch(_){}
+    const ae=document.activeElement;if(!(ae&&ae.classList&&ae.classList.contains('qz-in')))dqRefresh(wbQ||k)}catch(_){}}
 function detHtml(d,k,wb,wbQ){
   if(!d){
     if(detBusy[k])return `<p class="load">자세한 설명을 만드는 중… <span class="det-t" data-t0="${detBusy[k]}"></span> (보통 20~60초)</p>`;
     if(detErr[k])return `<p class="load">${esc(detErr[k])}</p>`;
     return `<p class="load">불러오는 중…</p>`;
   }
-  return `${pronHtml(k,wbQ)}${detBusy[k]?`<p class="load">설명을 더 보완하는 중… <span class="det-t" data-t0="${detBusy[k]}"></span></p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
+  if(!('pos' in d)&&!detBusy[k])setTimeout(()=>enrichWord(k,wbQ),0);
+  return `${pronHtml(k,wbQ)}${d.pos?`<div class="d-pos"><span>품사</span>${esc(d.pos)}</div>`:''}${detBusy[k]?`<p class="load">설명을 더 보완하는 중… <span class="det-t" data-t0="${detBusy[k]}"></span></p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
    ${d.usage?`<div class="d-use"><h4>이 문장에서의 쓰임</h4><p>${esc(d.usage)}</p></div>`:''}
+   ${(d.senses||[]).length?`<div class="d-sen"><h4>다른 뜻</h4><ul>${d.senses.map(x=>`<li><b>${esc(x.m)}</b>${x.en?`<div>${esc(x.en)}</div>`:''}${x.ko?`<div class="ko">${esc(x.ko)}</div>`:''}</li>`).join('')}</ul></div>`:''}
+   ${d.etym?`<div class="d-ety"><h4>어원</h4><p>${esc(d.etym)}</p></div>`:''}
    ${(d.examples||[]).length?`<div class="d-ex"><h4>예문</h4><ul>${d.examples.map(x=>`<li>${esc(x.en)}<div class="ko">${esc(x.ko)}</div></li>`).join('')}</ul></div>`:''}
    ${(d.similar||[]).length?`<div class="d-sim"><h4>비슷한 표현</h4><div class="sim">${d.similar.map(x=>`<span><b>${esc(x.t)}</b> · ${esc(x.m)}</span>`).join('')}</div></div>`:''}
    ${d.tip?`<div class="d-tip"><h4>외우는 팁 · 주의할 점</h4><p>${esc(d.tip)}</p></div>`:''}
@@ -1705,19 +1730,22 @@ async function loadDetail(w,i,j,k,quiet){
 [간단한 뜻] ${v.m}
 
 작성 규칙
-- 모든 항목(core, usage, examples, similar, tip, quizzes)을 빠짐없이 채운다.
+- 모든 항목(core, usage, examples, similar, tip, quizzes, pos, etym, senses)을 채운다.
 - core: 핵심 의미와 뉘앙스, 주로 쓰이는 상황을 한국어 2문장으로.
 - usage: 이 지문 문장 안에서 어떤 구조로, 무엇과 연결되어, 어떤 뜻으로 쓰였는지 문장 일부를 작은따옴표로 인용해 한국어 2문장으로.
 - examples: 일상·업무 상황의 짧고 자연스러운 영어 예문 3개. en은 영어 알파벳으로, ko는 자연스러운 한국어 해석.
 - similar: 비슷한 영어 표현 최대 3개. m에는 뜻과 함께 이 표현과의 차이(뉘앙스·격식·쓰임)를 한국어 1~2문장으로.
 - tip: 외우는 요령과 학습자가 자주 하는 실수를 한국어 2문장으로.
+- pos: 품사·형태를 한국어로 짧게(예: "동사", "명사", "형용사", "구동사(동사+부사)", "숙어(관용구)", "문법 패턴"). 동사면 자동사/타동사도.
+- etym: 어원을 한국어 1~2문장으로. 단어는 뿌리(라틴어·고대 영어·프랑스어 등)와 원래 뜻, 숙어는 구성 단어의 원래 뜻에서 지금 뜻이 된 흐름. 확실히 아는 것만 쓰고, 확실하지 않으면 빈 문자열.
+- senses: 이 표현(또는 핵심 단어)의 다른 뜻 1~3개 [{"m":"다른 뜻(한국어)","en":"짧은 영어 예문","ko":"해석"}]. 지문에서 쓰인 뜻은 빼고, 다른 뜻이 없으면 [].
 - quizzes: 이 표현을 직접 써 보게 하는 확인 퀴즈 3개를 난이도 순서로 [{"q":"...","a":"..."}]. q는 한국어 지시, a는 영어 정답 한 문장. 세 문제는 문제 모양·주어·시제·장면이 모두 서로 달라야 한다(같은 틀 반복 금지). ① 쉬움(바로 말하기): 표현의 뜻만 묻지 말고, 표현이 들어간 완전한 짧은 한국어 문장(8~15자, 예: '나는 다음 주에 복직해요')을 영어로. 주어 I, 현재나 과거 평서문. q 예: "'(한국어)'를 영어로 말해 보세요." ② 보통(대화 속 대답): 짧은 상황과 상대의 말을 주고 이 표현으로 대답하게 한다. 주어는 he/she/we/they 중 하나, 시제는 미래(will·be going to)나 현재완료. q 예: "친구가 '요즘 회사 다시 나가?'라고 물어요. 이 표현을 써서 '응, 다음 달부터 다시 나가'라고 대답해 보세요." ③ 도전(응용): 다음 중 하나를 골라 바꿔 가며 낸다 — 상대에게 묻는 질문 만들기 / 부정문으로 말하기 / because·when·if 로 두 생각을 이어 한 문장 / 내 경험을 이 표현으로 한 문장. 20~35자 분량의 한국어 지시로 주고, a는 그에 맞는 영어 한 문장. a(정답)에는 표현을 반드시 넣고, 지문 문장을 그대로 베끼지 않는다.
 - 영어를 한글 발음으로 적지 않는다. 존댓말(~입니다, ~합니다)로 쓴다.
 
 [좋은 답의 예시] 지문 문장 "To make rice in a pot, first measure out 240 grams of rice for a family of four."의 표현 "To + 동사원형, ..."에 대한 답:
 ${DETAIL_EXAMPLE}
 
-위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태에 quizzes 항목을 더해 답한다.`;
+위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태에 quizzes·pos·etym·senses 항목을 더해 답한다.`;
   const normDet=d=>{
     if(Array.isArray(d))d=d[0]||{};
     if(d&&typeof d==='object'&&!d.core&&Object.keys(d).length===1&&typeof d[Object.keys(d)[0]]==='object')d=d[Object.keys(d)[0]];
@@ -1726,6 +1754,7 @@ ${DETAIL_EXAMPLE}
     return {core:pick('core','meaning','핵심 의미'),usage:pick('usage','in_sentence','sentence_usage','usage_in_sentence','이 문장에서의 쓰임'),tip:pick('tip','tips','memory_tip','외우는 팁'),
       examples:(Array.isArray(d.examples)?d.examples:[]).slice(0,3).map(x=>({en:String(x.en||x.english||''),ko:String(x.ko||x.korean||'')})),
       similar:(Array.isArray(d.similar)?d.similar:[]).slice(0,3).map(x=>({t:String(x.t||x.expression||''),m:String(x.m||x.meaning||'')})),
+      ...wordInfo(d),
       ...(()=>{const qz=(Array.isArray(d.quizzes)?d.quizzes:[]).map(x=>({q:String(x&&(x.q||x.quiz)||'').trim(),a:String(x&&(x.a||x.answer)||'').trim()})).filter(x=>x.q).slice(0,3);
         if(qz.length)return {quiz:qz[0].q,quizAns:qz[0].a,quizzes:qz,quizV:2};return d.quiz?{quiz:String(d.quiz).trim(),quizAns:String(d.quizAns||d.answer||'').trim()}:{}})()};
   };
