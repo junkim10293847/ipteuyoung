@@ -317,6 +317,7 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .ko.empty{font-style:italic;opacity:.7}
 .voc summary{cursor:pointer;font-size:.8rem;font-weight:700;color:var(--accent);padding:2px 0;list-style:none;display:inline-flex;align-items:baseline;gap:6px;user-select:none}
 .voc summary::-webkit-details-marker{display:none}
+.voc summary{display:flex;flex-wrap:wrap;white-space:nowrap;row-gap:2px}.voc summary .wbadge{order:3;margin-left:auto;font-weight:500;padding-left:8px;white-space:nowrap}
 .voc summary::after{content:'펼치기 ▾';font-size:.74rem;font-weight:600;color:var(--muted)}
 .voc[open] summary::after{content:'접기 ▴'}
 .voc dl{margin:6px 0 2px;display:grid;gap:4px;border-top:1px dashed var(--line);padding-top:6px}
@@ -598,7 +599,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v158</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v159</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1104,7 +1105,7 @@ function patchCardState(w,i){
   const hb=c.querySelector('.hideen');if(hb){hb.setAttribute('aria-pressed',hid);hb.textContent=hid?'영어 보기':'영어 가리기'}
   const mb=c.querySelector('.mark');if(mb){mb.setAttribute('aria-pressed',!!dn[i]);mb.textContent=dn[i]?'✓ 외움':'☐ 외움'}
   const e=weakOf(w.id,i),ob=c.querySelector('.wbadge');
-  if(e){const t=document.createElement('div');t.innerHTML=`<div class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</div>`;const nb=t.firstChild;if(ob)ob.replaceWith(nb);else{const ko=c.querySelector('.ko');if(ko)ko.after(nb)}}
+  if(e){const sm=c.querySelector('details.voc>summary'),t=document.createElement('div');t.innerHTML=wbadgeHtml(e,!!sm);const nb=t.firstChild;if(ob)ob.replaceWith(nb);else if(sm)sm.appendChild(nb);else{const ko=c.querySelector('.ko');if(ko)ko.after(nb)}}
   const body=w.sentences.map((_,j)=>j).filter(j=>!w.sentences[j].isTitle),n=body.filter(j=>dn[j]).length;
   const pc=document.querySelector('.sumrow .pc');if(pc)pc.textContent=`${n}/${body.length} 암기`;
   const bar=document.querySelector('.sumrow .bar i');if(bar)bar.style.width=(body.length?n/body.length*100:0)+'%';
@@ -1250,6 +1251,8 @@ function vocItems(w,i){const s=w.sentences[i],out=[],seen=new Set();const T=ttlO
   if(T)(T.vocab||[]).forEach((x,j)=>{const k=cleanTerm(x.t).toLowerCase();if(!seen.has(k)){seen.add(k);out.push({x,ii:ti,j})}});
   (s.vocab||[]).forEach((x,j)=>{const k=cleanTerm(x.t).toLowerCase();if(!seen.has(k)){seen.add(k);out.push({x,ii:i,j})}});
   return out}
+/* 최근 써보기 기록: 단어·숙어 줄이 있으면 그 줄 오른쪽 끝에, 없으면 해석 아래에 (줄 하나 절약) */
+const wbadgeHtml=(e,inl)=>`<${inl?'span':'div'} class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</${inl?'span':'div'}>`;
 function ttlHtml(T,i){const hid=hiddenEn.has(i);return `<span class="ttl">${T.en.split(' ').map(x=>`<span class="w${hid?' hid':''}">${esc(x)}</span>`).join(' ')}</span>`}
 /* 귀트영 끊어 읽기: 문장마다 AI가 의미 덩어리로 나눈 s.ch("A / B / C")를 보고 덩어리 끝 단어 뒤에 / 표시 */
 function chunkEnds(t,ch){if(!ch||!isG())return null;const ws=t.split(' ');const parts=String(ch).split(/\s*\/\s*/).filter(Boolean);
@@ -1348,9 +1351,9 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
        <span class="num">${numLabel(w,i)}${todaySet.has(i)?`<i class="tdot${done[i]?' got':''}" title="오늘 외울 문장"></i>`:''}</span>
        ${(view&&view[0]==='d'&&listIdx[0]==='__H')?(r=>r==='rev'?'<span class="ctag rev">🔁 어제 복습</span>':r==='skip'?'<span class="ctag skip">✓ 이미 외움</span>':'<span class="ctag today">📖 오늘</span>')(roleOf(i)):''}${(T=>T?`<div class="enw">${ttlHtml(T,i)}<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div></div>`:`<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div>`)(ttlOf(w,i))}
        <div class="ko${s.ko?'':' empty'}">${(T=>T&&T.ko?`<b class="ttl-k">${esc(T.ko)}</b> · `:'')(ttlOf(w,i))}${s.ko?esc(s.ko):'해석 없음'}</div>
-       ${(()=>{const e=weakOf(w.id,i);return e?`<div class="wbadge${e.last===100?' good':''}">최근 써보기 ${e.last}% · ${e.n}회${e.best>e.last?` · 최고 ${e.best}%`:''}</div>`:''})()}
+       ${(()=>{const e=weakOf(w.id,i);return e&&!vocItems(w,i).length?wbadgeHtml(e):''})()}
 
-       ${(()=>{const vl=vocItems(w,i);return vl.length?`<details class="voc" data-i="${i}"${vocOpen||openVoc.has(i)?' open':''}><summary>단어·숙어 ${vl.length}</summary><dl>${vl.map(({x,ii,j})=>{const k=ii+'-'+j,op=openDet.has(k);return `<div class="vi"><dt><button class="vplay${x.audio?'':' waiting'}" data-t="${esc(x.t)}" data-a="${esc(x.audio||'')}" aria-label="${esc(x.t)} 듣기">${x.audio?'🔊':'⏳'}</button>${esc(x.t)}<button class="wbstar${wbHas(x.t)?' on':''}" data-wb="${ii}-${j}" aria-pressed="${wbHas(x.t)}" aria-label="내 단어장에 담기">${wbHas(x.t)?'★':'☆'}</button></dt><dd>${esc(x.m)} <button class="vmore" data-k="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button></dd>${op?`<div class="vdet">${detHtml(x.detail,k)}</div>`:''}</div>`}).join('')}</dl></details>`:''})()}
+       ${(()=>{const vl=vocItems(w,i);return vl.length?`<details class="voc" data-i="${i}"${vocOpen||openVoc.has(i)?' open':''}><summary>단어·숙어 ${vl.length}${(e=>e?wbadgeHtml(e,1):'')(weakOf(w.id,i))}</summary><dl>${vl.map(({x,ii,j})=>{const k=ii+'-'+j,op=openDet.has(k);return `<div class="vi"><dt><button class="vplay${x.audio?'':' waiting'}" data-t="${esc(x.t)}" data-a="${esc(x.audio||'')}" aria-label="${esc(x.t)} 듣기">${x.audio?'🔊':'⏳'}</button>${esc(x.t)}<button class="wbstar${wbHas(x.t)?' on':''}" data-wb="${ii}-${j}" aria-pressed="${wbHas(x.t)}" aria-label="내 단어장에 담기">${wbHas(x.t)?'★':'☆'}</button></dt><dd>${esc(x.m)} <button class="vmore" data-k="${k}" aria-expanded="${op}">${op?'접기 ▴':'자세히 ▾'}</button></dd>${op?`<div class="vdet">${detHtml(x.detail,k)}</div>`:''}</div>`}).join('')}</dl></details>`:''})()}
        <div class="acts">
          ${s.audio?`<button class="play" data-i="${i}">▶ 듣기</button>`:`<button class="play" data-i="${i}">▶ 듣기</button>`}
          <button class="slow" data-i="${i}">▶ 천천히</button>
