@@ -605,7 +605,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v162</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v163</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -681,8 +681,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   /* 바뀐 게 없으면 화면을 다시 그리지 않고, 글을 쓰는 중이면 다 쓴 뒤에 반영 (아이패드에서 화면이 튀는 것 방지) */
   let lastSig='',pendingEmit=false;
   const typing=()=>{const a=document.activeElement;return !!(a&&(a.tagName==='TEXTAREA'||a.tagName==='INPUT'||a.isContentEditable))};
-  function emitSafe(){if(typing()){pendingEmit=true;return}pendingEmit=false;emit()}
-  document.addEventListener('focusout',()=>{if(pendingEmit)setTimeout(()=>{if(pendingEmit&&!typing())emitSafe()},400)});
+  /* 채점·첨삭 직후 몇 초는 새 자료가 와도 화면을 다시 그리지 않음 (다시 그리면 보던 곳이 흔들림) → 조용해지면 반영 */
+  let pendT=null;
+  function emitSafe(){const q=(window.__quietUntil||0)-Date.now();
+    if(typing()||q>0){pendingEmit=true;clearTimeout(pendT);pendT=setTimeout(()=>{if(pendingEmit)emitSafe()},Math.max(q,0)+800);return}
+    pendingEmit=false;emit()}
+  document.addEventListener('focusout',()=>{if(pendingEmit){clearTimeout(pendT);pendT=setTimeout(()=>{if(pendingEmit&&!typing())emitSafe()},Math.max(400,(window.__quietUntil||0)-Date.now()+400))}});
   /* 연결이 잠깐 끊겨도(화면 꺼짐·절전·와이파이 전환) 이미 받은 주차는 그대로 두고 다음 확인 때 다시 시도 */
   let loadedOnce=false;
   const tries={has:()=>{try{const c=localStorage.getItem('weeksCache');return !!(c&&c.length>2)}catch(_){return false}}};
@@ -1199,7 +1203,7 @@ function writeHtml(w,i){
 </div>`:''}
   </div>`;
 }
-document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))document.body.classList.add('typing')});
+document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))document.body.classList.add('typing');const c=e.target.closest&&e.target.closest('li.card,details.tool');if(c&&c.id)window.__lastCard={id:c.id,at:Date.now()}});
 /* 쓰기 칸을 누르면 휴대폰이 너무 많이 올려서 다음 문장까지 보이는 문제: 키보드가 다 올라온 뒤
    쓰기 칸 아래 끝이 키보드 바로 위에 오도록 덜 올라간 만큼만 되돌림 (칸 윗부분이 가려지지 않는 범위 안에서) */
 (function(){const vv=window.visualViewport;if(!vv)return;let el=null,tmr=null,until=0;
@@ -1968,7 +1972,7 @@ document.addEventListener('click',async e=>{
   if(t.classList.contains('wr-check')){
     const key=curId+'|'+i, r=grade(w,i);if(!r){const ta=$('wr-'+i);if(ta)ta.focus();return}
     /* 바뀌기 전에 쓰기 칸 위치를 붙잡음 (위에 '최근 써보기' 줄이 새로 생기거나 키보드가 내려가도 칸이 제자리) */
-    const holdFix=holdAnchor($('wr-'+i)||$('c'+i),1100)||(()=>{});
+    const holdFix=holdAnchor($('wr-'+i)||$('c'+i),1100)||(()=>{});window.__quietUntil=Date.now()+6000;window.__lastCard={id:'c'+i,at:Date.now()};
     writeRes[key]=r;recordWeak(w.id,i,r,false);saveProg();
     if(r.perfect&&!doneOf(w.id)[i]){prog.done[w.id]={...doneOf(w.id),[i]:true};doneSeen.add(i);saveProg()}
     if(r.perfect)hiddenEn.add(i);
@@ -2797,7 +2801,9 @@ function topAnchor(){const els=[...document.querySelectorAll('#main li.card,#mai
 function scrollToAnchor(a){if(!a)return;try{history.scrollRestoration='manual'}catch(_){}
   const go=()=>{const e=a.id&&$(a.id);if(e)window.scrollBy(0,e.getBoundingClientRect().top-a.off);else if(a.y!=null)window.scrollTo(0,a.y)};
   go();requestAnimationFrame(go);setTimeout(go,250);setTimeout(go,800)}
-function keepScroll(fn){const a=topAnchor();fn();scrollToAnchor(a)}
+function keepScroll(fn){let a=topAnchor();const lc=window.__lastCard,el=lc&&Date.now()-lc.at<120000&&$(lc.id);
+  if(el){const r=el.getBoundingClientRect();if(r.bottom>0&&r.top<innerHeight)a={id:lc.id,off:Math.round(r.top)}}   /* 지금 쓰던 카드를 기준으로 제자리 */
+  fn();scrollToAnchor(a)}
 function saveUi(){if(!loaded||!curId)return;try{
   if(mock){const ta=$('mockIn');if(ta&&!mock.res)mock.ans[mock.pos]=ta.value}
   try{const mn=$('main');if(mn&&mn.querySelector('li.card'))localStorage.setItem('uiSnap',JSON.stringify({main:mn.innerHTML,week:($('weekRow')||{}).innerHTML||'',y:Math.round(scrollY)}))}catch(_){}
