@@ -595,7 +595,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v153</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v154</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -769,7 +769,9 @@ const lastKey=()=>curProg==='gtv'?'lastWeekGtv':'lastWeek';
 const otherProg=wid=>{const w=allWeeks.find(x=>x.id===wid);return !!w&&progOf(w)!==curProg};
 /* 귀트영은 아래 닉네임 사용자에게만 보임 (다른 멤버가 헷갈리지 않게). 사람을 늘리려면 이 목록에 닉네임 추가 */
 const GTV_USERS=['배라'];
-const canGtv=()=>{try{return GTV_USERS.includes(String(nick||'').trim())}catch(_){return false}};
+/* 2026-11-14: 모든 멤버에게 공개. 다시 일부에게만 보이게 하려면 GTV_ALL=false */
+const GTV_ALL=true;
+const canGtv=()=>{if(GTV_ALL)return true;try{return GTV_USERS.includes(String(nick||'').trim())}catch(_){return false}};
 function ensureProg(){if(curProg!=='gtv'||canGtv())return;
   curProg='ipt';ls.set('prog','ipt');weeks=allWeeks.filter(w=>progOf(w)===curProg);
   const last=ls.get(lastKey(),null);if(!weeks.find(w=>w.id===curId)){curId=(weeks.find(w=>w.id===last)||weeks[0]||{}).id||null;view=curId?todayView(weeks.find(w=>w.id===curId)):null}}
