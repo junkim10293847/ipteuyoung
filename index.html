@@ -2364,7 +2364,7 @@ async function makeClues(w,force){
 - "col": 자주 함께 쓰는 말 2~3개 배열 (예: ["return to work after maternity leave","be ready to return to work"])
 - "nu": 한국어 2~3문장. 비슷한 표현과의 차이, 한국인이 자주 틀리는 점(전치사·관사·시제 등).
 - "ex2": 실제로 쓰는 예문 2개 [{"en":"...","ko":"..."}]
-규칙: def·use·syn·ex 에는 표현에 들어 있는 단어(관사·전치사·대명사 제외)를 절대 쓰지 않는다. ex2·col 에는 써도 된다.
+규칙: def·use·syn·ex 에는 표현에 들어 있는 단어(관사·전치사·대명사 제외)를 절대 쓰지 않는다(비슷한 말에도 같은 단어 금지, 예: nap time → nap 금지). ex2·col 에는 써도 된다. 숙어는 pos를 idiom, 동사+부사/전치사 덩어리는 phrasal verb로 구분한다.
 입력과 같은 순서, 같은 개수로 답한다.
 JSON만: {"items":[{"def":"...","use":"...","ex":"...","syn":"...","pos":"...","reg":"...","col":["..."],"nu":"...","ex2":[{"en":"...","ko":"..."}]}]}
 표현 목록: ${JSON.stringify(part.map(x=>x.v.t+' ('+(x.v.m||'')+')'))}
