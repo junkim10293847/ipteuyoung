@@ -355,6 +355,10 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 :root[data-theme="dark"] .vdet{background:#3a3418;border-color:#7a6a2a}.vdet .d-use{--sec:var(--done)}.vdet .d-ex{--sec:#3b7dd8}.vdet .d-sim{--sec:#8a6fc7}.vdet .d-tip{--sec:var(--warn)}
 .vdet h4{display:inline-block;width:max-content;max-width:100%;justify-self:start;margin:0 0 6px;font-size:.74rem;letter-spacing:.02em;color:#fff;background:var(--sec,var(--accent));border-radius:999px;padding:2px 10px}
 .vdet p{margin:0}
+.dq-lvs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 6px;align-items:center}
+.dq-lv{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:4px 12px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+.dq-lv.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.seq-act .dq-lv{border-radius:10px;padding:8px 12px;font-size:.9rem}
 .dqa-t{margin:6px 0 2px}.dqa-t b{font-size:1.05rem}.dqa-t span{color:var(--muted)}.dqa-t small{color:var(--muted)}
 .dqa .d-quiz h4{display:none}
 .gs-clue i{font-style:normal;font-weight:600;color:var(--muted)}
@@ -601,7 +605,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v161</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v162</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1559,37 +1563,50 @@ ${prev.length?'[이전 대화]\n'+prev.map(x=>'Q: '+x.q+'\nA: '+x.a).join('\n'):
 const dqBusy={};let dqErr={};
 function dqLoc(k){const p=String(k).split('~');const wid=p.length>1?p[0]:curId,ij=p.length>1?p[1]:String(k);const [i,j]=ij.split('-').map(Number);
   const w=weeks.find(x=>x.id===wid);const v=w&&w.sentences[i]&&w.sentences[i].vocab&&w.sentences[i].vocab[j];return v?{w,i,j,v,key:wid+'|'+i+'-'+j}:null}
-function dqHtml(k,pre){const L=dqLoc(k);if(!L||!L.v.detail)return '';const q=L.v.detail.quiz,z=((prog.dq||{})[L.key])||null,b=dqBusy[L.key],id=(pre||'dq-')+L.key.replace(/[^a-z0-9]/gi,'_');
-  if(!q&&!b&&!dqErr[L.key]&&sample&&!readOnly)setTimeout(()=>makeDq(k),0);
-  if(!q)return `<div class="d-quiz"><h4>확인 퀴즈</h4>${dqErr[L.key]?`<p class="load">${esc(dqErr[L.key])}</p>`:''}<button type="button" class="ghost dq-make" data-dk="${esc(k)}"${b?' disabled':''}>${b||(!dqErr[L.key]&&sample)?'확인 퀴즈 만드는 중…':'✏️ 이 표현으로 확인 퀴즈 풀기'}</button></div>`;
-  return `<div class="d-quiz"><h4>확인 퀴즈</h4><p>${esc(q)}</p>
-    <input class="qz-in" id="${id}" data-dk="${esc(k)}" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" placeholder="여기에 영어로 써 보세요" value="${esc(z&&z.u||'')}">
-    <div class="seq-act">${micBtn(id)}${(()=>{const bb=busyBtn(b,'첨삭 받기');return `<button type="button" class="primary dq-go" data-dk="${esc(k)}"${bb.dis}${b?` data-busy0="${b}"`:''}>${bb.txt}</button>`})()}${z?`<button type="button" class="ghost dq-re" data-dk="${esc(k)}">↺ 다시 하기</button>`:''}</div>
+/* 확인 퀴즈 3단계: ① 쉬움 ② 보통 ③ 도전 — 단계마다 내 답·첨삭은 따로 저장(1단계 키는 예전과 같음) */
+const DQ_LV=['① 쉬움','② 보통','③ 도전'],dqLv={};
+const quizzesOf=d=>d?(Array.isArray(d.quizzes)&&d.quizzes.length?d.quizzes:(d.quiz?[{q:d.quiz,a:d.quizAns||''}]:[])):[];
+const lvKey=(key,lv)=>key+(lv>1?'#'+lv:'');
+function dqHtml(k,pre){const L=dqLoc(k);if(!L||!L.v.detail)return '';const QZ=quizzesOf(L.v.detail),D=prog.dq||{};
+  const mk=dqBusy[L.key+'#mk'];
+  if(QZ.length<3&&!mk&&!dqErr[L.key]&&sample&&!readOnly)setTimeout(()=>makeDq(k),0);
+  if(!QZ.length)return `<div class="d-quiz"><h4>확인 퀴즈</h4>${dqErr[L.key]?`<p class="load">${esc(dqErr[L.key])}</p>`:''}<button type="button" class="ghost dq-make" data-dk="${esc(k)}"${mk?' disabled':''}>${mk||(!dqErr[L.key]&&sample)?'확인 퀴즈 만드는 중…':'✏️ 이 표현으로 확인 퀴즈 풀기'}</button></div>`;
+  let lv=dqLv[L.key];if(!lv){lv=1;for(let n=1;n<=QZ.length;n++){if(!(D[lvKey(L.key,n)]||{}).ok){lv=n;break}if(n===QZ.length)lv=1}}lv=Math.min(lv,QZ.length);
+  const Q=QZ[lv-1],lk=lvKey(L.key,lv),z=D[lk]||null,b=dqBusy[lk],id=(pre||'dq-')+lk.replace(/[^a-z0-9]/gi,'_');
+  const tabs=QZ.length>1||mk?`<div class="dq-lvs">${QZ.map((_,n)=>{const zz=D[lvKey(L.key,n+1)];return `<button type="button" class="dq-lv${n+1===lv?' on':''}" data-dk="${esc(k)}" data-lv="${n+1}">${DQ_LV[n]}${zz&&zz.ok?' ✓':''}</button>`}).join('')}${QZ.length<3&&mk?'<span class="load">더 만드는 중…</span>':''}</div>`:'';
+  return `<div class="d-quiz"><h4>확인 퀴즈</h4>${tabs}<p>${esc(Q.q)}</p>
+    <input class="qz-in" id="${id}" data-dk="${esc(k)}" data-lv="${lv}" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" placeholder="여기에 영어로 써 보세요" value="${esc(z&&z.u||'')}">
+    <div class="seq-act">${micBtn(id)}${(()=>{const bb=busyBtn(b,'첨삭 받기');return `<button type="button" class="primary dq-go" data-dk="${esc(k)}" data-lv="${lv}"${bb.dis}${b?` data-busy0="${b}"`:''}>${bb.txt}</button>`})()}${z?`<button type="button" class="ghost dq-re" data-dk="${esc(k)}" data-lv="${lv}">↺ 다시 하기</button>`:''}${z&&z.ok&&lv<QZ.length?`<button type="button" class="ghost dq-lv" data-dk="${esc(k)}" data-lv="${lv+1}">다음 단계 ▶</button>`:''}</div>
     ${z&&z.err?`<p class="load">${esc(z.err)}</p>`:''}
     ${z&&z.fixed?`<div class="seq-r ${z.ok?'ok':''}"><b>${z.ok?'✅ 맞았어요':'✏️ 이렇게 고쳐 보세요'}</b>${z.ok?`<div class="wr-diff">${esc(z.fixed)}</div>`:diffHtml(gradeText(z.fixed,z.u))}${z.better&&z.better!==z.fixed?`<em>더 자연스럽게: ${esc(z.better)}</em>`:''}${z.tip?`<em>${esc(z.tip)}</em>`:''}</div>`:''}
-    ${z&&!z.ok&&L.v.detail.quizAns?`<details class="dq-ans"><summary>모범 답 보기</summary>${esc(L.v.detail.quizAns)}</details>`:''}
+    ${z&&!z.ok&&Q.a?`<details class="dq-ans"><summary>모범 답 보기</summary>${esc(Q.a)}</details>`:''}
   </div>`}
-/* 확인 퀴즈 만들기: 설명을 열었는데 퀴즈가 없으면 자동으로 (버튼을 누르지 않아도) */
-async function makeDq(k){const L=dqLoc(k);if(!L||!sample||readOnly||dqBusy[L.key]||(L.v.detail&&L.v.detail.quiz))return;
-    dqBusy[L.key]=1;delete dqErr[L.key];dqRefresh(k);
-    try{const j=await sample.json(`한국인 초보 영어 학습자가 아래 표현을 외웠다. 이 표현을 직접 써 보게 하는 '확인 퀴즈' 하나를 만든다.
+/* 확인 퀴즈 만들기: 단계가 3개가 안 되면 자동으로 (있던 1단계는 그대로 두고 ②·③을 채움) */
+async function makeDq(k){const L=dqLoc(k);const mkk=L&&L.key+'#mk';if(!L||!sample||readOnly||dqBusy[mkk]||quizzesOf(L.v.detail).length>=3)return;
+    dqBusy[mkk]=1;delete dqErr[L.key];dqRefresh(k);
+    try{const old=quizzesOf(L.v.detail);
+      const j=await sample.json(`한국인 영어 학습자가 아래 표현을 외웠다. 이 표현을 직접 써 보게 하는 '확인 퀴즈'를 난이도별로 3개 만든다.
 [표현] ${L.v.t} — ${L.v.m||''}
 [지문 문장] ${L.w.sentences[L.i].en}
-규칙: 지문 문장과 다른 일상 상황의 짧은 한국어 문장(8~20자)을 주고 영어로 말하게 한다. 형식: "'(한국어 문장)'을 영어로 말해 보세요." 정답은 그 표현을 꼭 쓰는 쉬운 영어 한 문장.
-JSON만: {"quiz":"...","answer":"..."}`,{modelTier:'default',limit:50000});
-      const quiz=String(j?.quiz||'').trim(),ans=String(j?.answer||'').trim();if(!quiz)throw{code:'invalid_json'};
-      L.v.detail={...L.v.detail,quiz,quizAns:ans};
+${old[0]?`[이미 있는 ① 쉬움 퀴즈] ${old[0].q}\n`:''}규칙: q 형식은 "'(한국어 문장)'을 영어로 말해 보세요." a는 그 표현을 꼭 쓰는 영어 정답 한 문장. 지문 문장을 그대로 베끼지 않는다.
+① 쉬움: 지문과 비슷한 상황의 짧은 문장(8~15자), 기본 시제. ② 보통: 다른 일상 상황에서 주어나 시제를 바꾼 문장(12~25자). ③ 도전: 질문·부정·이유(because)·조건(if) 중 하나를 넣은 긴 문장(20~35자).
+JSON만: {"quizzes":[{"q":"...","a":"..."},{"q":"...","a":"..."},{"q":"...","a":"..."}]}`,{modelTier:'default',limit:60000});
+      let qz=(Array.isArray(j?.quizzes)?j.quizzes:[]).map(x=>({q:String(x&&(x.q||x.quiz)||'').trim(),a:String(x&&(x.a||x.answer)||'').trim()})).filter(x=>x.q).slice(0,3);
+      if(!qz.length&&j?.quiz)qz=[{q:String(j.quiz).trim(),a:String(j.answer||'').trim()}];
+      if(!qz.length)throw{code:'invalid_json'};
+      if(old[0])qz[0]=old[0];
+      L.v.detail={...L.v.detail,quizzes:qz,quiz:qz[0].q,quizAns:qz[0].a};
       const cur=weeks.find(x=>x.id===L.w.id);if(cur&&cur.sentences[L.i]&&cur.sentences[L.i].vocab[L.j])cur.sentences[L.i].vocab[L.j].detail=L.v.detail;
       try{await db.doc('weeks/'+L.w.id).update({sentences:JSON.parse(JSON.stringify((cur||L.w).sentences))})}catch(_){}
-    }catch(err){dqErr[L.key]='퀴즈를 만들지 못했어요. 다시 눌러 주세요.'}
-    delete dqBusy[L.key];dqRefresh(k)}
+    }catch(err){if(!quizzesOf(L.v.detail).length)dqErr[L.key]='퀴즈를 만들지 못했어요. 다시 눌러 주세요.'}
+    delete dqBusy[mkk];dqRefresh(k)}
 /* ✏️ 확인 퀴즈 모아 풀기: 이번 주 모든 단어·숙어의 확인 퀴즈를 한 문제씩 (퀴즈 화면·첨삭·기록은 설명 속 퀴즈와 같은 것을 씀) */
 let dqaPos=0;
 const dqaItems=w=>{const L=[];w.sentences.forEach((s,i)=>(s.vocab||[]).forEach((v,j)=>{if(v&&v.t&&v.detail&&v.detail.core)L.push({i,j,v})}));return L};
 function dqaHtml(w){const L=dqaItems(w);if(!L.length)return `<p class="hint" style="margin-top:10px">아직 설명이 만들어진 단어·숙어가 없어요. 단어·숙어 '자세히'가 만들어지면 여기에 모여요.</p>`;
   const p=Math.max(0,Math.min(dqaPos,L.length-1)),it=L[p],k=it.i+'-'+it.j,D=prog.dq||{};
-  const ok=L.filter(x=>(D[w.id+'|'+x.i+'-'+x.j]||{}).ok).length,tried=L.filter(x=>(D[w.id+'|'+x.i+'-'+x.j]||{}).fixed).length;
-  return `<div class="seq dqa"><div class="seq-step">${p+1} / ${L.length}${tried?` · 맞힘 ${ok}/${tried}`:''}</div>
+  const lks=L.flatMap(x=>quizzesOf(x.v.detail).map((_,n)=>lvKey(w.id+'|'+x.i+'-'+x.j,n+1)));const ok=lks.filter(q=>(D[q]||{}).ok).length,tried=lks.filter(q=>(D[q]||{}).fixed).length;
+  return `<div class="seq dqa"><div class="seq-step">${p+1} / ${L.length}${tried?` · 맞힘 ${ok}/${tried}`:''}${lks.length?` · 전체 ${lks.length}문제`:''}</div>
     <div class="dqa-t"><b>${esc(it.v.t)}</b> <span>${esc(it.v.m||'')}</span> <small>· ${it.i+1}번 문장</small></div>
     ${dqHtml(k,'dqa-')}
     <div class="seq-act"><button class="ghost" id="dqaPrev"${p===0?' disabled':''}>◀ 이전</button><button class="primary" id="dqaNext">${p===L.length-1?'처음부터':'다음 ▶'}</button>${tried<L.length?`<button class="ghost" id="dqaSkip">안 푼 문제로</button>`:''}</div></div>`}
@@ -1601,8 +1618,10 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   const box=$('dqaBox'),y0=box?box.getBoundingClientRect().top:0;dqaPatch();if(box){const d=box.getBoundingClientRect().top-y0;if(Math.abs(d)>1)window.scrollBy(0,d)}});
 function dqRefresh(k){const L=dqLoc(k);if(!L)return;if(L.w.id===curId&&!wbView)dqaPatch();if(wbView)wbPatch();else{if(L.w.id===curId)renderCard(L.i)}}
 document.addEventListener('click',async e=>{
-  const t=e.target.closest&&e.target.closest('.dq-make,.dq-go,.dq-re');if(!t)return;e.preventDefault();e.stopPropagation();
-  const k=t.dataset.dk,L=dqLoc(k);if(!L)return;prog.dq=prog.dq||{};
+  const t=e.target.closest&&e.target.closest('.dq-make,.dq-go,.dq-re,.dq-lv');if(!t)return;e.preventDefault();e.stopPropagation();
+  const k=t.dataset.dk,L0=dqLoc(k);if(!L0)return;prog.dq=prog.dq||{};
+  if(t.classList.contains('dq-lv')){dqLv[L0.key]=+t.dataset.lv||1;try{micStop()}catch(_){}dqRefresh(k);return}
+  const lv=+t.dataset.lv||1,Q=quizzesOf(L0.v.detail)[lv-1]||{q:L0.v.detail.quiz,a:L0.v.detail.quizAns},L={...L0,key:lvKey(L0.key,lv)};dqLv[L0.key]=lv;
   if(t.classList.contains('dq-re')){delete prog.dq[L.key];saveProg();dqRefresh(k);return}
   if(!sample){dqErr[L.key]='AI 기능이 켜져 있어야 해요.';dqRefresh(k);return}
   if(t.classList.contains('dq-make')){makeDq(k);return}
@@ -1610,8 +1629,8 @@ document.addEventListener('click',async e=>{
   micStop();const myT=Date.now();dqBusy[L.key]=myT;prog.dq[L.key]={u};dqRefresh(k);let ok=false;
   try{const j=await sample.json(`너는 한국인 초보 영어 학습자를 다정하게 가르치는 영어 강사다.
 [외운 표현] ${L.v.t} — ${L.v.m||''}
-[확인 퀴즈] ${L.v.detail.quiz}
-[모범 답] ${L.v.detail.quizAns||''}
+[확인 퀴즈] ${Q.q}
+[모범 답] ${Q.a||''}
 [학습자 답] ${u}
 (음성 인식으로 받아 적어 철자가 이상하거나 한국어가 섞였을 수 있다. 뜻을 짐작해 고친다. 모범 답과 달라도 뜻이 맞고 표현을 맞게 썼으면 ok.)
 "ok"(true/false), "fixed"(학습자 답을 가장 적게 고친 올바른 문장), "better"(더 자연스러운 문장, 같으면 빈 문자열), "tip"(한국어 한 문장).
@@ -1621,7 +1640,7 @@ JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'defau
   catch(err){prog.dq[L.key]={u,err:err&&err.code==='network'?'답이 늦어 멈췄어요. [첨삭 받기]를 다시 눌러 주세요.':'첨삭을 받지 못했어요. 다시 눌러 주세요.'}}
   if(dqBusy[L.key]!==myT)return;   /* 그사이 다시 눌렀으면 이 늦은 답은 버림 */
   delete dqBusy[L.key];try{saveProg()}catch(_){}dqRefresh(k);
-  if(ok){const el=document.querySelector(`.dq-go[data-dk="${CSS.escape(k)}"]`);const box=el&&el.closest('.d-quiz').querySelector('.seq-r');if(box)celebrateBox(box)}
+  if(ok){const el=document.querySelector(`.dq-go[data-dk="${CSS.escape(k)}"][data-lv="${lv}"]`);const box=el&&el.closest('.d-quiz').querySelector('.seq-r');if(box)celebrateBox(box)}
 },true);
 function detHtml(d,k,wb,wbQ){
   if(!d){
@@ -1694,20 +1713,19 @@ async function loadDetail(w,i,j,k,quiet){
 [간단한 뜻] ${v.m}
 
 작성 규칙
-- 모든 항목(core, usage, examples, similar, tip, quiz, quizAns)을 빠짐없이 채운다.
+- 모든 항목(core, usage, examples, similar, tip, quizzes)을 빠짐없이 채운다.
 - core: 핵심 의미와 뉘앙스, 주로 쓰이는 상황을 한국어 2문장으로.
 - usage: 이 지문 문장 안에서 어떤 구조로, 무엇과 연결되어, 어떤 뜻으로 쓰였는지 문장 일부를 작은따옴표로 인용해 한국어 2문장으로.
 - examples: 일상·업무 상황의 짧고 자연스러운 영어 예문 3개. en은 영어 알파벳으로, ko는 자연스러운 한국어 해석.
 - similar: 비슷한 영어 표현 최대 3개. m에는 뜻과 함께 이 표현과의 차이(뉘앙스·격식·쓰임)를 한국어 1~2문장으로.
 - tip: 외우는 요령과 학습자가 자주 하는 실수를 한국어 2문장으로.
-- quiz: 이 표현을 직접 써 보게 하는 확인 퀴즈 하나. 지문 문장과 다른 일상 상황의 짧은 한국어 문장(8~20자)을 주고 영어로 말하게 한다. 형식: "'(한국어 문장)'을 영어로 말해 보세요."
-- quizAns: 확인 퀴즈의 정답. 그 표현을 꼭 쓰는 쉬운 영어 한 문장.
+- quizzes: 이 표현을 직접 써 보게 하는 확인 퀴즈 3개를 난이도 순서로 [{"q":"...","a":"..."}]. q 형식: "'(한국어 문장)'을 영어로 말해 보세요." a는 그 표현을 꼭 쓰는 영어 정답 한 문장. ① 쉬움: 지문과 비슷한 상황의 짧은 문장(8~15자), 기본 시제. ② 보통: 다른 일상 상황에서 주어나 시제를 바꾼 문장(12~25자). ③ 도전: 질문·부정·이유(because)·조건(if) 중 하나를 넣은 긴 문장(20~35자).
 - 영어를 한글 발음으로 적지 않는다. 존댓말(~입니다, ~합니다)로 쓴다.
 
 [좋은 답의 예시] 지문 문장 "To make rice in a pot, first measure out 240 grams of rice for a family of four."의 표현 "To + 동사원형, ..."에 대한 답:
 ${DETAIL_EXAMPLE}
 
-위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태에 quiz·quizAns 두 항목을 더해 답한다.`;
+위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태에 quizzes 항목을 더해 답한다.`;
   const normDet=d=>{
     if(Array.isArray(d))d=d[0]||{};
     if(d&&typeof d==='object'&&!d.core&&Object.keys(d).length===1&&typeof d[Object.keys(d)[0]]==='object')d=d[Object.keys(d)[0]];
@@ -1716,7 +1734,8 @@ ${DETAIL_EXAMPLE}
     return {core:pick('core','meaning','핵심 의미'),usage:pick('usage','in_sentence','sentence_usage','usage_in_sentence','이 문장에서의 쓰임'),tip:pick('tip','tips','memory_tip','외우는 팁'),
       examples:(Array.isArray(d.examples)?d.examples:[]).slice(0,3).map(x=>({en:String(x.en||x.english||''),ko:String(x.ko||x.korean||'')})),
       similar:(Array.isArray(d.similar)?d.similar:[]).slice(0,3).map(x=>({t:String(x.t||x.expression||''),m:String(x.m||x.meaning||'')})),
-      ...(d.quiz?{quiz:String(d.quiz).trim(),quizAns:String(d.quizAns||d.answer||'').trim()}:{})};
+      ...(()=>{const qz=(Array.isArray(d.quizzes)?d.quizzes:[]).map(x=>({q:String(x&&(x.q||x.quiz)||'').trim(),a:String(x&&(x.a||x.answer)||'').trim()})).filter(x=>x.q).slice(0,3);
+        if(qz.length)return {quiz:qz[0].q,quizAns:qz[0].a,quizzes:qz};return d.quiz?{quiz:String(d.quiz).trim(),quizAns:String(d.quizAns||d.answer||'').trim()}:{}})()};
   };
   const probs=det=>{const p=[];
     if(det.core.length<20)p.push('core가 비었거나 너무 짧음');

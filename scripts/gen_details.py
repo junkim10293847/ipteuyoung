@@ -56,20 +56,19 @@ def prompt(s, v, ex):
 [간단한 뜻] {v.get('m', '')}
 
 작성 규칙
-- 모든 항목(core, usage, examples, similar, tip, quiz, quizAns)을 빠짐없이 채운다.
+- 모든 항목(core, usage, examples, similar, tip, quizzes)을 빠짐없이 채운다.
 - core: 핵심 의미와 뉘앙스, 주로 쓰이는 상황을 한국어 2문장으로.
 - usage: 이 지문 문장 안에서 어떤 구조로, 무엇과 연결되어, 어떤 뜻으로 쓰였는지 문장 일부를 작은따옴표로 인용해 한국어 2문장으로.
 - examples: 일상·업무 상황의 짧고 자연스러운 영어 예문 3개. en은 영어 알파벳으로, ko는 자연스러운 한국어 해석.
 - similar: 비슷한 영어 표현 최대 3개. m에는 뜻과 함께 이 표현과의 차이(뉘앙스·격식·쓰임)를 한국어 1~2문장으로.
 - tip: 외우는 요령과 학습자가 자주 하는 실수를 한국어 2문장으로.
-- quiz: 이 표현을 직접 써 보게 하는 확인 퀴즈 하나. 지문 문장과 다른 일상 상황의 짧은 한국어 문장(8~20자)을 주고 영어로 말하게 한다. 형식: "'(한국어 문장)'을 영어로 말해 보세요."
-- quizAns: 확인 퀴즈의 정답. 그 표현을 꼭 쓰는 쉬운 영어 한 문장.
+- quizzes: 이 표현을 직접 써 보게 하는 확인 퀴즈 3개를 난이도 순서로 [{{"q":"...","a":"..."}}]. q 형식: "'(한국어 문장)'을 영어로 말해 보세요." a는 그 표현을 꼭 쓰는 영어 정답 한 문장. ① 쉬움: 지문과 비슷한 상황의 짧은 문장(8~15자), 기본 시제. ② 보통: 다른 일상 상황에서 주어나 시제를 바꾼 문장(12~25자). ③ 도전: 질문·부정·이유(because)·조건(if) 중 하나를 넣은 긴 문장(20~35자).
 - 영어를 한글 발음으로 적지 않는다. 존댓말(~입니다, ~합니다)로 쓴다.
 
 [좋은 답의 예시] 지문 문장 "To make rice in a pot, first measure out 240 grams of rice for a family of four."의 표현 "To + 동사원형, ..."에 대한 답:
 {ex}
 
-위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태에 quiz·quizAns 두 항목을 더해 답한다."""
+위 예시와 같은 깊이·문체·분량으로, 같은 JSON 형태에 quizzes 항목을 더해 답한다."""
 
 
 def norm(d):
@@ -83,7 +82,20 @@ def norm(d):
     return {'core': pick('core', 'meaning'), 'usage': pick('usage', 'in_sentence', 'usage_in_sentence'), 'tip': pick('tip', 'tips', 'memory_tip'),
             'examples': [{'en': str(x.get('en', '')), 'ko': str(x.get('ko', ''))} for x in ex[:3] if isinstance(x, dict)],
             'similar': [{'t': str(x.get('t', x.get('expression', ''))), 'm': str(x.get('m', x.get('meaning', '')))} for x in sim[:3] if isinstance(x, dict)],
-            **({'quiz': str(d['quiz']).strip(), 'quizAns': str(d.get('quizAns') or d.get('answer') or '').strip()} if d.get('quiz') else {})}
+            **qfields(d)}
+
+
+def qlist(d):
+    qz = d.get('quizzes') if isinstance(d.get('quizzes'), list) else []
+    out = [{'q': str(x.get('q') or x.get('quiz') or '').strip(), 'a': str(x.get('a') or x.get('answer') or '').strip()} for x in qz if isinstance(x, dict)]
+    return [x for x in out if x['q']][:3]
+
+
+def qfields(d):
+    qz = qlist(d)
+    if qz:
+        return {'quiz': qz[0]['q'], 'quizAns': qz[0]['a'], 'quizzes': qz}
+    return {'quiz': str(d['quiz']).strip(), 'quizAns': str(d.get('quizAns') or d.get('answer') or '').strip()} if d.get('quiz') else {}
 
 
 def good(d):
@@ -128,7 +140,7 @@ def flush(url, pend):
 
 
 def quiz_todo(weeks):
-    """설명은 있는데 확인 퀴즈가 없는 단어·숙어 (최근 2주)"""
+    """설명은 있는데 확인 퀴즈가 3단계(쉬움·보통·도전)로 갖춰지지 않은 단어·숙어 (최근 2주)"""
     since = (datetime.date.today() - datetime.timedelta(days=14)).isoformat()
     out = []
     for wid, w in sorted(weeks.items(), reverse=True):
@@ -137,7 +149,7 @@ def quiz_todo(weeks):
         for i, s in enumerate(w.get('sentences') or []):
             for j, v in enumerate(s.get('vocab') or []):
                 d = v.get('detail') or {}
-                if v.get('t') and d.get('core') and not d.get('quiz'):
+                if v.get('t') and d.get('core') and len(d.get('quizzes') or []) < 3:
                     out.append((wid, i, j))
     return out
 
@@ -145,14 +157,14 @@ def quiz_todo(weeks):
 def make_quizzes(url, weeks, jobs):
     """확인 퀴즈를 8개씩 한 번에 만들어, 최신 자료에 퀴즈만 끼워 넣어 저장"""
     made = 0
-    for b in range(0, len(jobs), 8):
-        part = jobs[b:b + 8]
+    for b in range(0, len(jobs), 5):
+        part = jobs[b:b + 5]
         items = [{'n': n, 't': weeks[w]['sentences'][i]['vocab'][j].get('t', ''), 'm': weeks[w]['sentences'][i]['vocab'][j].get('m', ''),
                   'sentence': weeks[w]['sentences'][i].get('en', '')} for n, (w, i, j) in enumerate(part)]
-        p = ('한국인 초보 영어 학습자가 아래 표현들을 외웠다. 표현마다 직접 써 보게 하는 확인 퀴즈를 하나씩 만든다.\n'
-             '규칙: 지문 문장과 다른 일상 상황의 짧은 한국어 문장(8~20자)을 주고 영어로 말하게 한다. 형식: "\'(한국어 문장)\'을 영어로 말해 보세요." '
-             'answer 는 그 표현을 꼭 쓰는 쉬운 영어 한 문장.\n' + json.dumps(items, ensure_ascii=False) +
-             '\nJSON만: {"items":[{"n":번호,"quiz":"...","answer":"..."}]}')
+        p = ('한국인 영어 학습자가 아래 표현들을 외웠다. 표현마다 직접 써 보게 하는 확인 퀴즈를 난이도별로 3개씩 만든다.\n'
+             '규칙: q 형식은 "\'(한국어 문장)\'을 영어로 말해 보세요." a는 그 표현을 꼭 쓰는 영어 정답 한 문장. 지문 문장을 그대로 베끼지 않는다.\n'
+             '① 쉬움: 지문과 비슷한 상황의 짧은 문장(8~15자), 기본 시제. ② 보통: 다른 일상 상황에서 주어나 시제를 바꾼 문장(12~25자). ③ 도전: 질문·부정·이유(because)·조건(if) 중 하나를 넣은 긴 문장(20~35자).\n' + json.dumps(items, ensure_ascii=False) +
+             '\nJSON만: {"items":[{"n":번호,"quizzes":[{"q":"...","a":"..."},{"q":"...","a":"..."},{"q":"...","a":"..."}]}]}')
         try:
             r = call(url, 'aiJson', p)
         except Exception as e:
@@ -160,7 +172,7 @@ def make_quizzes(url, weeks, jobs):
             if 'rate_limited' in str(e):
                 break
             continue
-        got = {int(x.get('n', -1)): x for x in (r or {}).get('items', []) if isinstance(x, dict) and x.get('quiz')}
+        got = {int(x.get('n', -1)): qlist(x) for x in (r or {}).get('items', []) if isinstance(x, dict) and qlist(x)}
         fresh = call(url, 'getWeeks') or {}
         touched = set()
         for n, (wid, i, j) in enumerate(part):
@@ -170,14 +182,16 @@ def make_quizzes(url, weeks, jobs):
             except Exception:
                 continue
             d = fv.get('detail') or {}
-            if not x or fv.get('t') != items[n]['t'] or not d.get('core') or d.get('quiz'):
+            if not x or fv.get('t') != items[n]['t'] or not d.get('core') or len(d.get('quizzes') or []) >= 3:
                 continue
-            d['quiz'] = str(x['quiz']).strip(); d['quizAns'] = str(x.get('answer', '')).strip(); fv['detail'] = d
+            if d.get('quiz'):   # 이미 있던 퀴즈는 ① 쉬움으로 그대로 둠
+                x = [{'q': d['quiz'], 'a': d.get('quizAns', '')}] + x[1:]
+            d['quizzes'] = x; d['quiz'] = x[0]['q']; d['quizAns'] = x[0]['a']; fv['detail'] = d
             touched.add(wid); made += 1
         for wid in touched:
             call(url, 'saveWeek', wid, {'sentences': fresh[wid]['sentences']}, True)
         weeks.update({k: fresh[k] for k in touched})
-    print(f'확인 퀴즈 {made}개 저장')
+    print(f'확인 퀴즈(3단계) {made}개 표현 저장')
 
 
 def main():
