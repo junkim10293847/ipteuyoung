@@ -357,7 +357,7 @@ li.card .ko{font-size:1rem;line-height:1.55}
 .vdet .d-core{--sec:var(--accent)}
 .vdet .d-sen{--sec:#2f8f6f}.vdet .d-ety{--sec:#a0703a}
 .vdet .d-sen ul{margin:0;padding-left:1.1em;display:grid;gap:6px}.vdet .d-sen li b{font-weight:700}
-.d-pos{font-size:.88rem;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.d-pos span{font-size:.72rem;font-weight:700;color:var(--surface);background:var(--muted);border-radius:999px;padding:1px 8px}
+.d-pos{font-size:.88rem;display:flex;gap:6px 8px;align-items:baseline;flex-wrap:wrap}.d-fms{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.d-fm{font-style:normal;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:2px 10px}.d-fm i{font-style:normal;font-size:.72rem;color:var(--muted);margin-right:4px}.d-fm b{font-weight:700}.d-pos span{font-size:.72rem;font-weight:700;color:var(--surface);background:var(--muted);border-radius:999px;padding:1px 8px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .vdet{background:#3a3418;border-color:#7a6a2a}}
 :root[data-theme="dark"] .vdet{background:#3a3418;border-color:#7a6a2a}.vdet .d-use{--sec:var(--done)}.vdet .d-ex{--sec:#3b7dd8}.vdet .d-sim{--sec:#8a6fc7}.vdet .d-tip{--sec:var(--warn)}
 .vdet h4{display:inline-block;width:max-content;max-width:100%;justify-self:start;margin:0 0 6px;font-size:.74rem;letter-spacing:.02em;color:#fff;background:var(--sec,var(--accent));border-radius:999px;padding:2px 10px}
@@ -656,7 +656,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v180</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v181</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -685,7 +685,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v180</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v181</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1938,20 +1938,22 @@ JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'defau
 /* 단어·숙어 정보: 품사(pos)·어원(etym)·다른 뜻(senses) */
 function wordInfo(d){if(!d||typeof d!=='object')return {};const o={};
   if(typeof d.pos==='string')o.pos=d.pos.trim();if(typeof d.etym==='string')o.etym=d.etym.trim();
+  if(Array.isArray(d.forms))o.forms=d.forms.slice(0,5).map(x=>({p:String(x&&(x.p||x.pos)||'').trim(),w:String(x&&(x.w||x.word)||'').trim(),m:String(x&&(x.m||x.meaning)||'').trim()})).filter(x=>x.w);
   if(Array.isArray(d.senses))o.senses=d.senses.slice(0,3).map(x=>({m:String(x&&(x.m||x.meaning)||'').trim(),en:String(x&&x.en||'').trim(),ko:String(x&&x.ko||'').trim()})).filter(x=>x.m);
   return o}
 const wiTried=new Set();
 /* 예전에 만든 설명에 품사·어원·다른 뜻이 없으면, 열었을 때 한 번만 뒤에서 채움 */
-async function enrichWord(k,wbQ){const L=dqLoc(wbQ||k);if(!L||!sample||readOnly||!L.v.detail||'pos' in L.v.detail||wiTried.has(L.key))return;wiTried.add(L.key);
-  try{const j=await sample.json(`영어 학습자용 사전처럼, 아래 표현의 품사·어원·다른 뜻을 정리한다.
+async function enrichWord(k,wbQ){const L=dqLoc(wbQ||k);if(!L||!sample||readOnly||!L.v.detail||('pos' in L.v.detail&&'forms' in L.v.detail)||wiTried.has(L.key))return;wiTried.add(L.key);
+  try{const j=await sample.json(`영어 학습자용 사전처럼, 아래 표현의 품사·단어 가족·어원·다른 뜻을 정리한다.
 [표현] ${L.v.t} — ${L.v.m||''}
 [지문 문장] ${L.w.sentences[L.i].en}
 - pos: 품사·형태를 한국어로 짧게(예: "동사", "명사", "형용사", "구동사(동사+부사)", "숙어(관용구)", "문법 패턴"). 동사면 자동사/타동사도.
+- forms: 같은 뿌리의 다른 품사 형태(단어 가족) 2~4개 [{"p":"동사","w":"paralyze","m":"마비시키다"}]. 이 표현 자체의 형태는 빼고, 실제로 널리 쓰이는 형태만. 동사의 과거·과거분사가 불규칙이면 {"p":"과거·과거분사","w":"went / gone","m":""}도 넣는다. 숙어·문법 패턴은 핵심 단어 기준으로, 마땅한 것이 없으면 [].
 - etym: 어원을 한국어 1~2문장으로. 단어는 뿌리(라틴어·고대 영어·프랑스어 등)와 원래 뜻, 숙어는 구성 단어의 원래 뜻에서 지금 뜻이 된 흐름. 확실히 아는 것만 쓰고, 확실하지 않으면 빈 문자열.
 - senses: 이 표현(또는 핵심 단어)의 다른 뜻 1~3개 [{"m":"다른 뜻(한국어)","en":"짧은 영어 예문","ko":"해석"}]. 지문에서 쓰인 뜻은 빼고, 다른 뜻이 없으면 [].
-JSON만: {"pos":"...","etym":"...","senses":[{"m":"...","en":"...","ko":"..."}]}`,{modelTier:'default',limit:60000,bg:true});
-    const add=wordInfo(j||{});if(!('pos' in add))return;add.senses=add.senses||[];add.etym=add.etym||'';
-    L.v.detail={...L.v.detail,...add};const cur=weeks.find(x=>x.id===L.w.id);if(cur&&cur.sentences[L.i]&&cur.sentences[L.i].vocab[L.j])cur.sentences[L.i].vocab[L.j].detail=L.v.detail;
+JSON만: {"pos":"...","forms":[{"p":"...","w":"...","m":"..."}],"etym":"...","senses":[{"m":"...","en":"...","ko":"..."}]}`,{modelTier:'default',limit:60000,bg:true});
+    const add=wordInfo(j||{});if(!('pos' in add))return;add.senses=add.senses||[];add.etym=add.etym||'';add.forms=add.forms||[];
+    const keep=L.v.detail;L.v.detail={...add,...keep,forms:add.forms};const cur=weeks.find(x=>x.id===L.w.id);if(cur&&cur.sentences[L.i]&&cur.sentences[L.i].vocab[L.j])cur.sentences[L.i].vocab[L.j].detail=L.v.detail;
     try{await db.doc('weeks/'+L.w.id).update({sentences:JSON.parse(JSON.stringify((cur||L.w).sentences))})}catch(_){}
     const ae=document.activeElement;if(!(ae&&ae.classList&&ae.classList.contains('qz-in')))dqRefresh(wbQ||k)}catch(_){}}
 function detHtml(d,k,wb,wbQ){
@@ -1961,7 +1963,7 @@ function detHtml(d,k,wb,wbQ){
     return `<p class="load">불러오는 중…</p>`;
   }
   if(!('pos' in d)&&!detBusy[k])setTimeout(()=>enrichWord(k,wbQ),0);
-  return `${pronHtml(k,wbQ)}${d.pos?`<div class="d-pos"><span>품사</span>${esc(d.pos)}</div>`:''}${detBusy[k]?`<p class="load">설명을 더 보완하는 중… <span class="det-t" data-t0="${detBusy[k]}"></span></p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
+  return `${pronHtml(k,wbQ)}${d.pos||(d.forms||[]).length?`<div class="d-pos">${d.pos?`<span>품사</span>${esc(d.pos)}`:''}${(d.forms||[]).length?`<div class="d-fms"><span>다른 형태</span>${d.forms.map(f=>`<em class="d-fm"><i>${esc(f.p)}</i><b>${esc(f.w)}</b>${f.m?` ${esc(f.m)}`:''}</em>`).join('')}</div>`:''}</div>`:''}${detBusy[k]?`<p class="load">설명을 더 보완하는 중… <span class="det-t" data-t0="${detBusy[k]}"></span></p>`:''}${d.core?`<div class="d-core"><h4>핵심 의미</h4><p>${esc(d.core)}</p></div>`:''}
    ${d.usage?`<div class="d-use"><h4>이 문장에서의 쓰임</h4><p>${esc(d.usage)}</p></div>`:''}
    ${(d.senses||[]).length?`<div class="d-sen"><h4>다른 뜻</h4><ul>${d.senses.map(x=>`<li><b>${esc(x.m)}</b>${x.en?`<div>${esc(x.en)}</div>`:''}${x.ko?`<div class="ko">${esc(x.ko)}</div>`:''}</li>`).join('')}</ul></div>`:''}
    ${d.etym?`<div class="d-ety"><h4>어원</h4><p>${esc(d.etym)}</p></div>`:''}
@@ -2028,13 +2030,14 @@ async function loadDetail(w,i,j,k,quiet){
 [간단한 뜻] ${v.m}
 
 작성 규칙
-- 모든 항목(core, usage, examples, similar, tip, quizzes, pos, etym, senses)을 채운다.
+- 모든 항목(core, usage, examples, similar, tip, quizzes, pos, forms, etym, senses)을 채운다.
 - core: 핵심 의미와 뉘앙스, 주로 쓰이는 상황을 한국어 2문장으로.
 - usage: 이 지문 문장 안에서 어떤 구조로, 무엇과 연결되어, 어떤 뜻으로 쓰였는지 문장 일부를 작은따옴표로 인용해 한국어 2문장으로.
 - examples: 일상·업무 상황의 짧고 자연스러운 영어 예문 3개. en은 영어 알파벳으로, ko는 자연스러운 한국어 해석.
 - similar: 비슷한 영어 표현 최대 3개. m에는 뜻과 함께 이 표현과의 차이(뉘앙스·격식·쓰임)를 한국어 1~2문장으로.
 - tip: 외우는 요령과 학습자가 자주 하는 실수를 한국어 2문장으로.
 - pos: 품사·형태를 한국어로 짧게(예: "동사", "명사", "형용사", "구동사(동사+부사)", "숙어(관용구)", "문법 패턴"). 동사면 자동사/타동사도.
+- forms: 같은 뿌리의 다른 품사 형태(단어 가족) 2~4개 [{"p":"동사","w":"paralyze","m":"마비시키다"}]. 이 표현 자체의 형태는 빼고, 실제로 널리 쓰이는 형태만. 동사의 과거·과거분사가 불규칙이면 {"p":"과거·과거분사","w":"went / gone","m":""}도 넣는다. 숙어·문법 패턴은 핵심 단어 기준으로, 마땅한 것이 없으면 [].
 - etym: 어원을 한국어 1~2문장으로. 단어는 뿌리(라틴어·고대 영어·프랑스어 등)와 원래 뜻, 숙어는 구성 단어의 원래 뜻에서 지금 뜻이 된 흐름. 확실히 아는 것만 쓰고, 확실하지 않으면 빈 문자열.
 - senses: 이 표현(또는 핵심 단어)의 다른 뜻 1~3개 [{"m":"다른 뜻(한국어)","en":"짧은 영어 예문","ko":"해석"}]. 지문에서 쓰인 뜻은 빼고, 다른 뜻이 없으면 [].
 - quizzes: 이 표현을 직접 써 보게 하는 확인 퀴즈 3개를 난이도 순서로 [{"q":"...","a":"..."}]. q는 한국어 지시, a는 영어 정답 한 문장. 세 문제는 문제 모양·주어·시제·장면이 모두 서로 달라야 한다(같은 틀 반복 금지). ① 쉬움(바로 말하기): 표현의 뜻만 묻지 말고, 표현이 들어간 완전한 짧은 한국어 문장(8~15자, 예: '나는 다음 주에 복직해요')을 영어로. 주어 I, 현재나 과거 평서문. q 예: "'(한국어)'를 영어로 말해 보세요." ② 보통(대화 속 대답): 짧은 상황과 상대의 말을 주고 이 표현으로 대답하게 한다. 주어는 he/she/we/they 중 하나, 시제는 미래(will·be going to)나 현재완료. q 예: "친구가 '요즘 회사 다시 나가?'라고 물어요. 이 표현을 써서 '응, 다음 달부터 다시 나가'라고 대답해 보세요." ③ 도전(응용): 다음 중 하나를 골라 바꿔 가며 낸다 — 상대에게 묻는 질문 만들기 / 부정문으로 말하기 / because·when·if 로 두 생각을 이어 한 문장 / 내 경험을 이 표현으로 한 문장. 20~35자 분량의 한국어 지시로 주고, a는 그에 맞는 영어 한 문장. a(정답)에는 표현을 반드시 넣고, 지문 문장을 그대로 베끼지 않는다.
