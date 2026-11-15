@@ -133,12 +133,13 @@ html{font-size:16px}
 .gate-brand{margin-bottom:18px}
 .brand-s{color:var(--muted);font-size:.84rem;margin-top:3px;text-wrap:balance}
 .eyebrow{font-size:.75rem;letter-spacing:.08em;color:var(--muted);font-weight:700}
-h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;text-wrap:balance;line-height:1.15}
+h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:.1rem 0 0;text-wrap:balance;line-height:1.15}h1.long{font-size:1.4rem;line-height:1.25}   /* 긴 기사 제목은 한 단계 작게 */
 .meta{color:var(--muted);font-size:.88rem;margin:.3rem 0 0}
 .meta b{color:var(--accent)}
 .scroller{overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
 .row{display:flex;gap:6px;width:max-content;padding-block:2px}
 .chip{border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:7px 12px;border-radius:999px;font:inherit;font-size:.84rem;cursor:pointer;white-space:nowrap}
+.chip[data-week]{max-width:13em;overflow:hidden;text-overflow:ellipsis}   /* 긴 제목은 … 으로 줄이고, 고른 주차의 전체 제목은 아래 큰 제목에서 */
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
 .chip.add{border-style:dashed;color:var(--accent);font-weight:700}
 .weeks{margin-bottom:16px}
@@ -654,7 +655,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v188</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v189</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -683,7 +684,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v188</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v189</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1040,7 +1041,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   $('addPanel').hidden=true;renderBrand();full();window.scrollTo(0,0);
   toast(PROGS[p].t.replace(' 스터디','')+(weeks.length?'로 바꿨어요':' — 아직 주차가 없어요. [+ 새 주차]로 지문을 올려 주세요'))});
 function renderWeeks(){
-  $('weekRow').innerHTML=`<button class="chip wbchip" id="wbChip" aria-pressed="${wbView}">⭐ 내 단어장${wbList().length?` <b>${wbList().length}</b>`:''}</button>`+weeks.map(w=>`<button class="chip" data-week="${esc(w.id)}" aria-pressed="${!wbView&&w.id===curId}" title="${md(studyOf(w))} 테스트">${esc(w.title)}</button>`).join('')+'';{const ab=$('addBtn');if(ab)ab.hidden=!canWrite}
+  $('weekRow').innerHTML=`<button class="chip wbchip" id="wbChip" aria-pressed="${wbView}">⭐ 내 단어장${wbList().length?` <b>${wbList().length}</b>`:''}</button>`+weeks.map(w=>`<button class="chip" data-week="${esc(w.id)}" aria-pressed="${!wbView&&w.id===curId}" title="${esc(w.title)} · ${md(studyOf(w))} 테스트">${esc(w.title)}</button>`).join('')+'';{const ab=$('addBtn');if(ab)ab.hidden=!canWrite}
 }
 /* ✍ 써보기: 외운 문장을 직접 입력하고 원문과 단어 단위로 비교 (로그인 없이도 사용 가능) */
 const writeOpen=new Set(), writeDraft={}, writeRes={};
@@ -1411,7 +1412,7 @@ function render(){
   main.innerHTML=`
    <header class="head">
      <div class="eyebrow">${mdw(prev)} 스터디에서 배정 → ${mdw(sat)} 오전 스터디 테스트</div>
-     <h1>${esc(w.title)}</h1>
+     <h1${String(w.title||'').length>34?' class="long"':''}>${esc(w.title)}</h1>
      ${w.sentences.some(x=>!x.audio)?`<div class="pending"><span class="dot" aria-hidden="true"></span><div><b>${window.__features.tts?'🔊 원어민 음성 만드는 중':'🔊 기기 음성으로 재생 중'}</b><span>${window.__features.tts?'15~20분 안에 자동으로 원어민 음성이 붙습니다. 그동안은 휴대폰 기본 음성으로 읽어 줍니다.':'휴대폰 기본 음성으로 읽어 줍니다.'}</span></div></div>`:''}
      <p class="meta"><b>${dLabel}</b> · ${total}문장${by?` · ${esc(by)} 님이 등록`:''}</p>
      ${todoHtml}
@@ -2378,7 +2379,8 @@ const TT_SMALL=/^(a|an|the|of|for|to|in|on|and|or|but|nor|with|at|by|from|as|vs\
 const titleLike=t=>{const ws=String(t||'').trim().replace(/[.!]$/,'').split(/\s+/).filter(Boolean);if(ws.length<2||ws.length>16)return false;
   const big=ws.filter(x=>!TT_SMALL.test(x));return big.length>=2&&big.filter(x=>/^["“‘'(]?[A-Z0-9]/.test(x)).length/big.length>=0.8};
 const noTitleFix=w=>!w.sentences.some(x=>x.isTitle)&&w.sentences.length>2&&titleLike(w.sentences[0].en);
-const needFix=w=>noTitleFix(w)||w.sentences.some(x=>!x.isTitle&&PART_RE.test(String(x.en||'').trim())||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.en||'')||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.ch||''));
+const noWkTitle=w=>(!w.title||w.title==='제목 없음')&&w.sentences.some(x=>x.isTitle);
+const needFix=w=>noTitleFix(w)||noWkTitle(w)||w.sentences.some(x=>!x.isTitle&&PART_RE.test(String(x.en||'').trim())||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.en||'')||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.ch||''));
 const fixTried={};
 async function fixWeek(w){fixTried[w.id]=1;const cur=weeks.find(y=>y.id===w.id)||w;
   const hasPart=cur.sentences.some(x=>!x.isTitle&&PART_RE.test(String(x.en||'').trim()));
@@ -2390,8 +2392,10 @@ async function fixWeek(w){fixTried[w.id]=1;const cur=weeks.find(y=>y.id===w.id)|
   /* 문장이 바뀐 것은 음성을 새로 만들도록 기존 음성 연결을 뗌 */
   out.forEach(o=>{const orig=cur.sentences.find(y=>y.en&&unSup(y.en)===o.en&&y.en!==o.en);if(orig){delete o.audio;delete o.alt}});
   if(!out.some(o=>o.isTitle)&&out.length>2&&titleLike(out[0].en)){out[0].isTitle=true;delete out[0].pStart;if(out[1])delete out[1].pStart}   /* 긴 제목을 첫 문장으로 잘못 넣은 주차 바로잡기 */
-  [w,cur].forEach(y=>{y.sentences=out});
-  try{await db.doc('weeks/'+w.id).update({sentences:JSON.parse(JSON.stringify(out))})}catch(e){}
+  const tt=out.find(o=>o.isTitle),upd={sentences:JSON.parse(JSON.stringify(out))};
+  if(tt&&(!cur.title||cur.title==='제목 없음'))upd.title=String(tt.en||'').replace(/\.$/,'');   /* 주차 이름도 제목으로 */
+  [w,cur].forEach(y=>{y.sentences=out;if(upd.title)y.title=upd.title});
+  try{await db.doc('weeks/'+w.id).update(upd)}catch(e){}
   if(w.id===curId)full()}
 function splitText(raw,title){
   /* PART 줄은 빼고, 그 다음 줄부터 새 문단(PART가 있으면 PART 기준으로만 문단을 나눔) */
