@@ -21,7 +21,12 @@ jobs:
       - run: python scripts/cutout.py "${{ inputs.chars }}" "${{ inputs.test }}"
       - run: |
           git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
-          git add img/anim img/paint diag/cut 2>/dev/null || git add img/anim img/paint
+          git add img/anim img/paint
           git diff --cached --quiet && exit 0
           git commit -qm "그림 속 대화: 인물 오려 내기 (${{ inputs.chars }})"
-          for i in 1 2 3 4 5; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          for i in 1 2 3 4 5; do
+            git pull -q --rebase -X theirs origin main || { git rebase --abort; sleep 5; continue; }
+            python3 -c "import glob,json,os;json.dump(sorted(os.path.basename(v) for v in glob.glob('img/anim/*.mp4')+glob.glob('img/paint/*-cut.png')),open('img/anim/index.json','w'),ensure_ascii=False)"
+            git add img/anim/index.json; git diff --cached --quiet || git commit -qm "영상 목록 갱신"
+            git push -q origin HEAD:main && break; sleep 5
+          done
