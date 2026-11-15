@@ -196,5 +196,23 @@
   "file": "File:Tsunami by hokusai 19th century.jpg",
   "source": "https://commons.wikimedia.org/wiki/File:Tsunami_by_hokusai_19th_century.jpg",
   "license": "Public domain"
+ },
+ "cassatt": {
+  "name": "Lydia",
+  "title": "진주 목걸이를 한 여인 (극장 특별석)",
+  "artist": "메리 커샛",
+  "year": "1879",
+  "file": "File:Mary Stevenson Cassatt, American - Woman with a Pearl Necklace in a Loge - Google Art Project.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Mary_Stevenson_Cassatt,_American_-_Woman_with_a_Pearl_Necklace_in_a_Loge_-_Google_Art_Project.jpg",
+  "license": "Public domain"
+ },
+ "armand": {
+  "name": "Armand",
+  "title": "아르망 룰랭의 초상",
+  "artist": "빈센트 반 고흐",
+  "year": "1888",
+  "file": "File:Vincent van Gogh - Portrait d'Armand Roulin (1888).jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_-_Portrait_d%27Armand_Roulin_(1888).jpg",
+  "license": "Public domain"
  }
 }
