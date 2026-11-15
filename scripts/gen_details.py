@@ -194,7 +194,7 @@ def make_winfo(url, weeks, jobs):
             if 'rate_limited' in str(e):
                 break
             continue
-        got = {int(x.get('n', -1)): winfo(x) for x in (r or {}).get('items', []) if isinstance(x, dict) and isinstance(x.get('pos'), str)}
+        got = {int(x.get('n', -1)): winfo(x) for x in (r if isinstance(r, list) else (r or {}).get('items', [])) if isinstance(x, dict) and isinstance(x.get('pos'), str)}
         fresh = call(url, 'getWeeks') or {}
         touched = set()
         for n, (wid, i, j) in enumerate(part):
