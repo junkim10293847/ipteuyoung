@@ -398,7 +398,7 @@ li.card .ko{font-size:1rem;line-height:1.55}
 .dlg-scene{position:relative;width:100%;aspect-ratio:16/10;border-radius:14px;overflow:hidden;background:#222;box-shadow:0 4px 14px rgba(0,0,0,.3);isolation:isolate}
 .dlg-scene .sc-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.04);animation:scPan 26s ease-in-out infinite alternate}
 @keyframes scPan{from{transform:scale(1.04) translateX(-1%)}to{transform:scale(1.08) translateX(1%)}}
-.dlg-scene::after{content:'';position:absolute;left:0;right:0;bottom:0;height:28%;background:linear-gradient(transparent,rgba(0,0,0,.45));pointer-events:none;z-index:3}
+.dlg-scene::after{content:'';position:absolute;left:0;right:0;bottom:0;height:22%;background:linear-gradient(transparent,rgba(0,0,0,.32));pointer-events:none;z-index:3}
 .sc-p{position:absolute;display:block;padding:0;border:0;border-radius:0;background:none;max-width:none;cursor:pointer;z-index:1;transition:filter .35s;-webkit-tap-highlight-color:transparent}
 .sc-p.spk{z-index:2}.sc-p.on,.sc-p:focus{background:none;border:0;outline:none}.dlg-scene.live .sc-p:not(.spk){filter:brightness(.8) saturate(.85)}
 .sc-p.on .dlg-tk{filter:drop-shadow(0 0 5px var(--accent))}.sc-p.mytn .dlg-tk{filter:drop-shadow(0 0 7px var(--done))}
@@ -654,7 +654,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v185</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v186</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -683,7 +683,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v185</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v186</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1681,7 +1681,14 @@ const CAST={
   ermine:{name:'Cecilia',voice:'bf_emma',g:'f',p:'elegant and witty; likes jokes',f:[.47,.25,.40,1.344],art:'레오나르도 다빈치 「흰 족제비를 안은 여인」'},
   milkmaid:{name:'Maria',voice:'af_nicole',g:'f',p:'hard-working and practical; talks about daily life',f:[.60,.24,.30,1.122],art:'페르메이르 「우유를 따르는 여인」'},
   castiglione:{name:'Baldassare',voice:'bm_george',g:'m',p:'polite gentleman; gives kind advice',f:[.55,.34,.50,1.244],art:'라파엘로 「발다사레 카스틸리오네의 초상」'},
-  blueboy:{name:'Jonathan',voice:'am_adam',g:'m',p:'cheerful teenage boy; very curious',f:[.49,.135,.22,1.454],art:'게인즈버러 「파란 옷을 입은 소년」'}};
+  blueboy:{name:'Jonathan',voice:'am_adam',g:'m',p:'cheerful teenage boy; very curious',f:[.49,.135,.22,1.454],art:'게인즈버러 「파란 옷을 입은 소년」'},
+  /* 밝은 톤 인물 */
+  lebrun:{name:'Elisabeth',voice:'bf_lily',g:'f',p:'cheerful, sociable painter; loves fashion, friends and parties',f:[.48,.33,.20,1.388],art:'비제 르브룅 「밀짚모자를 쓴 자화상」'},
+  samary:{name:'Jeanne',voice:'af_sarah',g:'f',p:'lively young actress; laughs easily and loves stories',f:[.52,.35,.31,1.24],art:'르누아르 「잔 사마리의 초상」'},
+  roulin:{name:'Joseph',voice:'am_eric',g:'m',p:'friendly postman and proud family man; loves a good chat',f:[.53,.38,.30,1.224],art:'반 고흐 「우편배달부 조제프 룰랭」'},
+  cavalier:{name:'Willem',voice:'bm_daniel',g:'m',p:'confident, playful gentleman; teases friends with a smile',f:[.46,.30,.18,1.218],art:'프란스 할스 「웃고 있는 기사」'},
+  cassatt:{name:'Lydia',voice:'af_heart',g:'f',p:'warm, modern young woman; enjoys theater and city life',f:[.37,.27,.21,1.378],art:'메리 커샛 「진주 목걸이를 한 여인」'},
+  armand:{name:'Armand',voice:'am_liam',g:'m',p:'shy but honest young man; thinking about his future',f:[.485,.42,.22,1.206],art:'반 고흐 「아르망 룰랭의 초상」'}};
 const fnv=s=>{let h=0x811c9dc5;for(const b of new TextEncoder().encode(s)){h^=b;h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,'0')};
 const dlgName=(voice,en)=>'d-'+fnv(voice+'|'+en)+'.mp3';
 let dlgBusy=0,dlgErr='',dlgPlay=null,dlgRole='',dlgShowEn=true;
@@ -1690,7 +1697,7 @@ let dlgStep=1,dlgPos=0,dlgRes={},dlgInV={},dlgFlow=0;
 const DLG_GUIDE={1:'두 사람의 대화를 자막과 함께 끝까지 들어 보세요. 모르는 표현은 아래 대본에서 확인해요.',
   2:'한 줄씩 듣고 🎤 말하기를 눌러 똑같이 따라 말해요. 말한 영어를 원문과 비교해 채점해요.',
   3:'한 사람 역할을 맡아요. 내 차례에는 한글만 보고 영어로 말하면 채점한 뒤 원어민 발음을 들려줘요.'};
-function dlgPick(w,prev){const ks=Object.keys(CAST);let seed=0;for(const c of (w.id+(prev||'')))seed=(seed*31+c.charCodeAt(0))>>>0;
+function dlgPick(w,prev){let ks=Object.keys(CAST);const rd=ks.filter(k=>ANIM&&ANIM.has(k+'-cut.png'));if(rd.length>=4&&rd.some(k=>CAST[k].g==='f')&&rd.some(k=>CAST[k].g==='m'))ks=rd;   /* 움직이는 영상이 준비된 인물 중에서 */let seed=0;for(const c of (w.id+(prev||'')))seed=(seed*31+c.charCodeAt(0))>>>0;
   const fs=ks.filter(k=>CAST[k].g==='f'),ms=ks.filter(k=>CAST[k].g==='m');let a=fs[seed%fs.length],b=ms[(seed>>>3)%ms.length];
   if(prev&&prev===a+'|'+b){a=fs[(seed+1)%fs.length]}return [a,b]}
 async function makeDlg(w){if(dlgBusy||!sample||readOnly)return;dlgBusy=Date.now();dlgErr='';dlgPatch();
@@ -1749,7 +1756,8 @@ function dlgFrame(k){const c=CAST[k]||{},f=c.f||[.5,.3,.5,1.3],H=4/3;animLoad();
   return `<span class="dlg-fr"><span class="dlg-mv"><span class="dlg-tk"><img src="img/paint/${k}.jpg" alt="${esc(c.name||k)}" draggable="false" style="${st}">${vid('idle')}${vid('talk')}</span></span><span class="dlg-wave"><i></i><i></i><i></i><i></i></span><span class="dlg-mic">🎤 내 차례 — 말해 보세요</span></span>`}
 /* 한 장면 보기: 명화 배경(img/paint/bg-*.jpg) 위에 오려 낸 두 인물(img/paint/{인물}-cut.png)을 마주 세움.
    움직이는 영상은 {인물}-{idle|talk}-a.mp4 (위=영상, 아래=흑백 가림판)를 캔버스에서 합쳐 인물만 그림 */
-const BGS=[['cafe','50% 66%','고흐 「밤의 카페 테라스」'],['bridge','50% 50%','모네 「수련 연못 위의 다리」'],['room','40% 62%','하메르스호이 「햇빛이 드는 실내」'],['delft','50% 60%','페르메이르 「델프트 풍경」']];
+const BGS=[['cafe','50% 66%','고흐 「밤의 카페 테라스」'],['bridge','50% 50%','모네 「수련 연못 위의 다리」'],['room','40% 62%','하메르스호이 「햇빛이 드는 실내」'],['delft','50% 60%','페르메이르 「델프트 풍경」'],
+  ['poppy','50% 62%','모네 「양귀비 들판」'],['almond','50% 45%','고흐 「꽃 피는 아몬드 나무」'],['wheat','50% 55%','고흐 「사이프러스가 있는 밀밭」'],['garden','50% 55%','모네 「생타드레스의 정원」'],['wave','50% 50%','호쿠사이 「가나가와 앞바다의 큰 파도」']];
 let dlgBg=-1;
 const canScene=D=>!!(ANIM&&ANIM.has(D.a+'-cut.png')&&ANIM.has(D.b+'-cut.png'));
 function scPerson(k,side){const c=CAST[k]||{},f=c.f||[.5,.3,.5,1.3],H=.625,fx=side==='a'?.28:.72,fy=.36*H;
@@ -1757,7 +1765,7 @@ function scPerson(k,side){const c=CAST[k]||{},f=c.f||[.5,.3,.5,1.3],H=.625,fx=si
   const PW=Math.max(.15/f[2],Math.min((H+.02-fy)/((1-f[1])*f[3]),.23/f[2])),fy2=Math.max(fy,H+.02-(1-f[1])*PW*f[3]),L=fx-f[0]*PW,T=fy2-f[1]*PW*f[3];
   const vid=t=>ANIM.has(`${k}-${t}-a.mp4`)?`<video class="dlg-vid ${t}" src="img/anim/${k}-${t}-a.mp4" muted playsinline loop preload="auto"${t==='idle'?' autoplay':''}></video>`:'';
   return `<button class="dlg-who sc-p ${side}${dlgRole===k?' on':''}" data-role="${k}" title="이 사람 역할 맡기" style="left:${(L*100).toFixed(1)}%;top:${(T/H*100).toFixed(1)}%;width:${(PW*100).toFixed(1)}%;aspect-ratio:1/${f[3]}"><span class="dlg-mv"><span class="dlg-tk"><img src="img/paint/${k}-cut.png" alt="${esc(c.name||k)}" draggable="false"><canvas width="240" height="${Math.round(240*f[3])}"></canvas></span></span>${vid('idle')}${vid('talk')}</button>`}
-function dlgScene(D){if(dlgBg<0){let h=0;for(const ch of D.a+D.b)h=(h*31+ch.charCodeAt(0))>>>0;dlgBg=h%BGS.length}
+function dlgScene(D){if(dlgBg<0){let h=0;for(const ch of D.a+D.b)h=(h*31+ch.charCodeAt(0))>>>0;dlgBg=4+h%(BGS.length-4)}   /* 처음엔 밝은 배경 중에서 */
   const b=BGS[dlgBg%BGS.length],A=CAST[D.a]||{},B=CAST[D.b]||{},tag=(k,s)=>`<span class="sc-tag ${s}" data-role="${k}"><b>${esc((CAST[k]||{}).name||k)}</b><span class="dlg-wave"><i></i><i></i><i></i><i></i></span><span class="dlg-mic">🎤 내 차례</span></span>`;
   setTimeout(scLoop,0);
   return `<div class="dlg-scene" id="dlgStage"><img class="sc-bg" src="img/paint/bg-${b[0]}.jpg" style="object-position:${b[1]}" alt="">${scPerson(D.a,'a')}${scPerson(D.b,'b')}${tag(D.a,'a')}${tag(D.b,'b')}<button class="sc-chg" id="dlgBgChg" title="배경 바꾸기">🖼 배경</button></div>
