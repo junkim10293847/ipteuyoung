@@ -9,16 +9,34 @@ from rembg import new_session, remove
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHARS = ['mona', 'pearl', 'vincent', 'rembrandt', 'ermine', 'milkmaid', 'castiglione', 'blueboy']
 want = [c for c in (sys.argv[1].split(',') if len(sys.argv) > 1 and sys.argv[1] else CHARS) if c]
-S = new_session(os.environ.get('MODEL', 'isnet-general-use'))
+MODEL = {'pearl': 'birefnet-portrait'}   # 인물별로 더 잘 오려지는 모델 (기본: isnet-general-use)
+_S = {}
+def sess(name):
+    if name not in _S:
+        _S[name] = new_session(name)
+    return _S[name]
+TEST = len(sys.argv) > 2 and sys.argv[2]   # 모델 비교: 그림만 diag/cut/{인물}-{모델}.png 로 저장
+if TEST:
+    os.makedirs(f'{REPO}/diag/cut', exist_ok=True)
+    for k in want:
+        im = Image.open(f'{REPO}/img/paint/{k}.jpg').convert('RGB')
+        for mdl in TEST.split(','):
+            try:
+                m = remove(im, session=sess(mdl), only_mask=True, post_process_mask=True)
+                Image.fromarray(np.dstack([np.asarray(im), np.asarray(m.convert('L'))])).save(f'{REPO}/diag/cut/{k}-{mdl}.png')
+                print('test', k, mdl, flush=True)
+            except Exception as e:
+                print('test fail', k, mdl, e, flush=True)
+    sys.exit(0)
 
-def mask(img):
-    m = remove(img.convert('RGB'), session=S, only_mask=True, post_process_mask=True)
+def mask(img, k=''):
+    m = remove(img.convert('RGB'), session=sess(MODEL.get(k, 'isnet-general-use')), only_mask=True, post_process_mask=True)
     return np.asarray(m.convert('L'), dtype=np.float32)
 
 for k in want:
     src = f'{REPO}/img/paint/{k}.jpg'
     if os.path.exists(src):
-        im = Image.open(src).convert('RGB'); m = mask(im)
+        im = Image.open(src).convert('RGB'); m = mask(im, k)
         Image.fromarray(np.dstack([np.asarray(im), m.astype(np.uint8)])).save(f'{REPO}/img/paint/{k}-cut.png', optimize=True)
         print('still', k, flush=True)
     for t in ('idle', 'talk'):
@@ -28,7 +46,7 @@ for k in want:
         tmp = f'/tmp/cut/{k}-{t}'; shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
         subprocess.run(['ffmpeg', '-v', 'error', '-i', v, f'{tmp}/f%04d.png'], check=True)
         fs = sorted(glob.glob(f'{tmp}/f*.png')); n = len(fs) // 2   # 앞뒤로 이어 붙인 영상이라 앞 절반만 처리
-        ms = [mask(Image.open(f)) for f in fs[:n]]
+        ms = [mask(Image.open(f), k) for f in fs[:n]]
         out = f'{tmp}/o'; os.makedirs(out)
         for i in range(n):
             mm = np.mean(ms[max(0, i - 1):i + 2], axis=0)   # 앞뒤 프레임과 평균 → 가장자리 떨림 줄이기

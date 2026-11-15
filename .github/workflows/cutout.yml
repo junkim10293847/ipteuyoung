@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       chars: {description: '인물 (쉼표, 비우면 전부)', default: '', required: false}
+      test: {description: '모델 비교(쉼표, 비우면 실제 작업)', default: '', required: false}
 permissions:
   contents: write
 concurrency: {group: cutout, cancel-in-progress: false}
@@ -17,10 +18,10 @@ jobs:
       - run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
           pip install -q "rembg[cpu]==2.0.59" pillow numpy
-      - run: python scripts/cutout.py "${{ inputs.chars }}"
+      - run: python scripts/cutout.py "${{ inputs.chars }}" "${{ inputs.test }}"
       - run: |
           git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
-          git add img/anim img/paint
+          git add img/anim img/paint diag/cut 2>/dev/null || git add img/anim img/paint
           git diff --cached --quiet && exit 0
           git commit -qm "그림 속 대화: 인물 오려 내기 (${{ inputs.chars }})"
           for i in 1 2 3 4 5; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
