@@ -16,7 +16,10 @@ for k in chars:
         t = time.time()
         cmd = ['python', 'inference.py', '-s', src, '-d', f'assets/examples/driving/{drv}', '-o', out,
                '--flag_force_cpu', '--animation_region', region]
-        r = subprocess.run(cmd, cwd=LP, capture_output=True, text=True)
+        try:
+            r = subprocess.run(cmd, cwd=LP, capture_output=True, text=True, timeout=int(os.environ.get('CLIP_TIMEOUT', '2400')))
+        except subprocess.TimeoutExpired:
+            print(k, tag, '시간 초과', flush=True); continue
         vids = [v for v in glob.glob(f'{out}/*.mp4') if 'concat' not in v]
         print(k, tag, 'rc', r.returncode, f'{time.time()-t:.0f}s', vids, flush=True)
         if r.returncode or not vids:
@@ -26,3 +29,9 @@ for k in chars:
                         '[0:v]scale=360:-2,split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1,format=yuv420p[v]',
                         '-map', '[v]', '-an', '-c:v', 'libx264', '-crf', '27', '-preset', 'slow', '-movflags', '+faststart', dst], check=True)
         print('  ->', dst, os.path.getsize(dst)//1024, 'KB', flush=True)
+        if os.environ.get('SAVE_EACH'):   # 하나 만들 때마다 바로 저장 (중간에 멈춰도 남도록)
+            subprocess.run(f'cd {REPO} && git add img/anim && git commit -qm "움직이는 인물 영상: {k}-{tag}" && (for i in 1 2 3 4 5; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done)', shell=True)
+import json
+names = sorted(os.path.basename(v) for v in glob.glob(f'{REPO}/img/anim/*.mp4'))
+json.dump(names, open(f'{REPO}/img/anim/index.json', 'w'), ensure_ascii=False)
+print('index', len(names))

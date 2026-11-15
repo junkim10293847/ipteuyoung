@@ -20,11 +20,18 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
           git clone -q --depth 1 https://github.com/KwaiVGI/LivePortrait.git /tmp/lp
           sed -i '/gradio/d' /tmp/lp/requirements_base.txt
+          # CPU에서는 FP16이 매우 느림 → 끔 / 예전 형식 동작 파일(.pkl)도 읽히게
+          sed -i 's/flag_use_half_precision: bool = True/flag_use_half_precision: bool = False/' /tmp/lp/src/config/argument_config.py /tmp/lp/src/config/inference_config.py
+          sed -i "s/else driving_template_dct\['c_d_eyes_lst'\]/else driving_template_dct.get('c_d_eyes_lst')/; s/else driving_template_dct\['c_d_lip_lst'\]/else driving_template_dct.get('c_d_lip_lst')/" /tmp/lp/src/live_portrait_pipeline.py
+          grep -n "c_d_eyes_lst')" /tmp/lp/src/live_portrait_pipeline.py
           pip install -q torch==2.3.0 torchvision==0.18.0 --extra-index-url https://download.pytorch.org/whl/cpu
           pip install -q -r /tmp/lp/requirements_base.txt onnxruntime==1.18.0 "huggingface_hub[cli]<0.30"
           huggingface-cli download KwaiVGI/LivePortrait --local-dir /tmp/lp/pretrained_weights --exclude "*.git*" "README.md" "docs" >/dev/null
       - name: 영상 만들기
-        run: python scripts/animate.py "${{ inputs.chars }}" "${{ inputs.drivers }}"
+        env: {SAVE_EACH: '1'}
+        run: |
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          python scripts/animate.py "${{ inputs.chars }}" "${{ inputs.drivers }}"
       - name: 저장
         run: |
           git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
