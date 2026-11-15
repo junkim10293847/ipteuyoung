@@ -70,5 +70,45 @@
   "file": "File:Thomas Gainsborough - The Blue Boy (c. 1770).jpg",
   "source": "https://commons.wikimedia.org/wiki/File:Thomas_Gainsborough_-_The_Blue_Boy_(c._1770).jpg",
   "license": "Public domain"
+ },
+ "bg-cafe": {
+  "name": "cafe",
+  "title": "밤의 카페 테라스",
+  "artist": "빈센트 반 고흐",
+  "year": "1888",
+  "bg": true,
+  "file": "File:Vincent van Gogh (1853-1890) Caféterras bij nacht (place du Forum) Kröller-Müller Museum Otterlo 23-8-2016 13-35-40.JPG",
+  "source": "https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_(1853-1890)_Caf%C3%A9terras_bij_nacht_(place_du_Forum)_Kr%C3%B6ller-M%C3%BCller_Museum_Otterlo_23-8-2016_13-35-40.JPG",
+  "license": "Public domain"
+ },
+ "bg-bridge": {
+  "name": "bridge",
+  "title": "수련 연못 위의 다리",
+  "artist": "클로드 모네",
+  "year": "1899",
+  "bg": true,
+  "file": "File:Bridge Over a Pond of Water Lilies, Claude Monet 1899.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Bridge_Over_a_Pond_of_Water_Lilies,_Claude_Monet_1899.jpg",
+  "license": "Public domain"
+ },
+ "bg-room": {
+  "name": "room",
+  "title": "햇빛이 드는 실내",
+  "artist": "빌헬름 하메르스호이",
+  "year": "1906",
+  "bg": true,
+  "file": "File:Vilhelm Hammershøi (1864-1916) - Interior, Sunlight on the Floor - N04509 - National Gallery.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Vilhelm_Hammersh%C3%B8i_(1864-1916)_-_Interior,_Sunlight_on_the_Floor_-_N04509_-_National_Gallery.jpg",
+  "license": "Public domain"
+ },
+ "bg-delft": {
+  "name": "delft",
+  "title": "델프트 풍경",
+  "artist": "요하네스 페르메이르",
+  "year": "1660–1661",
+  "bg": true,
+  "file": "File:View of Delft, by Johannes Vermeer.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:View_of_Delft,_by_Johannes_Vermeer.jpg",
+  "license": "Public domain"
  }
 }
