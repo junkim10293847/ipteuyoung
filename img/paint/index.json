@@ -1,0 +1,74 @@
+{
+ "mona": {
+  "name": "Mona",
+  "title": "모나리자",
+  "artist": "레오나르도 다빈치",
+  "year": "1503–1519",
+  "file": "File:Mona Lisa, by Leonardo da Vinci, from C2RMF retouched.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg",
+  "license": "Public domain"
+ },
+ "pearl": {
+  "name": "Griet",
+  "title": "진주 귀걸이를 한 소녀",
+  "artist": "요하네스 페르메이르",
+  "year": "1665년경",
+  "file": "File:1665 Girl with a Pearl Earring.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:1665_Girl_with_a_Pearl_Earring.jpg",
+  "license": "Public domain"
+ },
+ "vincent": {
+  "name": "Vincent",
+  "title": "자화상",
+  "artist": "빈센트 반 고흐",
+  "year": "1887",
+  "file": "File:Vincent van Gogh - Self-Portrait - Google Art Project (454045).jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_(454045).jpg",
+  "license": "Public domain"
+ },
+ "rembrandt": {
+  "name": "Rembrandt",
+  "title": "두 개의 원이 있는 자화상",
+  "artist": "렘브란트",
+  "year": "1665–1669",
+  "file": "File:Rembrandt Self-portrait (Kenwood).jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Rembrandt_Self-portrait_(Kenwood).jpg",
+  "license": "Public domain"
+ },
+ "ermine": {
+  "name": "Cecilia",
+  "title": "흰 족제비를 안은 여인",
+  "artist": "레오나르도 다빈치",
+  "year": "1489–1491",
+  "file": "File:Lady with an Ermine - Leonardo da Vinci - Google Art Project.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Lady_with_an_Ermine_-_Leonardo_da_Vinci_-_Google_Art_Project.jpg",
+  "license": "Public domain"
+ },
+ "milkmaid": {
+  "name": "Maria",
+  "title": "우유를 따르는 여인",
+  "artist": "요하네스 페르메이르",
+  "year": "1658년경",
+  "file": "File:Johannes Vermeer - Het melkmeisje - Google Art Project.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg",
+  "license": "Public domain"
+ },
+ "castiglione": {
+  "name": "Baldassare",
+  "title": "발다사레 카스틸리오네의 초상",
+  "artist": "라파엘로",
+  "year": "1514–1515",
+  "file": "File:Baldassare Castiglione, by Raffaello Sanzio, from C2RMF retouched.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Baldassare_Castiglione,_by_Raffaello_Sanzio,_from_C2RMF_retouched.jpg",
+  "license": "Public domain"
+ },
+ "blueboy": {
+  "name": "Jonathan",
+  "title": "파란 옷을 입은 소년",
+  "artist": "토머스 게인즈버러",
+  "year": "1770년경",
+  "file": "File:Thomas Gainsborough - The Blue Boy (c. 1770).jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Thomas_Gainsborough_-_The_Blue_Boy_(c._1770).jpg",
+  "license": "Public domain"
+ }
+}
