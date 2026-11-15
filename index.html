@@ -657,7 +657,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v191</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v192</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -686,7 +686,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v191</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v192</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1869,16 +1869,29 @@ function dlgPatch(){const b=$('dlgBody'),w=weeks.find(x=>x.id===curId);if(b&&w&&
 async function dlgSay(w,n,rate){const D=w.dlg,x=D.lines[n];const k=x.who==='a'?D.a:D.b;
   const url=window.__ixHas&&window.__ixHas(x.audio)?'audio/'+x.audio:'';if(url)dlgEnv(url);
   dlgTalk(k,url);try{await dlgSay0(w,x,k,rate,url)}finally{dlgTalk(null)}}
+/* 기기 음성 고르기: 여자 인물은 여자 목소리, 남자 인물은 남자 목소리.
+   같은 성별 두 사람이면 서로 다른 목소리(없으면 높낮이를 달리)로 */
+const V_FEM=/female|woman|samantha|zira|aria|jenny|karen|moira|tessa|serena|kate|susan|hazel|libby|sonia|emma|ava|allison|victoria|google us english|-x-(tpf|sfg|tpc|gba|gbc|gbg|fis|aua|auc)-|#female/i;
+const V_MAL=/\bmale\b|\bman\b|david|daniel|fred|alex|mark|guy|ryan|george|thomas|arthur|oliver|aaron|-x-(iom|iol|tpd|gbb|gbd|rjs|aub|aud)-|#male/i;
+const vGender=v=>{const n=(v.name||'')+' '+(v.voiceURI||'');return V_FEM.test(n)?'f':V_MAL.test(n)?'m':''};
+function dlgVoice(w,x,k){const c=CAST[k]||{},D=w.dlg||{},vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
+  const gb=c.voice&&c.voice[0]==='b',same=(CAST[D.a]||{}).g===(CAST[D.b]||{}).g,second=same&&x.who==='b';
+  const pref=l=>l.slice().sort((p,q)=>((gb?/GB/i:/US/i).test(q.lang)-(gb?/GB/i:/US/i).test(p.lang)));
+  let L=pref(vs.filter(v=>vGender(v)===c.g)),known=!!L.length;
+  if(!L.length)L=pref(vs.filter(v=>vGender(v)!==(c.g==='m'?'f':'m')));if(!L.length)L=vs;
+  const v=L.length?L[(second?1:0)%L.length]:(voice||null);
+  /* 성별을 알 수 있는 목소리를 못 찾으면 높낮이로 구분 */
+  let pitch=known?1:(c.g==='m'?0.72:1.3);if(second&&(!known||L.length<2))pitch*=c.g==='m'?0.85:1.12;
+  return {v,pitch:Math.max(0.5,Math.min(2,pitch))}}
 async function dlgSay0(w,x,k,rate,url){
   if(url){const ok=await playUrl(url,rate);if(ok)return;if(dlgSpk)dlgSpk.url=''}
   /* 기기 음성: 영어 목소리를 꼭 지정 (지정하지 않으면 한국어 기본 음성이 골라져 소리가 안 나는 휴대폰이 있음) */
   if(!('speechSynthesis' in window))return;
-  const c=CAST[k]||{},gb=c.voice&&c.voice[0]==='b',vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)),
-    pick=vs.find(v=>(gb?/en-GB/i:/en-US/i).test(v.lang)&&(c.g==='m'?/male|guy|david|daniel|fred|alex|google uk english male/i:/female|samantha|zira|aria|jenny|google us english|karen/i).test(v.name))||vs.find(v=>(gb?/en-GB/i:/en-US/i).test(v.lang))||voice||vs[0];
+  const c=CAST[k]||{},pv=dlgVoice(w,x,k),pick=pv.v;
   try{speechSynthesis.cancel()}catch(_){}await new Promise(r=>setTimeout(r,80));   /* 취소 직후 바로 말하면 무시되는 기기가 있어 잠깐 쉼 */
   await new Promise(res=>{let done=false;const fin=()=>{if(!done){done=true;clearTimeout(t);res()}};
     const t=setTimeout(fin,Math.max(4000,x.en.split(' ').length*900/rate));   /* 끝 신호가 안 오는 기기 대비 */
-    try{const u=new SpeechSynthesisUtterance(x.en);u.lang=pick?pick.lang:(gb?'en-GB':'en-US');if(pick)u.voice=pick;u.rate=rate;u.pitch=c.g==='m'?0.85:1.1;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(_){fin()}})}
+    try{const u=new SpeechSynthesisUtterance(x.en);u.lang=pick?pick.lang:'en-US';if(pick)u.voice=pick;u.rate=rate;u.pitch=pv.pitch;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(_){fin()}})}
 function dlgMark(n,mode,noScroll){document.querySelectorAll('.dlg-l').forEach(li=>{li.classList.toggle('now',+li.dataset.n===n);if(+li.dataset.n===n&&mode)li.dataset.mode=mode;else delete li.dataset.mode});
   const st=$('dlgStage'),sub=$('dlgSub'),w=weeks.find(x=>x.id===curId),D=w&&w.dlg,x=D&&D.lines[n];
   if(st){st.classList.toggle('live',n>=0);const k=x?(x.who==='a'?D.a:D.b):'';st.querySelectorAll('[data-role]').forEach(b=>b.classList.toggle('mytn',mode==='mine'&&b.dataset.role===k));
