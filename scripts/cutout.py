@@ -9,7 +9,7 @@ from rembg import new_session, remove
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHARS = ['mona', 'pearl', 'vincent', 'rembrandt', 'ermine', 'milkmaid', 'castiglione', 'blueboy']
 want = [c for c in (sys.argv[1].split(',') if len(sys.argv) > 1 and sys.argv[1] else CHARS) if c]
-MODEL = {'pearl': 'u2net_human_seg', 'vincent': 'u2net_human_seg', 'roulin': 'u2net_human_seg'}   # 인물별로 더 잘 오려지는 모델 (기본: isnet-general-use)
+MODEL = {'pearl': 'u2net_human_seg', 'vincent': 'u2net_human_seg', 'roulin': 'birefnet-portrait'}   # 인물별로 더 잘 오려지는 모델 (기본: isnet-general-use)
 _S = {}
 def sess(name):
     if name not in _S:
