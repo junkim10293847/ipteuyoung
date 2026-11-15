@@ -6,7 +6,7 @@ on:
       test: {description: '모델 비교(쉼표, 비우면 실제 작업)', default: '', required: false}
 permissions:
   contents: write
-concurrency: {group: cutout, cancel-in-progress: false}
+concurrency: {group: animate, cancel-in-progress: false}
 jobs:
   run:
     runs-on: ubuntu-latest
