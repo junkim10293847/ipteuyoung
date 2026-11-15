@@ -654,7 +654,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v184</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v185</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -683,7 +683,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v184</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v185</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1726,7 +1726,7 @@ function dlgHtml(w){const D=w.dlg;
   const ready=D.lines.filter(x=>window.__ixHas&&window.__ixHas(x.audio)).length;
   return `<div class="dlg">
     ${canScene(D)?dlgScene(D):`<div class="dlg-stage" id="dlgStage">${[D.a,D.b].map(k=>`<button class="dlg-who${dlgRole===k?' on':''}" data-role="${k}" title="이 사람 역할 맡기">${dlgFrame(k)}<b>${esc(P(k).name)}</b><small>${esc(P(k).art)}</small></button>`).join('')}</div>`}
-    <div class="dlg-steps">${[[1,'① 듣기'],[2,'② 따라 말하기'],[3,'③ 역할 말하기']].map(([n,t])=>`<button class="${dlgStep===n?'on':''}" data-dstep="${n}">${t}</button>`).join('')}</div>
+    <div class="dlg-steps">${[[1,'① 듣기'],[2,'② 따라 말하기'],[3,'③ 역할 말하기']].map(([n,t])=>`<button class="${dlgStep===n?'on':''}" data-dstep="${n}">${n===1&&dlgStep===1&&dlgPlay?'■ 멈춤':t}</button>`).join('')}</div>
     <p class="hint">${DLG_GUIDE[dlgStep]}${ready<D.lines.length?` · 원어민 음성 준비 중(${ready}/${D.lines.length}), 그동안은 기기 음성`:''}</p>
     ${dlgStep===2?'':`<div class="dlg-sub" id="dlgSub"><span class="s-ko">${dlgStep===1?'▶ 대화 듣기를 누르면 두 사람이 이야기를 시작해요':'…'}</span></div>`}
     ${dlgStep===1?`<div class="seq-act"><button class="primary" id="dlgGo">${dlgPlay?'■ 멈춤':'▶ 대화 듣기'}</button><button class="ghost" id="dlgEn">${dlgShowEn?'영어 가리기':'영어 보기'}</button></div>`:`<div id="dlgPr">${dlgPrHtml(w)}</div>`}
@@ -1884,7 +1884,10 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   const w=weeks.find(x=>x.id===curId);if(!w)return;
   if(t.id==='dlgMake'||t.id==='dlgNew'){dlgPlay=null;makeDlg(w);return}
   if(t.id==='dlgEn'){dlgShowEn=!dlgShowEn;if(dlgStep===1)dlgPatch();else dlgPrPatch();return}
-  if(t.dataset.dstep){dlgPlay=null;dlgFlow++;try{stop()}catch(_){}dlgStep=+t.dataset.dstep;dlgPos=0;dlgRes={};dlgInV={};dlgPatch();dlgMark(-1);if(dlgStep===2||(dlgStep===3&&dlgRole))dlgGo(0);return}
+  if(t.dataset.dstep){const again=dlgStep===1&&t.dataset.dstep==='1'&&dlgPlay;dlgPlay=null;dlgFlow++;try{stop()}catch(_){}try{speechSynthesis.cancel()}catch(_){}
+    dlgStep=+t.dataset.dstep;dlgPos=0;dlgRes={};dlgInV={};dlgPatch();dlgMark(-1);
+    if(dlgStep===1){if(!again)dlgRun(w)}   /* ① 듣기를 누르면 바로 대화 시작 (재생 중에 다시 누르면 멈춤) */
+    else if(dlgStep===2||(dlgStep===3&&dlgRole))dlgGo(0);return}
   if(t.dataset.drole){dlgRole=t.dataset.drole;dlgPos=0;dlgRes={};dlgInV={};dlgPatch();dlgGo(0);return}
   if(t.id==='dlgChk'){dlgCheck();return}
   if(t.id==='dlgNext'){dlgGo(dlgPos+1);return}
