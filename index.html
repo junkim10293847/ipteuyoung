@@ -509,7 +509,10 @@ mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-sha
 .acts .play.pressing::after{transform:scaleX(1);transition:transform 1s linear}
 .acts .play.looping{background:var(--done);border-color:var(--done)}
 .hint.press{margin:2px 0 10px}
-.acts .wr-check{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.acts .wr-check,.wr-btns .wr-check{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.wr-btns{display:flex;flex-wrap:wrap;gap:6px}.wr-btns button{font:inherit;font-size:.9rem;border-radius:10px;padding:7px 14px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}.wr-btns .wr-check{padding:7px 22px}
+.wr-btns [hidden]{display:none}
+li.card:has(.wr) > .ko,li.card:has(.wr) .body > .ko{display:none}   /* 쓰는 동안엔 한글이 쓰기 칸 바로 위에 한 번만 */
 .acts .write[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
 .wr{display:grid;gap:6px;margin-top:6px}
 .wr-ko{font-size:.92rem;font-weight:600;color:var(--fg);background:var(--accent-soft);border-radius:8px;padding:6px 10px;line-height:1.5}
@@ -653,7 +656,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v179</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v180</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -682,7 +685,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v179</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v180</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1206,7 +1209,7 @@ function foldWriteSmooth(w,i,done){
   if(hadFocus)ta.blur();
   setTimeout(()=>{
     keep();
-    const btns=c.querySelectorAll('.acts .wr-check,.acts .wr-clear');
+    const btns=[];
     wr.style.overflow='hidden';wr.style.height=wr.offsetHeight+'px';wr.style.transition='height .3s ease, opacity .25s ease, margin .3s ease';
     btns.forEach(b=>{b.style.transition='opacity .2s';b.style.opacity='0'});
     requestAnimationFrame(()=>{wr.style.height='0px';wr.style.opacity='0';wr.style.marginTop='0px'});
@@ -1219,7 +1222,7 @@ function patchWriteOpen(w,i){
   wb.setAttribute('aria-pressed',open);wb.textContent=open?'✍ 접기':isG()?'🎧 받아쓰기':'✍ 써보기';
   acts.querySelectorAll('.wr-check,.wr-clear').forEach(x=>x.remove());
   const old=c.querySelector('.wr');if(old)old.remove();
-  if(open){wb.insertAdjacentHTML('afterend',`<button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button>`);acts.insertAdjacentHTML('afterend',writeHtml(w,i))}
+  if(open)acts.insertAdjacentHTML('afterend',writeHtml(w,i));
   return true;
 }
 /* 채점·다시 쓰기 버튼을 눌러도 쓰기 칸의 입력 상태(키보드·펜)가 풀리지 않게 → 키보드가 닫히며 화면이 튀는 것 방지 */
@@ -1265,6 +1268,7 @@ function patchWriteRes(w,i){
   const tmp=document.createElement('div');tmp.innerHTML=writeHtml(w,i);
   const nr=tmp.querySelector('.wr-res'),old=wr.querySelector('.wr-res');
   if(old&&nr)old.replaceWith(nr);else if(nr)wr.appendChild(nr);else if(old)old.remove();
+  const sb=wr.querySelector('.wr-say');if(sb)sb.hidden=!nr;
   return true;
 }
 function writeHtml(w,i){
@@ -1272,6 +1276,7 @@ function writeHtml(w,i){
   return `<div class="wr">
     ${isG()&&!r?`<div class="wr-ko dict"><span>🎧</span>▶ 듣기·천천히로 몇 번이든 듣고, <b>들리는 대로</b> 받아쓰세요. 모르는 곳은 비워도 돼요.</div>`:`<div class="wr-ko"><span>한글</span>${esc(w.sentences[i].ko||'(해석 없음)')}</div>`}
     <textarea id="wr-${i}" data-i="${i}" rows="2" placeholder="${isG()?'들리는 대로 영어로 받아쓰기':'뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)'}" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
+    <div class="wr-btns"><button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button><button class="ghost wr-say" data-i="${i}"${r?'':' hidden'}>🔊 정답 듣기</button></div>
     ${r?`<div class="wr-res${r.perfect?' perfect':r.almost?' almost':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':r.almost?'거의 완벽! 단어는 모두 맞았어요 👍':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':r.almost?`<span class="al-note">쉼표 ${r.cmiss?r.cmiss+'곳 빠짐':''}${r.cmiss&&r.cbad?', ':''}${r.cbad?r.cbad+'곳 더 씀':''} — 표시된 자리만 고치면 완벽이에요</span>`:[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       ${diffHtml(r)}
 </div>`:''}
@@ -1289,8 +1294,9 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
   const rkey=()=>'kbVis:'+Math.round(window.innerWidth/50);   // 접은 화면·펼친 화면·가로 화면마다 따로 기억
   function fit(){if(!el||document.activeElement!==el||!kbOpen())return;
     ls.set(rkey(),Math.round((vv.offsetTop+vv.height)/H0*1000)/1000);
-    const r=el.getBoundingClientRect(),gap=vv.offsetTop+vv.height-12-r.bottom;
-    if(gap>8)window.scrollBy(0,-gap)}
+    /* 쓰기 칸 바로 아래 채점 버튼 줄까지 키보드 위에 보이게 (단, 쓰기 칸 윗부분은 가리지 않는 범위에서) */
+    const bt=(el.closest('.wr')&&el.closest('.wr').querySelector('.wr-btns'))||el,rt=el.getBoundingClientRect(),r=bt.getBoundingClientRect(),gap=vv.offsetTop+vv.height-12-r.bottom;
+    if(gap>8)window.scrollBy(0,-gap);else if(gap<-4){const d=Math.min(-gap,rt.top-(vv.offsetTop+8));if(d>4)window.scrollBy(0,d)}}
   const kick=()=>{if(Date.now()>until)return;clearTimeout(tmr);tmr=setTimeout(fit,140)};
   vv.addEventListener('resize',kick);vv.addEventListener('scroll',kick);
   document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;el=t;until=Date.now()+1800;kick();setTimeout(fit,500);setTimeout(fit,1000)});
@@ -1302,8 +1308,8 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
   document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;
     if(!pu||Date.now()-pu>700||!(matchMedia('(pointer:coarse)').matches)||kbOpen())return;pu=0;
     const ratio=+ls.get(rkey(),0);if(!(ratio>0.2&&ratio<0.85))return;
-    const r=t.getBoundingClientRect(),d=r.bottom-(H0*ratio-12);
-    if(Math.abs(d)>8&&r.top-d>8)window.scrollBy(0,d)},true);
+    const bt=(t.closest('.wr')&&t.closest('.wr').querySelector('.wr-btns'))||t,rt=t.getBoundingClientRect(),r=bt.getBoundingClientRect(),d=Math.min(r.bottom-(H0*ratio-12),rt.top-8);
+    if(Math.abs(d)>8)window.scrollBy(0,d)},true);
 })();
 /* 쓰는 중(키보드가 올라온 상태)에 같은 카드의 듣기·천천히·영어 보기·다시 쓰기·외움을 눌러도 키보드가 내려가지 않게
    → 키보드가 내려가며 화면 크기가 바뀌어 화면이 움직이던 문제 방지 (접기·채점은 원래대로 키보드를 내림) */
@@ -1432,7 +1438,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
          ${s.audio?`<button class="play" data-i="${i}">▶ 듣기</button>`:`<button class="play" data-i="${i}">▶ 듣기</button>`}
          <button class="slow" data-i="${i}">▶ 천천히</button>
          <button class="hideen" data-i="${i}" aria-pressed="${hiddenEn.has(i)}">${hiddenEn.has(i)?"영어 보기":"영어 가리기"}</button>
-         <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✍ 접기":isG()?"🎧 받아쓰기":"✍ 써보기"}</button>${writeOpen.has(i)?`<button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button>`:''}
+         <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✍ 접기":isG()?"🎧 받아쓰기":"✍ 써보기"}</button>
          <button class="mark" data-i="${i}" aria-pressed="${!!done[i]}">${done[i]?'✓ 외움':'☐ 외움'}</button>
        </div>
        ${writeOpen.has(i)?writeHtml(w,i):''}
@@ -2267,6 +2273,7 @@ document.addEventListener('click',async e=>{
     if(suppressClick){suppressClick=false;return}
     if(loopIdx===i){stop();return}
   }
+  if(t.classList.contains('wr-say')){const pb=document.querySelector(`#c${i} .acts .play`);if(pb)pb.click();return}
   if(t.classList.contains('mark')){const d={...doneOf(w.id)};if(d[i]){delete d[i];hiddenEn.delete(i);doneSeen.delete(i)}else{d[i]=true;doneSeen.add(i)}prog.done[w.id]=d;saveProg();if(!patchCardState(w,i))stay(i,render);return}
   if(t.classList.contains('write')){writeOpen.has(i)?writeOpen.delete(i):writeOpen.add(i);
     /* 귀트영 받아쓰기: 열 때 영어를 가리고 바로 한 번 들려줌 */
