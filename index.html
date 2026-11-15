@@ -377,7 +377,8 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .dlg-mv{animation:dlgBr 5.5s ease-in-out infinite}
 .dlg-who:nth-child(3) .dlg-mv{animation-delay:-2.4s;animation-duration:6.2s}
 .dlg-tk{transform-origin:50% 70%;will-change:transform}
-.dlg-tk img{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none}
+.dlg-tk img,.dlg-vid{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none}
+.dlg-vid{opacity:0;transition:opacity .2s;pointer-events:none}.dlg-vid.idle.on{opacity:1}.dlg-who.spk .dlg-vid.talk.on{opacity:1}
 @keyframes dlgBr{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.022) translateY(-1.5px)}}
 .dlg-stage.live .dlg-who:not(.spk) .dlg-fr{filter:brightness(.55) saturate(.6);transform:scale(.95)}
 .dlg-who.spk .dlg-fr{box-shadow:0 0 0 3px var(--accent),0 8px 22px rgba(0,0,0,.35)}
@@ -623,7 +624,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v174</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v175</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -652,7 +653,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v174</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v175</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1699,19 +1700,30 @@ function dlgHtml(w){const D=w.dlg;
         <button class="dlg-say" data-n="${n}" aria-label="이 줄 듣기">🔊</button></li>`}).join('')}</ol>
     <p class="hint">그림: ${[D.a,D.b].map(k=>esc(P(k).art)).join(', ')} — 저작권이 끝난 공공 그림(위키미디어 공용)</p></div>`}
 /* 그림 크게 보기: 얼굴(f=[가로 중심, 세로 중심, 얼굴 너비, 그림 세로/가로 비율])이 틀 가운데 오도록 */
-function dlgFrame(k){const c=CAST[k]||{},f=c.f||[.5,.3,.5,1.3],H=4/3;
+/* 움직이는 인물 영상(img/anim/{인물}-idle.mp4 가만히, -talk.mp4 말할 때)이 있으면 그림 위에 겹쳐 재생 */
+let ANIM=null;
+function animLoad(){if(ANIM)return;ANIM=new Set();fetch('img/anim/index.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).then(a=>{if(Array.isArray(a)&&a.length){ANIM=new Set(a);if($('dlgStage')&&!dlgPlay)dlgPatch()}}).catch(()=>{})}
+function dlgFrame(k){const c=CAST[k]||{},f=c.f||[.5,.3,.5,1.3],H=4/3;animLoad();
   const IW=Math.max(.56/f[2],1,H/f[3]);let L=.5-f[0]*IW,T=.42*H-f[1]*IW*f[3];L=Math.min(0,Math.max(1-IW,L));T=Math.min(0,Math.max(H-IW*f[3],T));
-  return `<span class="dlg-fr"><span class="dlg-mv"><span class="dlg-tk"><img src="img/paint/${k}.jpg" alt="${esc(c.name||k)}" draggable="false" style="width:${(IW*100).toFixed(1)}%;left:${(L*100).toFixed(1)}%;top:${(T/H*100).toFixed(1)}%"></span></span><span class="dlg-wave"><i></i><i></i><i></i><i></i></span><span class="dlg-mic">🎤 내 차례 — 말해 보세요</span></span>`}
+  const st=`width:${(IW*100).toFixed(1)}%;left:${(L*100).toFixed(1)}%;top:${(T/H*100).toFixed(1)}%`;
+  const vid=t=>ANIM&&ANIM.has(`${k}-${t}.mp4`)?`<video class="dlg-vid ${t}" src="img/anim/${k}-${t}.mp4" muted playsinline loop preload="auto"${t==='idle'?' autoplay':''} style="${st}" oncanplay="this.classList.add('on')"></video>`:'';
+  return `<span class="dlg-fr"><span class="dlg-mv"><span class="dlg-tk"><img src="img/paint/${k}.jpg" alt="${esc(c.name||k)}" draggable="false" style="${st}">${vid('idle')}${vid('talk')}</span></span><span class="dlg-wave"><i></i><i></i><i></i><i></i></span><span class="dlg-mic">🎤 내 차례 — 말해 보세요</span></span>`}
 /* 말하는 동안 고개·몸이 말소리 리듬에 맞춰 살짝 움직임 (음절마다 높낮이를 바꿔 자연스럽게) */
 let dlgTalkRaf=0;
 function dlgTalk(k){cancelAnimationFrame(dlgTalkRaf);document.querySelectorAll('.dlg-tk').forEach(e=>e.style.transform='');
-  document.querySelectorAll('#dlgStage .dlg-who').forEach(b=>b.classList.toggle('spk',!!k&&b.dataset.role===k));
+  document.querySelectorAll('#dlgStage .dlg-who').forEach(b=>{const on=!!k&&b.dataset.role===k;b.classList.toggle('spk',on);
+    /* 가만히(idle)·말하기(talk) 영상은 고개 움직임이 같은 순서라, 같은 시점으로 맞춰 바꾸면 입만 움직이기 시작하는 것처럼 이어짐 */
+    const v=b.querySelector('.dlg-vid.talk'),iv=b.querySelector('.dlg-vid.idle');
+    if(v){try{if(on){if(iv&&iv.duration)v.currentTime=iv.currentTime%(v.duration||1e9);else if(v.duration)v.currentTime=Math.random()*v.duration*.8;v.play().catch(()=>{})}
+      else if(!v.paused){if(iv)iv.currentTime=v.currentTime%(iv.duration||1e9);v.pause()}}catch(_){}}
+    if(iv&&iv.paused)iv.play().catch(()=>{})});
   if(!k||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
   const el=document.querySelector(`#dlgStage .dlg-who[data-role="${k}"] .dlg-tk`);if(!el)return;
+  const sv=!!el.querySelector('.dlg-vid.talk'),G=sv?.2:1;   /* 영상이 있으면 몸 흔들림은 약하게 */
   let amp=0,tgt=0,next=0,t0=performance.now(),side=Math.random()<.5?-1:1;
   const step=t=>{if(t>next){const pause=Math.random()<.12;tgt=pause?0:.35+Math.random()*.65;next=t+(pause?260:90+Math.random()*90);if(Math.random()<.05)side=-side}
     amp+=(tgt-amp)*.28;const s=(t-t0)/1000;
-    el.style.transform=`translateY(${(-amp*3).toFixed(2)}px) rotate(${(side*Math.sin(s*1.3)*1.1+(amp-.5)*.7).toFixed(2)}deg) scale(${(1+amp*.028+Math.sin(s*.9)*.006).toFixed(4)})`;
+    el.style.transform=`translateY(${(-amp*3*G).toFixed(2)}px) rotate(${((side*Math.sin(s*1.3)*1.1+(amp-.5)*.7)*G).toFixed(2)}deg) scale(${(1+(amp*.028+Math.sin(s*.9)*.006)*G).toFixed(4)})`;
     dlgTalkRaf=requestAnimationFrame(step)};dlgTalkRaf=requestAnimationFrame(step)}
 function dlgPatch(){const b=$('dlgBody'),w=weeks.find(x=>x.id===curId);if(b&&w&&!wbView){const y=$('dlgBox')?$('dlgBox').getBoundingClientRect().top:0;b.innerHTML=dlgHtml(w);const d=$('dlgBox')?$('dlgBox').getBoundingClientRect().top-y:0;if(Math.abs(d)>1)scrollBy(0,d)}}
 async function dlgSay(w,n,rate){const D=w.dlg,x=D.lines[n];const k=x.who==='a'?D.a:D.b;
