@@ -1,15 +1,19 @@
-"""점검: 귀트영 이번 주 문장별 음성 연결 상태"""
-import json, re, urllib.request, os
+"""점검: AI 첨삭 응답 시간·오류"""
+import json, re, time, urllib.request
 cfg = open('config.js', encoding='utf-8').read()
 url = re.search(r'https://script\.google\.com[^\'"]+', cfg).group(0)
-req = urllib.request.Request(url, data=json.dumps({'fn': 'getWeeks', 'args': []}).encode(), headers={'Content-Type': 'text/plain'})
-res = json.loads(urllib.request.urlopen(req, timeout=60).read())['res']
-ws = res if isinstance(res, list) else list(res.values())
+def call(fn, args, t=120):
+    t0 = time.time()
+    try:
+        req = urllib.request.Request(url, data=json.dumps({'fn': fn, 'args': args}).encode(), headers={'Content-Type': 'text/plain'})
+        r = json.loads(urllib.request.urlopen(req, timeout=t).read())
+        return round(time.time() - t0, 1), json.dumps(r, ensure_ascii=False)[:300]
+    except Exception as e:
+        return round(time.time() - t0, 1), 'ERR ' + repr(e)[:300]
 out = []
-for w in sorted(ws, key=lambda x: x.get('id', ''))[-4:]:
-    out.append(f"{w.get('id')} prog={w.get('prog')} title={w.get('title')!r} n={len(w.get('sentences') or [])} longAudio={bool(w.get('longAudio'))}")
-    for i, s in enumerate(w.get('sentences') or []):
-        a = s.get('audio')
-        out.append(f"  {i} T={bool(s.get('isTitle'))} audio={a} exists={bool(a) and os.path.exists('audio/' + a)} {s.get('en', '')[:60]}")
-open('diag/qa_result.txt', 'w').write('\n'.join(out))
-print('\n'.join(out))
+out.append('features ' + str(call('features', [])))
+p = '학습자 답을 채점한다. 문제: \'내일 오전에는 큰 수술이 있습니다.\'를 영어로. 학습자: "I had a big surgery tomorrow morning." JSON만: {"ok":true/false,"fixed":"...","tip":"..."}'
+for i in range(3):
+    out.append(f'aiJson#{i} ' + str(call('aiJson', [p, {'modelTier': 'default'}])))
+out.append('aiText ' + str(call('aiText', ['Say hi in one word.'])))
+open('diag/qa_result.txt', 'w').write('\n'.join(out)); print('\n'.join(out))
