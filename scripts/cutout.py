@@ -41,5 +41,5 @@ for k in want:
                         '-c:v', 'libx264', '-crf', '26', '-preset', 'slow', '-movflags', '+faststart', dst], check=True)
         print(' ', k, t, n, 'frames ->', os.path.getsize(dst) // 1024, 'KB', flush=True)
 if not (len(sys.argv) > 1 and sys.argv[1]):   # 전체 실행일 때만 목록 갱신 (시험 실행은 목록을 건드리지 않음)
-  names = sorted(os.path.basename(v) for v in glob.glob(f'{REPO}/img/anim/*.mp4'))
+  names = sorted(os.path.basename(v) for v in glob.glob(f'{REPO}/img/anim/*.mp4') + glob.glob(f'{REPO}/img/paint/*-cut.png'))
   json.dump(names, open(f'{REPO}/img/anim/index.json', 'w'), ensure_ascii=False)

@@ -32,6 +32,6 @@ for k in chars:
         if os.environ.get('SAVE_EACH'):   # 하나 만들 때마다 바로 저장 (중간에 멈춰도 남도록)
             subprocess.run(f'cd {REPO} && git add img/anim && git commit -qm "움직이는 인물 영상: {k}-{tag}" && (for i in 1 2 3 4 5; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done)', shell=True)
 import json
-names = sorted(os.path.basename(v) for v in glob.glob(f'{REPO}/img/anim/*.mp4'))
+names = sorted(os.path.basename(v) for v in glob.glob(f'{REPO}/img/anim/*.mp4') + glob.glob(f'{REPO}/img/paint/*-cut.png'))
 json.dump(names, open(f'{REPO}/img/anim/index.json', 'w'), ensure_ascii=False)
 print('index', len(names))
