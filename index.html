@@ -402,8 +402,9 @@ li.card .ko{font-size:1rem;line-height:1.55}
 .dlg-scene .sc-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.04);animation:scPan 26s ease-in-out infinite alternate}
 @keyframes scPan{from{transform:scale(1.04) translateX(-1%)}to{transform:scale(1.08) translateX(1%)}}
 .dlg-scene::after{content:'';position:absolute;left:0;right:0;bottom:0;height:22%;background:linear-gradient(transparent,rgba(0,0,0,.32));pointer-events:none;z-index:3}
-.sc-p{position:absolute;display:block;padding:0;border:0;border-radius:0;background:none;max-width:none;cursor:pointer;z-index:1;transition:filter .35s;-webkit-tap-highlight-color:transparent}
-.sc-p.spk{z-index:2}.sc-p.on,.sc-p:focus{background:none;border:0;outline:none}.dlg-scene.live .sc-p:not(.spk){filter:brightness(.8) saturate(.85)}
+.sc-p{position:absolute;display:block;padding:0;border:0;border-radius:0;background:none;max-width:none;cursor:pointer;z-index:1;transition:filter .35s,transform .35s;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
+.sc-p.spk{z-index:2;transform:scale(1.05)}.sc-p.on,.sc-p:focus{background:none;border:0;outline:none}.dlg-scene.live .sc-p:not(.spk){filter:brightness(.5) saturate(.55);transform:scale(.96)}   /* 말하는 사람만 또렷하게 */
+.sc-tag.spk b{background:var(--accent);padding:2px 9px;border-radius:999px;text-shadow:none}.dlg-scene.live .sc-tag:not(.spk){opacity:.55}
 .sc-p.on .dlg-tk{filter:drop-shadow(0 0 5px var(--accent))}.sc-p.mytn .dlg-tk{filter:drop-shadow(0 0 7px var(--done))}
 .sc-p .dlg-tk img,.sc-p canvas{position:absolute;left:0;top:0;width:100%;height:100%}
 .sc-p canvas{opacity:0}.sc-p canvas.on{opacity:1}
@@ -657,7 +658,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v193</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v194</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -686,7 +687,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v193</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v194</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1677,21 +1678,21 @@ JSON만: {"quizzes":[{"q":"...","a":"..."},{"q":"...","a":"..."},{"q":"...","a":
 const DLG_USERS=['배라'];
 const canDlg=()=>true;   /* 모든 사용자에게 열림 */
 const CAST={
-  mona:{name:'Mona',voice:'bf_isabella',g:'f',p:'calm, wise, gently curious; asks thoughtful questions',f:[.50,.26,.46,1.49],art:'레오나르도 다빈치 「모나리자」'},
-  pearl:{name:'Griet',voice:'af_bella',g:'f',p:'shy but curious young woman; shares honest feelings',f:[.48,.45,.62,1.184],art:'페르메이르 「진주 귀걸이를 한 소녀」'},
-  vincent:{name:'Vincent',voice:'am_michael',g:'m',p:'passionate, emotional painter; speaks with energy',f:[.52,.45,.62,1.264],art:'반 고흐 「자화상」'},
-  rembrandt:{name:'Rembrandt',voice:'bm_lewis',g:'m',p:'warm, experienced old man; gives life advice',f:[.45,.27,.36,1.206],art:'렘브란트 「두 개의 원이 있는 자화상」'},
-  ermine:{name:'Cecilia',voice:'bf_emma',g:'f',p:'elegant and witty; likes jokes',f:[.47,.25,.40,1.344],art:'레오나르도 다빈치 「흰 족제비를 안은 여인」'},
-  milkmaid:{name:'Maria',voice:'af_nicole',g:'f',p:'hard-working and practical; talks about daily life',f:[.60,.24,.30,1.122],art:'페르메이르 「우유를 따르는 여인」'},
-  castiglione:{name:'Baldassare',voice:'bm_george',g:'m',p:'polite gentleman; gives kind advice',f:[.55,.34,.50,1.244],art:'라파엘로 「발다사레 카스틸리오네의 초상」'},
-  blueboy:{name:'Jonathan',voice:'am_adam',g:'m',p:'cheerful teenage boy; very curious',f:[.49,.135,.22,1.454],art:'게인즈버러 「파란 옷을 입은 소년」'},
+  mona:{name:'Mona',voice:'bf_isabella',g:'f',p:'calm, wise, gently curious; asks thoughtful questions',f:[.50,.26,.46,1.49,0.2],art:'레오나르도 다빈치 「모나리자」'},
+  pearl:{name:'Griet',voice:'af_bella',g:'f',p:'shy but curious young woman; shares honest feelings',f:[.48,.45,.62,1.184,0.22],art:'페르메이르 「진주 귀걸이를 한 소녀」'},
+  vincent:{name:'Vincent',voice:'am_michael',g:'m',p:'passionate, emotional painter; speaks with energy',f:[.52,.45,.62,1.264,0.3],art:'반 고흐 「자화상」'},
+  rembrandt:{name:'Rembrandt',voice:'bm_lewis',g:'m',p:'warm, experienced old man; gives life advice',f:[.45,.27,.36,1.206,0.16],art:'렘브란트 「두 개의 원이 있는 자화상」'},
+  ermine:{name:'Cecilia',voice:'bf_emma',g:'f',p:'elegant and witty; likes jokes',f:[.47,.25,.40,1.344,0.16],art:'레오나르도 다빈치 「흰 족제비를 안은 여인」'},
+  milkmaid:{name:'Maria',voice:'af_nicole',g:'f',p:'hard-working and practical; talks about daily life',f:[.60,.24,.30,1.122,0.12],art:'페르메이르 「우유를 따르는 여인」'},
+  castiglione:{name:'Baldassare',voice:'bm_george',g:'m',p:'polite gentleman; gives kind advice',f:[.55,.34,.50,1.244,0.22],art:'라파엘로 「발다사레 카스틸리오네의 초상」'},
+  blueboy:{name:'Jonathan',voice:'am_adam',g:'m',p:'cheerful teenage boy; very curious',f:[.49,.135,.22,1.454,0.08],art:'게인즈버러 「파란 옷을 입은 소년」'},
   /* 밝은 톤 인물 */
-  lebrun:{name:'Elisabeth',voice:'bf_lily',g:'f',p:'cheerful, sociable painter; loves fashion, friends and parties',f:[.48,.33,.20,1.388],art:'비제 르브룅 「밀짚모자를 쓴 자화상」'},
-  samary:{name:'Jeanne',voice:'af_sarah',g:'f',p:'lively young actress; laughs easily and loves stories',f:[.52,.35,.31,1.24],art:'르누아르 「잔 사마리의 초상」'},
-  roulin:{name:'Joseph',voice:'am_eric',g:'m',p:'friendly postman and proud family man; loves a good chat',f:[.53,.38,.30,1.224],art:'반 고흐 「우편배달부 조제프 룰랭」'},
-  cavalier:{name:'Willem',voice:'bm_daniel',g:'m',p:'confident, playful gentleman; teases friends with a smile',f:[.46,.30,.22,1.218],art:'프란스 할스 「웃고 있는 기사」'},
-  cassatt:{name:'Lydia',voice:'af_heart',g:'f',p:'warm, modern young woman; enjoys theater and city life',f:[.37,.27,.21,1.378],art:'메리 커샛 「진주 목걸이를 한 여인」'},
-  armand:{name:'Armand',voice:'am_liam',g:'m',p:'shy but honest young man; thinking about his future',f:[.485,.42,.22,1.206],art:'반 고흐 「아르망 룰랭의 초상」'}};
+  lebrun:{name:'Elisabeth',voice:'bf_lily',g:'f',p:'cheerful, sociable painter; loves fashion, friends and parties',f:[.48,.33,.20,1.388,0.13],art:'비제 르브룅 「밀짚모자를 쓴 자화상」'},
+  samary:{name:'Jeanne',voice:'af_sarah',g:'f',p:'lively young actress; laughs easily and loves stories',f:[.52,.35,.31,1.24,0.23],art:'르누아르 「잔 사마리의 초상」'},
+  roulin:{name:'Joseph',voice:'am_eric',g:'m',p:'friendly postman and proud family man; loves a good chat',f:[.53,.38,.30,1.224,0.22],art:'반 고흐 「우편배달부 조제프 룰랭」'},
+  cavalier:{name:'Willem',voice:'bm_daniel',g:'m',p:'confident, playful gentleman; teases friends with a smile',f:[.46,.30,.22,1.218,0.2],art:'프란스 할스 「웃고 있는 기사」'},
+  cassatt:{name:'Lydia',voice:'af_heart',g:'f',p:'warm, modern young woman; enjoys theater and city life',f:[.37,.27,.21,1.378,0.2],art:'메리 커샛 「진주 목걸이를 한 여인」'},
+  armand:{name:'Armand',voice:'am_liam',g:'m',p:'shy but honest young man; thinking about his future',f:[.485,.42,.22,1.206,0.24],art:'반 고흐 「아르망 룰랭의 초상」'}};
 const fnv=s=>{let h=0x811c9dc5;for(const b of new TextEncoder().encode(s)){h^=b;h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,'0')};
 const dlgName=(voice,en)=>'d-'+fnv(voice+'|'+en)+'.mp3';
 let dlgBusy=0,dlgErr='',dlgPlay=null,dlgRole='',dlgShowEn=true;
@@ -1763,9 +1764,10 @@ const BGS=[['cafe','50% 66%','고흐 「밤의 카페 테라스」'],['bridge','
   ['poppy','50% 62%','모네 「양귀비 들판」'],['almond','50% 45%','고흐 「꽃 피는 아몬드 나무」'],['wheat','50% 55%','고흐 「사이프러스가 있는 밀밭」'],['garden','50% 55%','모네 「생타드레스의 정원」'],['wave','50% 50%','호쿠사이 「가나가와 앞바다의 큰 파도」']];
 let dlgBg=-1;
 const canScene=D=>!!(ANIM&&ANIM.has(D.a+'-cut.png')&&ANIM.has(D.b+'-cut.png'));
-function scPerson(k,side){const c=CAST[k]||{},f=c.f||[.5,.3,.5,1.3],H=.625,fx=side==='a'?.28:.72,fy=.36*H;
+function scPerson(k,side){const c=CAST[k]||{},f=c.f||[.5,.3,.5,1.3],H=.625,fx=side==='a'?.28:.72,fy=.40*H;
   /* 얼굴 크기를 맞추고 몸이 장면 아래까지 닿게. 얼굴 근처에서 잘린 초상(진주 귀걸이 소녀·고흐)은 너무 커지지 않게 얼굴을 조금 낮춤 */
-  const PW=Math.max(.15/f[2],Math.min((H+.02-fy)/((1-f[1])*f[3]),.23/f[2])),fy2=Math.max(fy,H+.02-(1-f[1])*PW*f[3]),L=fx-f[0]*PW,T=fy2-f[1]*PW*f[3];
+  /* 두 사람 얼굴 크기를 똑같이(진주 귀걸이 소녀 크기 기준) 맞추고, 몸이 장면 아래까지 닿도록 필요하면 얼굴 위치만 낮춤 */
+  const PW=.10/(f[4]||f[2]*.5),fy2=Math.max(fy,H+.02-(1-f[1])*PW*f[3]),L=fx-f[0]*PW,T=fy2-f[1]*PW*f[3];
   const vid=t=>ANIM.has(`${k}-${t}-a.mp4`)?`<video class="dlg-vid ${t}" src="img/anim/${k}-${t}-a.mp4" muted playsinline loop preload="auto"${t==='idle'?' autoplay':''}></video>`:'';
   return `<button class="dlg-who sc-p ${side}${dlgRole===k?' on':''}" data-role="${k}" title="이 사람 역할 맡기" style="left:${(L*100).toFixed(1)}%;top:${(T/H*100).toFixed(1)}%;width:${(PW*100).toFixed(1)}%;aspect-ratio:1/${f[3]}"><span class="dlg-mv"><span class="dlg-tk"><img src="img/paint/${k}-cut.png" alt="${esc(c.name||k)}" draggable="false"><canvas width="240" height="${Math.round(240*f[3])}"></canvas></span></span>${vid('idle')}${vid('talk')}</button>`}
 function dlgScene(D){if(dlgBg<0){let h=0;for(const ch of D.a+D.b)h=(h*31+ch.charCodeAt(0))>>>0;dlgBg=4+h%(BGS.length-4)}   /* 처음엔 밝은 배경 중에서 */
