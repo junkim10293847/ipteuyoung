@@ -1,0 +1,10 @@
+[
+ {"id":"mona","name":"Mona","search":"Mona Lisa Leonardo da Vinci C2RMF retouched","title":"모나리자","artist":"레오나르도 다빈치","year":"1503–1519"},
+ {"id":"pearl","name":"Griet","search":"Girl with a Pearl Earring Vermeer 1665","title":"진주 귀걸이를 한 소녀","artist":"요하네스 페르메이르","year":"1665년경"},
+ {"id":"vincent","name":"Vincent","search":"Van Gogh Self-Portrait 1887 Art Institute of Chicago","title":"자화상","artist":"빈센트 반 고흐","year":"1887"},
+ {"id":"rembrandt","name":"Rembrandt","search":"Rembrandt Self-Portrait with Two Circles Kenwood","title":"두 개의 원이 있는 자화상","artist":"렘브란트","year":"1665–1669"},
+ {"id":"ermine","name":"Cecilia","search":"Lady with an Ermine Leonardo da Vinci","title":"흰 족제비를 안은 여인","artist":"레오나르도 다빈치","year":"1489–1491"},
+ {"id":"milkmaid","name":"Maria","search":"The Milkmaid Vermeer Rijksmuseum","title":"우유를 따르는 여인","artist":"요하네스 페르메이르","year":"1658년경"},
+ {"id":"castiglione","name":"Baldassare","search":"Portrait of Baldassare Castiglione Raphael Louvre","title":"발다사레 카스틸리오네의 초상","artist":"라파엘로","year":"1514–1515"},
+ {"id":"blueboy","name":"Jonathan","search":"The Blue Boy Gainsborough Huntington","title":"파란 옷을 입은 소년","artist":"토머스 게인즈버러","year":"1770년경"}
+]
