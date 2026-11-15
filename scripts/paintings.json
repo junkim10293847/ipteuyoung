@@ -10,5 +10,16 @@
  {"id": "bg-cafe", "name": "cafe", "search": "Van Gogh Café Terrace at Night 1888 Kröller-Müller", "title": "밤의 카페 테라스", "artist": "빈센트 반 고흐", "year": "1888", "w": 960, "bg": true},
  {"id": "bg-bridge", "name": "bridge", "search": "Monet Bridge over a Pond of Water Lilies 1899 Metropolitan", "title": "수련 연못 위의 다리", "artist": "클로드 모네", "year": "1899", "w": 960, "bg": true},
  {"id": "bg-room", "name": "room", "search": "Hammershøi Interior with Sunlight on the Floor", "title": "햇빛이 드는 실내", "artist": "빌헬름 하메르스호이", "year": "1906", "w": 960, "bg": true},
- {"id": "bg-delft", "name": "delft", "search": "Vermeer View of Delft Mauritshuis", "title": "델프트 풍경", "artist": "요하네스 페르메이르", "year": "1660–1661", "w": 960, "bg": true}
+ {"id": "bg-delft", "name": "delft", "search": "Vermeer View of Delft Mauritshuis", "title": "델프트 풍경", "artist": "요하네스 페르메이르", "year": "1660–1661", "w": 960, "bg": true},
+ {"id": "lebrun", "name": "Elisabeth", "search": "Vigée Le Brun Self-portrait in a Straw Hat 1782 National Gallery", "title": "밀짚모자를 쓴 자화상", "artist": "엘리자베트 비제 르브룅", "year": "1782년 이후"},
+ {"id": "samary", "name": "Jeanne", "search": "Renoir Portrait of the actress Jeanne Samary 1877 Pushkin", "title": "잔 사마리의 초상", "artist": "피에르오귀스트 르누아르", "year": "1877"},
+ {"id": "roulin", "name": "Joseph", "search": "Van Gogh Portrait of the Postman Joseph Roulin 1889 Kröller-Müller", "title": "우편배달부 조제프 룰랭의 초상", "artist": "빈센트 반 고흐", "year": "1889"},
+ {"id": "arlesienne", "name": "Marie", "search": "Van Gogh L'Arlésienne Madame Joseph-Michel Ginoux 1888 Metropolitan", "title": "아를의 여인 (지누 부인)", "artist": "빈센트 반 고흐", "year": "1888"},
+ {"id": "cavalier", "name": "Willem", "search": "Frans Hals The Laughing Cavalier Wallace Collection", "title": "웃고 있는 기사", "artist": "프란스 할스", "year": "1624"},
+ {"id": "gachet", "name": "Paul", "search": "Van Gogh Portrait of Dr Gachet 1890 Musée d'Orsay", "title": "가셰 박사의 초상", "artist": "빈센트 반 고흐", "year": "1890"},
+ {"id": "bg-poppy", "name": "poppy", "search": "Monet Poppy Field Argenteuil 1873 Orsay", "title": "양귀비 들판", "artist": "클로드 모네", "year": "1873", "w": 960, "bg": true},
+ {"id": "bg-almond", "name": "almond", "search": "Van Gogh Almond Blossoms 1890 Van Gogh Museum", "title": "꽃 피는 아몬드 나무", "artist": "빈센트 반 고흐", "year": "1890", "w": 960, "bg": true},
+ {"id": "bg-wheat", "name": "wheat", "search": "Van Gogh Wheat Field with Cypresses 1889 National Gallery London", "title": "사이프러스가 있는 밀밭", "artist": "빈센트 반 고흐", "year": "1889", "w": 960, "bg": true},
+ {"id": "bg-garden", "name": "garden", "search": "Monet Garden at Sainte-Adresse 1867 Metropolitan", "title": "생타드레스의 정원", "artist": "클로드 모네", "year": "1867", "w": 960, "bg": true},
+ {"id": "bg-wave", "name": "wave", "search": "Hokusai Great Wave off Kanagawa Metropolitan", "title": "가나가와 앞바다의 큰 파도", "artist": "가쓰시카 호쿠사이", "year": "1831년경", "w": 960, "bg": true}
 ]
