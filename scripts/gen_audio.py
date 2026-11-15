@@ -66,7 +66,8 @@ TEXTS = os.path.join(AUDIO, 'texts.json')
 LONGMAP = os.path.join(AUDIO, 'longmap.json')   # 연속 듣기 파일 안에서 문장마다 몇 초인지(화면이 지금 읽는 문장을 정확히 표시)
 ALL_LONGS = []
 DLG_VOICE = {'mona': 'bf_isabella', 'pearl': 'af_bella', 'vincent': 'am_michael', 'rembrandt': 'bm_lewis', 'ermine': 'bf_emma',
-             'milkmaid': 'af_nicole', 'castiglione': 'bm_george', 'blueboy': 'am_adam'}
+             'milkmaid': 'af_nicole', 'castiglione': 'bm_george', 'blueboy': 'am_adam',
+             'lebrun': 'bf_lily', 'samary': 'af_sarah', 'roulin': 'am_eric', 'cavalier': 'bm_daniel', 'cassatt': 'af_heart', 'armand': 'am_liam'}
 
 
 def fnv(s):
