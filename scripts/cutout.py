@@ -40,5 +40,6 @@ for k in want:
                         '[0:v]split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1,format=yuv420p[v]', '-map', '[v]',
                         '-c:v', 'libx264', '-crf', '26', '-preset', 'slow', '-movflags', '+faststart', dst], check=True)
         print(' ', k, t, n, 'frames ->', os.path.getsize(dst) // 1024, 'KB', flush=True)
-names = sorted(os.path.basename(v) for v in glob.glob(f'{REPO}/img/anim/*.mp4'))
-json.dump(names, open(f'{REPO}/img/anim/index.json', 'w'), ensure_ascii=False)
+if not (len(sys.argv) > 1 and sys.argv[1]):   # 전체 실행일 때만 목록 갱신 (시험 실행은 목록을 건드리지 않음)
+  names = sorted(os.path.basename(v) for v in glob.glob(f'{REPO}/img/anim/*.mp4'))
+  json.dump(names, open(f'{REPO}/img/anim/index.json', 'w'), ensure_ascii=False)

@@ -5,7 +5,7 @@ on:
       chars: {description: '인물 (쉼표, 비우면 전부)', default: '', required: false}
 permissions:
   contents: write
-concurrency: {group: animate, cancel-in-progress: false}
+concurrency: {group: cutout, cancel-in-progress: false}
 jobs:
   run:
     runs-on: ubuntu-latest
