@@ -1,7 +1,15 @@
-import json, urllib.request, re, time
-api = re.search(r'https://script[^"]+', open('config.js').read()).group(0)
-t0=time.time()
-req = urllib.request.Request(api, data=json.dumps({'fn':'aiJson','args':['Write a short, natural spoken English dialogue for Korean beginner-intermediate learners.\nTwo characters from famous old paintings talk as if they were real friends today:\nA = Maria (hard-working and practical; talks about daily life)\nB = Vincent (passionate, emotional painter; speaks with energy)\nTopic: the same topic as this week\'s study passage, retold as their own lives and opinions.\n[Passage title] A Dog for Life\n[Passage] I love dogs. So, after I got married, my husband and I adopted a dachshund. She had short legs and a long body, like a little sausage. We named her Coco, a pretty name. Coco was a huge source of comfort and strength for me when I was going through a difficult time. I didn’t think of her as just a dog. She was my companion animal, someone I shared my life with. After four years together, Coco suddenly started limping on her back legs and collapsed one day. We rushed her to the hospital, where we found out that she had become paralyzed because of a hereditary spinal disc problem. She had surgery, but sadly, she eventually passed away. I think that was the most I’ve ever cried in my life. Since then, my husband and I have been volunteering regularly at an animal shelter, helping dogs that need love and care. My beloved dog is no longer with me, but I feel proud and happy that I can still do something good for other dogs.\n[This week\'s key expressions] a dog for life / life / love / dog / get married / adopt / dachshund / short / long / like\nRules:\n- 10 to 12 lines, alternating A and B, each line 6~18 words, everyday spoken English (contractions OK).\n- Naturally use at least 5 of the key expressions; put the expression used in "x" (empty string if none).\n- Keep it warm and a little fun, matching each character\'s personality. No stage directions.\n- "ko": natural Korean translation of the line.\nJSON only: {"lines":[{"who":"A","en":"...","ko":"...","x":"..."}]}']}).encode(), headers={'Content-Type':'text/plain;charset=utf-8'})
-try: body=urllib.request.urlopen(req, timeout=300).read().decode()
-except Exception as e: body='EXC '+repr(e)
-open('diag/qa_result.txt','w').write(f'{time.time()-t0:.1f}s\n'+body)
+"""점검: 귀트영 이번 주 문장별 음성 연결 상태"""
+import json, re, urllib.request, os
+cfg = open('config.js', encoding='utf-8').read()
+url = re.search(r'https://script\.google\.com[^\'"]+', cfg).group(0)
+req = urllib.request.Request(url, data=json.dumps({'fn': 'getWeeks', 'args': []}).encode(), headers={'Content-Type': 'text/plain'})
+res = json.loads(urllib.request.urlopen(req, timeout=60).read())['res']
+ws = res if isinstance(res, list) else list(res.values())
+out = []
+for w in sorted(ws, key=lambda x: x.get('id', ''))[-4:]:
+    out.append(f"{w.get('id')} prog={w.get('prog')} title={w.get('title')!r} n={len(w.get('sentences') or [])} longAudio={bool(w.get('longAudio'))}")
+    for i, s in enumerate(w.get('sentences') or []):
+        a = s.get('audio')
+        out.append(f"  {i} T={bool(s.get('isTitle'))} audio={a} exists={bool(a) and os.path.exists('audio/' + a)} {s.get('en', '')[:60]}")
+open('diag/qa_result.txt', 'w').write('\n'.join(out))
+print('\n'.join(out))
