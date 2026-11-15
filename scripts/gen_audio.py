@@ -65,6 +65,17 @@ def vkey(t):
 TEXTS = os.path.join(AUDIO, 'texts.json')
 LONGMAP = os.path.join(AUDIO, 'longmap.json')   # 연속 듣기 파일 안에서 문장마다 몇 초인지(화면이 지금 읽는 문장을 정확히 표시)
 ALL_LONGS = []
+DLG_VOICE = {'mona': 'bf_isabella', 'pearl': 'af_bella', 'vincent': 'am_michael', 'rembrandt': 'bm_lewis', 'ermine': 'bf_emma',
+             'milkmaid': 'af_nicole', 'castiglione': 'bm_george', 'blueboy': 'am_adam'}
+
+
+def fnv(s):
+    """화면(index.html)의 fnv와 같은 32비트 FNV-1a — 대화 음성 파일 이름"""
+    h = 0x811c9dc5
+    for b in s.encode('utf-8'):
+        h ^= b
+        h = (h * 0x01000193) & 0xffffffff
+    return f'{h:08x}'
 
 
 def load_longmap():
@@ -178,6 +189,16 @@ def plan(weeks, have, texts=None):
                     jobs[n] = (t, 'af')
                 elif n not in texts:
                     texts[n] = tkey(t)
+        dlg = w.get('dlg') or {}          # 🎭 그림 속 대화: 인물마다 다른 목소리
+        cast = {'a': DLG_VOICE.get(dlg.get('a'), 'af_bella'), 'b': DLG_VOICE.get(dlg.get('b'), 'am_michael')}
+        for ln_ in dlg.get('lines') or []:
+            en = (ln_.get('en') or '').strip()
+            if not en:
+                continue
+            v = cast.get(ln_.get('who'), 'af_heart')
+            n = 'd-' + fnv(v + '|' + en) + '.mp3'
+            if n not in have:
+                jobs[n] = (en, v)
         ln = name(w.get('longAudio'), f'{wk}-long2.mp3')
         sig = '|'.join(src)
         if src:
@@ -235,7 +256,7 @@ def main():
     from tts import synth, save_mp3
     for k, (name, (text, v)) in enumerate(sorted(jobs.items()), 1):
         print(f'[{k}/{len(jobs)}] {name}: {text[:60]}')
-        save_mp3(synth(text, VOICE[v]), os.path.join(AUDIO, name))
+        save_mp3(synth(text, VOICE.get(v, v)), os.path.join(AUDIO, name))
         texts[name] = tkey(text)
     for ln, src in longs:
         files = [os.path.join(AUDIO, n) for n in src if os.path.exists(os.path.join(AUDIO, n))]
