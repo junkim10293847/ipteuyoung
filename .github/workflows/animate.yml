@@ -1,0 +1,34 @@
+name: animate
+on:
+  workflow_dispatch:
+    inputs:
+      chars: {description: '인물 (쉼표)', default: 'mona', required: false}
+      drivers: {description: '드라이버 파일:부분:이름표 (쉼표)', default: 'talking.pkl:all:talk', required: false}
+permissions:
+  contents: write
+concurrency: {group: animate, cancel-in-progress: false}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.10'}
+      - name: LivePortrait 준비
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          git clone -q --depth 1 https://github.com/KwaiVGI/LivePortrait.git /tmp/lp
+          sed -i '/gradio/d' /tmp/lp/requirements_base.txt
+          pip install -q torch==2.3.0 torchvision==0.18.0 --extra-index-url https://download.pytorch.org/whl/cpu
+          pip install -q -r /tmp/lp/requirements_base.txt onnxruntime==1.18.0 "huggingface_hub[cli]<0.30"
+          huggingface-cli download KwaiVGI/LivePortrait --local-dir /tmp/lp/pretrained_weights --exclude "*.git*" "README.md" "docs" >/dev/null
+      - name: 영상 만들기
+        run: python scripts/animate.py "${{ inputs.chars }}" "${{ inputs.drivers }}"
+      - name: 저장
+        run: |
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git add img/anim
+          git diff --cached --quiet && exit 0
+          git commit -qm "그림 속 대화: 움직이는 인물 영상 (${{ inputs.chars }})"
+          for i in 1 2 3 4 5; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
