@@ -602,7 +602,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v171</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v172</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -631,7 +631,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v171</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v172</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1652,11 +1652,12 @@ Topic: the same topic as this week's study passage, retold as their own lives an
 [This week's key expressions] ${keys.join(' / ')}
 Rules:
 - 10 to 12 lines, alternating A and B, each line 6~18 words, everyday spoken English (contractions OK).
-- Naturally use at least 5 of the key expressions; put the expression used in "x" (empty string if none).
+- Naturally use at least 5 of the key expressions, in their correct meaning. "x" = the ONE key expression from the list used in that line, copied exactly from the list; "" if the line uses none. Never put ordinary words in "x".
 - Keep it warm and a little fun, matching each character's personality. No stage directions.
 - "ko": natural Korean translation of the line.
 JSON only: {"lines":[{"who":"A","en":"...","ko":"...","x":"..."}]}`,{modelTier:'default',limit:90000});
-    const L=(Array.isArray(j&&j.lines)?j.lines:[]).map(x=>({who:/^b/i.test(String(x.who||''))?'b':'a',en:String(x.en||'').trim(),ko:String(x.ko||'').trim(),x:String(x.x||'').trim()})).filter(x=>x.en).slice(0,14);
+    const kl=keys.map(k=>k.toLowerCase());
+    const L=(Array.isArray(j&&j.lines)?j.lines:[]).map(x=>{const xx=String(x.x||'').split(/[,/]/).map(t=>t.trim()).find(t=>kl.includes(t.toLowerCase()))||'';return {who:/^b/i.test(String(x.who||''))?'b':'a',en:String(x.en||'').trim(),ko:String(x.ko||'').trim(),x:xx}}).filter(x=>x.en).slice(0,14);
     if(L.length<4)throw{code:'invalid_json'};
     L.forEach(x=>{x.audio=dlgName(CAST[x.who==='a'?a:b].voice,x.en)});
     const dlg={a,b,lines:L,at:Date.now(),by:nick||''};const cur=weeks.find(x=>x.id===w.id)||w;w.dlg=cur.dlg=dlg;
