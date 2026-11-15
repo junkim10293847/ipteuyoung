@@ -3,13 +3,16 @@ name: scene
 on:
   workflow_dispatch:
     inputs:
+      from_run: {description: '이미 만든 실행 번호에서 결과만 가져와 저장 (비우면 새로 만들기)', default: '', required: false}
       chars: {description: '인물 (JSON 목록)', default: '["mona","pearl","vincent","rembrandt","ermine","milkmaid","castiglione","blueboy"]', required: false}
       mult: {description: '움직임 세기 (1=원래)', default: '0.6', required: false}
 permissions:
   contents: write
+  actions: read
 concurrency: {group: animate, cancel-in-progress: false}
 jobs:
   make:
+    if: inputs.from_run == ''
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
@@ -48,10 +51,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
-        with: {path: /tmp/art, pattern: 'scene-*'}
+        with:
+          path: /tmp/art
+          pattern: 'scene-*'
+          run-id: ${{ inputs.from_run || github.run_id }}
+          github-token: ${{ github.token }}
       - run: |
           ls -R /tmp/art | head -50
-          for d in /tmp/art/scene-*; do cp -r $d/. . ; done
+          for d in /tmp/art/scene-*; do cp -r $d/. img/ ; done   # 묶음 안은 anim/, paint/ (img/ 아래로 복사)
           python3 -c "import glob,json,os;json.dump(sorted(os.path.basename(v) for v in glob.glob('img/anim/*.mp4')+glob.glob('img/paint/*-cut.png')),open('img/anim/index.json','w'),ensure_ascii=False)"
           git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
           git add img/anim img/paint
