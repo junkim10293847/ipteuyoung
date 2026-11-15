@@ -110,5 +110,109 @@
   "file": "File:View of Delft, by Johannes Vermeer.jpg",
   "source": "https://commons.wikimedia.org/wiki/File:View_of_Delft,_by_Johannes_Vermeer.jpg",
   "license": "Public domain"
+ },
+ "lebrun": {
+  "name": "Elisabeth",
+  "title": "밀짚모자를 쓴 자화상",
+  "artist": "엘리자베트 비제 르브룅",
+  "year": "1782년 이후",
+  "file": "File:Self-portrait in a Straw Hat by Elisabeth-Louise Vigée-Lebrun.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Self-portrait_in_a_Straw_Hat_by_Elisabeth-Louise_Vig%C3%A9e-Lebrun.jpg",
+  "license": "Public domain"
+ },
+ "samary": {
+  "name": "Jeanne",
+  "title": "잔 사마리의 초상",
+  "artist": "피에르오귀스트 르누아르",
+  "year": "1877",
+  "file": "File:Renoir portrait of Jeanne Samary 1877.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Renoir_portrait_of_Jeanne_Samary_1877.jpg",
+  "license": "Public domain"
+ },
+ "roulin": {
+  "name": "Joseph",
+  "title": "우편배달부 조제프 룰랭의 초상",
+  "artist": "빈센트 반 고흐",
+  "year": "1889",
+  "file": "File:Portrait of the Postman Joseph Roulin (1889) van Gogh Kroller.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Portrait_of_the_Postman_Joseph_Roulin_(1889)_van_Gogh_Kroller.jpg",
+  "license": "Public domain"
+ },
+ "arlesienne": {
+  "name": "Marie",
+  "title": "아를의 여인 (지누 부인)",
+  "artist": "빈센트 반 고흐",
+  "year": "1888",
+  "file": "File:L'Arlésienne- Madame Joseph-Michel Ginoux.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:L%27Arl%C3%A9sienne-_Madame_Joseph-Michel_Ginoux.jpg",
+  "license": "Public domain"
+ },
+ "cavalier": {
+  "name": "Willem",
+  "title": "웃고 있는 기사",
+  "artist": "프란스 할스",
+  "year": "1624",
+  "file": "File:Cavalier soldier Hals-1624x.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Cavalier_soldier_Hals-1624x.jpg",
+  "license": "Public domain"
+ },
+ "gachet": {
+  "name": "Paul",
+  "title": "가셰 박사의 초상",
+  "artist": "빈센트 반 고흐",
+  "year": "1890",
+  "file": "File:Vincent van Gogh - Dr Paul Gachet - Google Art Project.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_-_Dr_Paul_Gachet_-_Google_Art_Project.jpg",
+  "license": "Public domain"
+ },
+ "bg-poppy": {
+  "name": "poppy",
+  "title": "양귀비 들판",
+  "artist": "클로드 모네",
+  "year": "1873",
+  "bg": true,
+  "file": "File:Claude Monet - Poppy Field - Google Art Project.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Claude_Monet_-_Poppy_Field_-_Google_Art_Project.jpg",
+  "license": "Public domain"
+ },
+ "bg-almond": {
+  "name": "almond",
+  "title": "꽃 피는 아몬드 나무",
+  "artist": "빈센트 반 고흐",
+  "year": "1890",
+  "bg": true,
+  "file": "File:Amandelbloesem - s0176V1962 - Van Gogh Museum.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Amandelbloesem_-_s0176V1962_-_Van_Gogh_Museum.jpg",
+  "license": "Public domain"
+ },
+ "bg-wheat": {
+  "name": "wheat",
+  "title": "사이프러스가 있는 밀밭",
+  "artist": "빈센트 반 고흐",
+  "year": "1889",
+  "bg": true,
+  "file": "File:Vincent van Gogh - Wheat Field with Cypresses (National Gallery version).jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_-_Wheat_Field_with_Cypresses_(National_Gallery_version).jpg",
+  "license": "Public domain"
+ },
+ "bg-garden": {
+  "name": "garden",
+  "title": "생타드레스의 정원",
+  "artist": "클로드 모네",
+  "year": "1867",
+  "bg": true,
+  "file": "File:Claude Monet - Jardin à Sainte-Adresse.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg",
+  "license": "Public domain"
+ },
+ "bg-wave": {
+  "name": "wave",
+  "title": "가나가와 앞바다의 큰 파도",
+  "artist": "가쓰시카 호쿠사이",
+  "year": "1831년경",
+  "bg": true,
+  "file": "File:Tsunami by hokusai 19th century.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Tsunami_by_hokusai_19th_century.jpg",
+  "license": "Public domain"
  }
 }
