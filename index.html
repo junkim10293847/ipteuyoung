@@ -316,6 +316,9 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .en .hid,.ttl .hid{color:transparent;background:var(--line);border-radius:3px}
 .ko{color:var(--muted);font-size:.85rem}
 .ko.empty{font-style:italic;opacity:.7}
+/* 본문 문장 카드는 크게 (휴대폰에서 읽기 편하게) */
+li.card .en,li.card .ttl{font-size:1.2rem;line-height:1.55}
+li.card .ko{font-size:1rem;line-height:1.55}
 .voc summary{cursor:pointer;font-size:.8rem;font-weight:700;color:var(--accent);padding:2px 0;list-style:none;display:inline-flex;align-items:baseline;gap:6px;user-select:none}
 .voc summary::-webkit-details-marker{display:none}
 .voc summary{display:flex;flex-wrap:wrap;white-space:nowrap;row-gap:2px}.voc summary .wbadge{order:3;margin-left:auto;font-weight:500;padding-left:8px;white-space:nowrap}
@@ -650,7 +653,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v178</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v179</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -679,7 +682,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v178</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v179</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
