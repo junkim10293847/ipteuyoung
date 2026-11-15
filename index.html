@@ -369,7 +369,28 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .dlg-cast{display:flex;align-items:center;justify-content:center;gap:10px}
 .dlg-who{display:grid;justify-items:center;gap:2px;border:2px solid transparent;background:none;border-radius:14px;padding:6px 8px;font:inherit;cursor:pointer;max-width:42%}
 .dlg-who.on{border-color:var(--accent);background:var(--accent-soft)}
-.dlg-who .dlg-av{width:72px;height:72px}.dlg-who b{font-size:.95rem}.dlg-who small{font-size:.66rem;color:var(--muted);text-align:center;line-height:1.3}
+.dlg-who .dlg-av{width:72px;height:72px}
+.dlg-stage{display:flex;align-items:flex-start;justify-content:center;gap:10px}
+.dlg-stage .dlg-who{width:44%;max-width:180px;padding:4px;gap:4px}
+.dlg-fr{position:relative;width:100%;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:#2a2a2a;box-shadow:0 3px 10px rgba(0,0,0,.28);transition:filter .35s,transform .35s,box-shadow .35s}
+.dlg-mv,.dlg-tk{position:absolute;inset:0}
+.dlg-mv{animation:dlgBr 5.5s ease-in-out infinite}
+.dlg-who:nth-child(3) .dlg-mv{animation-delay:-2.4s;animation-duration:6.2s}
+.dlg-tk{transform-origin:50% 70%;will-change:transform}
+.dlg-tk img{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none}
+@keyframes dlgBr{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.022) translateY(-1.5px)}}
+.dlg-stage.live .dlg-who:not(.spk) .dlg-fr{filter:brightness(.55) saturate(.6);transform:scale(.95)}
+.dlg-who.spk .dlg-fr{box-shadow:0 0 0 3px var(--accent),0 8px 22px rgba(0,0,0,.35)}
+.dlg-wave{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:none;gap:3px;align-items:flex-end;height:14px;padding:3px 6px;border-radius:999px;background:rgba(0,0,0,.45)}
+.dlg-wave i{width:3px;height:100%;background:#fff;border-radius:2px;animation:dlgW .45s ease-in-out infinite alternate}
+.dlg-wave i:nth-child(2){animation-delay:-.15s}.dlg-wave i:nth-child(3){animation-delay:-.3s}.dlg-wave i:nth-child(4){animation-delay:-.08s}
+@keyframes dlgW{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+.dlg-who.spk .dlg-wave{display:flex}
+.dlg-mic{position:absolute;left:0;right:0;bottom:0;padding:6px 4px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;font-size:.75rem;font-weight:700;display:none}
+.dlg-who.mytn .dlg-mic{display:block}.dlg-who.mytn .dlg-fr{box-shadow:0 0 0 3px var(--done),0 8px 22px rgba(0,0,0,.35)}
+.dlg-sub{min-height:3.4em;border-radius:12px;background:var(--surface);border:1px solid var(--line);padding:8px 12px;text-align:center;display:grid;gap:2px;align-content:center}
+.dlg-sub .s-en{font-size:1.02rem;line-height:1.4;font-weight:600}.dlg-sub .s-ko{font-size:.8rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.dlg-mv,.dlg-wave i{animation:none}}.dlg-who b{font-size:.95rem}.dlg-who small{font-size:.66rem;color:var(--muted);text-align:center;line-height:1.3}
 .dlg-vs{font-size:1.3rem}
 .dlg-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 1px 4px rgba(0,0,0,.25);background:#ccc}
 .dlg-lines{list-style:none;margin:0;padding:0;display:grid;gap:8px}
@@ -602,7 +623,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v173</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v174</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -631,7 +652,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v173</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v174</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1621,14 +1642,14 @@ JSON만: {"quizzes":[{"q":"...","a":"..."},{"q":"...","a":"..."},{"q":"...","a":
 const DLG_USERS=['배라'];
 const canDlg=()=>{try{return DLG_USERS.includes(String(nick||'').trim())}catch(_){return false}};
 const CAST={
-  mona:{name:'Mona',voice:'bf_isabella',g:'f',p:'calm, wise, gently curious; asks thoughtful questions',art:'레오나르도 다빈치 「모나리자」'},
-  pearl:{name:'Griet',voice:'af_bella',g:'f',p:'shy but curious young woman; shares honest feelings',art:'페르메이르 「진주 귀걸이를 한 소녀」'},
-  vincent:{name:'Vincent',voice:'am_michael',g:'m',p:'passionate, emotional painter; speaks with energy',art:'반 고흐 「자화상」'},
-  rembrandt:{name:'Rembrandt',voice:'bm_lewis',g:'m',p:'warm, experienced old man; gives life advice',art:'렘브란트 「두 개의 원이 있는 자화상」'},
-  ermine:{name:'Cecilia',voice:'bf_emma',g:'f',p:'elegant and witty; likes jokes',art:'레오나르도 다빈치 「흰 족제비를 안은 여인」'},
-  milkmaid:{name:'Maria',voice:'af_nicole',g:'f',p:'hard-working and practical; talks about daily life',art:'페르메이르 「우유를 따르는 여인」'},
-  castiglione:{name:'Baldassare',voice:'bm_george',g:'m',p:'polite gentleman; gives kind advice',art:'라파엘로 「발다사레 카스틸리오네의 초상」'},
-  blueboy:{name:'Jonathan',voice:'am_adam',g:'m',p:'cheerful teenage boy; very curious',art:'게인즈버러 「파란 옷을 입은 소년」'}};
+  mona:{name:'Mona',voice:'bf_isabella',g:'f',p:'calm, wise, gently curious; asks thoughtful questions',f:[.50,.26,.46,1.49],art:'레오나르도 다빈치 「모나리자」'},
+  pearl:{name:'Griet',voice:'af_bella',g:'f',p:'shy but curious young woman; shares honest feelings',f:[.48,.45,.62,1.184],art:'페르메이르 「진주 귀걸이를 한 소녀」'},
+  vincent:{name:'Vincent',voice:'am_michael',g:'m',p:'passionate, emotional painter; speaks with energy',f:[.52,.45,.62,1.264],art:'반 고흐 「자화상」'},
+  rembrandt:{name:'Rembrandt',voice:'bm_lewis',g:'m',p:'warm, experienced old man; gives life advice',f:[.45,.27,.36,1.206],art:'렘브란트 「두 개의 원이 있는 자화상」'},
+  ermine:{name:'Cecilia',voice:'bf_emma',g:'f',p:'elegant and witty; likes jokes',f:[.47,.25,.40,1.344],art:'레오나르도 다빈치 「흰 족제비를 안은 여인」'},
+  milkmaid:{name:'Maria',voice:'af_nicole',g:'f',p:'hard-working and practical; talks about daily life',f:[.60,.24,.30,1.122],art:'페르메이르 「우유를 따르는 여인」'},
+  castiglione:{name:'Baldassare',voice:'bm_george',g:'m',p:'polite gentleman; gives kind advice',f:[.55,.34,.50,1.244],art:'라파엘로 「발다사레 카스틸리오네의 초상」'},
+  blueboy:{name:'Jonathan',voice:'am_adam',g:'m',p:'cheerful teenage boy; very curious',f:[.49,.135,.22,1.454],art:'게인즈버러 「파란 옷을 입은 소년」'}};
 const fnv=s=>{let h=0x811c9dc5;for(const b of new TextEncoder().encode(s)){h^=b;h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,'0')};
 const dlgName=(voice,en)=>'d-'+fnv(voice+'|'+en)+'.mp3';
 let dlgBusy=0,dlgErr='',dlgPlay=null,dlgRole='',dlgShowEn=true;
@@ -1667,7 +1688,8 @@ function dlgHtml(w){const D=w.dlg;
   const P=k=>CAST[k]||{name:k,art:''},av=k=>`<img class="dlg-av" src="img/paint/${k}-face.jpg" alt="${esc(P(k).name)}" loading="lazy">`;
   const ready=D.lines.filter(x=>window.__ixHas&&window.__ixHas(x.audio)).length;
   return `<div class="dlg">
-    <div class="dlg-cast">${[D.a,D.b].map(k=>`<button class="dlg-who${dlgRole===k?' on':''}" data-role="${k}" title="이 사람 역할 맡기">${av(k)}<b>${esc(P(k).name)}</b><small>${esc(P(k).art)}</small></button>`).join('<span class="dlg-vs">💬</span>')}</div>
+    <div class="dlg-stage" id="dlgStage">${[D.a,D.b].map(k=>`<button class="dlg-who${dlgRole===k?' on':''}" data-role="${k}" title="이 사람 역할 맡기">${dlgFrame(k)}<b>${esc(P(k).name)}</b><small>${esc(P(k).art)}</small></button>`).join('')}</div>
+    <div class="dlg-sub" id="dlgSub"><span class="s-ko">▶ 대화 듣기를 누르면 두 사람이 이야기를 시작해요</span></div>
     <p class="hint">${dlgRole?`🎤 <b>${esc(P(dlgRole).name)}</b> 역할: 내 차례가 되면 한글을 보고 먼저 말해 본 뒤 원어민 음성이 나와요. (인물을 다시 누르면 해제)`:'인물을 누르면 그 사람 역할을 맡아 말하기 연습을 해요.'}${ready<D.lines.length?` · 원어민 음성 준비 중(${ready}/${D.lines.length}), 그동안은 기기 음성`:''}</p>
     <div class="seq-act"><button class="primary" id="dlgGo">${dlgPlay?'■ 멈춤':'▶ 대화 듣기'}</button><button class="ghost" id="dlgEn">${dlgShowEn?'영어 가리기':'영어 보기'}</button><button class="ghost" id="dlgNew"${dlgBusy?' disabled':''}>${dlgBusy?'새로 만드는 중…':'↻ 다른 인물로 새 대화'}</button></div>
     ${dlgErr?`<p class="load">${esc(dlgErr)}</p>`:''}
@@ -1676,16 +1698,37 @@ function dlgHtml(w){const D=w.dlg;
         <div class="dlg-en${dlgShowEn&&!mine?'':' hid'}">${esc(x.en)}</div><div class="dlg-ko">${esc(x.ko)}</div>${x.x?`<span class="dlg-x">${esc(x.x)}</span>`:''}</div>
         <button class="dlg-say" data-n="${n}" aria-label="이 줄 듣기">🔊</button></li>`}).join('')}</ol>
     <p class="hint">그림: ${[D.a,D.b].map(k=>esc(P(k).art)).join(', ')} — 저작권이 끝난 공공 그림(위키미디어 공용)</p></div>`}
+/* 그림 크게 보기: 얼굴(f=[가로 중심, 세로 중심, 얼굴 너비, 그림 세로/가로 비율])이 틀 가운데 오도록 */
+function dlgFrame(k){const c=CAST[k]||{},f=c.f||[.5,.3,.5,1.3],H=4/3;
+  const IW=Math.max(.56/f[2],1,H/f[3]);let L=.5-f[0]*IW,T=.42*H-f[1]*IW*f[3];L=Math.min(0,Math.max(1-IW,L));T=Math.min(0,Math.max(H-IW*f[3],T));
+  return `<span class="dlg-fr"><span class="dlg-mv"><span class="dlg-tk"><img src="img/paint/${k}.jpg" alt="${esc(c.name||k)}" draggable="false" style="width:${(IW*100).toFixed(1)}%;left:${(L*100).toFixed(1)}%;top:${(T/H*100).toFixed(1)}%"></span></span><span class="dlg-wave"><i></i><i></i><i></i><i></i></span><span class="dlg-mic">🎤 내 차례 — 말해 보세요</span></span>`}
+/* 말하는 동안 고개·몸이 말소리 리듬에 맞춰 살짝 움직임 (음절마다 높낮이를 바꿔 자연스럽게) */
+let dlgTalkRaf=0;
+function dlgTalk(k){cancelAnimationFrame(dlgTalkRaf);document.querySelectorAll('.dlg-tk').forEach(e=>e.style.transform='');
+  document.querySelectorAll('#dlgStage .dlg-who').forEach(b=>b.classList.toggle('spk',!!k&&b.dataset.role===k));
+  if(!k||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const el=document.querySelector(`#dlgStage .dlg-who[data-role="${k}"] .dlg-tk`);if(!el)return;
+  let amp=0,tgt=0,next=0,t0=performance.now(),side=Math.random()<.5?-1:1;
+  const step=t=>{if(t>next){const pause=Math.random()<.12;tgt=pause?0:.35+Math.random()*.65;next=t+(pause?260:90+Math.random()*90);if(Math.random()<.05)side=-side}
+    amp+=(tgt-amp)*.28;const s=(t-t0)/1000;
+    el.style.transform=`translateY(${(-amp*3).toFixed(2)}px) rotate(${(side*Math.sin(s*1.3)*1.1+(amp-.5)*.7).toFixed(2)}deg) scale(${(1+amp*.028+Math.sin(s*.9)*.006).toFixed(4)})`;
+    dlgTalkRaf=requestAnimationFrame(step)};dlgTalkRaf=requestAnimationFrame(step)}
 function dlgPatch(){const b=$('dlgBody'),w=weeks.find(x=>x.id===curId);if(b&&w&&!wbView){const y=$('dlgBox')?$('dlgBox').getBoundingClientRect().top:0;b.innerHTML=dlgHtml(w);const d=$('dlgBox')?$('dlgBox').getBoundingClientRect().top-y:0;if(Math.abs(d)>1)scrollBy(0,d)}}
 async function dlgSay(w,n,rate){const D=w.dlg,x=D.lines[n];const k=x.who==='a'?D.a:D.b;
+  dlgTalk(k);try{await dlgSay0(w,x,k,rate)}finally{dlgTalk(null)}}
+async function dlgSay0(w,x,k,rate){
   const url=window.__ixHas&&window.__ixHas(x.audio)?'audio/'+x.audio:'';if(url){const ok=await playUrl(url,rate);if(ok)return}
   await new Promise(res=>{try{const u=new SpeechSynthesisUtterance(x.en);u.lang=CAST[k]&&CAST[k].voice[0]==='b'?'en-GB':'en-US';u.rate=rate;u.pitch=CAST[k]&&CAST[k].g==='m'?0.85:1.1;u.onend=res;u.onerror=res;speechSynthesis.speak(u)}catch(_){res()}})}
 function dlgMark(n,mode){document.querySelectorAll('.dlg-l').forEach(li=>{li.classList.toggle('now',+li.dataset.n===n);if(+li.dataset.n===n&&mode)li.dataset.mode=mode;else delete li.dataset.mode});
+  const st=$('dlgStage'),sub=$('dlgSub'),w=weeks.find(x=>x.id===curId),D=w&&w.dlg,x=D&&D.lines[n];
+  if(st){st.classList.toggle('live',n>=0);const k=x?(x.who==='a'?D.a:D.b):'';st.querySelectorAll('.dlg-who').forEach(b=>b.classList.toggle('mytn',mode==='mine'&&b.dataset.role===k));
+    if(sub)sub.innerHTML=x?(mode==='mine'?`<span class="s-ko">🎤 ${esc(x.ko)}</span><span class="s-ko">영어로 먼저 말해 보세요</span>`:`<span class="s-en">${dlgShowEn&&dlgRole!==k?esc(x.en):'🔊 …'}</span><span class="s-ko">${esc(x.ko)}</span>`):'<span class="s-ko">▶ 대화 듣기를 누르면 두 사람이 이야기를 시작해요</span>';
+    if(n>=0){const r=st.getBoundingClientRect();if(r.top<50||r.top>innerHeight*.4)scrollBy({top:r.top-60,behavior:'smooth'})}return}
   const li=document.querySelector(`.dlg-l[data-n="${n}"]`);if(li){const r=li.getBoundingClientRect(),dk=document.querySelector('.dock'),bot=dk?dk.getBoundingClientRect().top:innerHeight;if(r.bottom>bot-10||r.top<60)scrollBy({top:r.top-(bot/2),behavior:'smooth'})}}
 async function dlgRun(w){const my={};dlgPlay=my;dlgPatch();const rate=+$('rate').value||1;
   try{for(let n=0;n<w.dlg.lines.length;n++){if(dlgPlay!==my)return;const x=w.dlg.lines[n],k=x.who==='a'?w.dlg.a:w.dlg.b;
     if(dlgRole===k){dlgMark(n,'mine');const sec=Math.min(9,2+x.en.split(' ').length*0.45);await new Promise(r=>setTimeout(r,sec*1000));if(dlgPlay!==my)return;
-      const li=document.querySelector(`.dlg-l[data-n="${n}"] .dlg-en`);if(li)li.classList.remove('hid')}
+      const li=document.querySelector(`.dlg-l[data-n="${n}"] .dlg-en`);if(li)li.classList.remove('hid');dlgMark(n);const se=document.querySelector('#dlgSub .s-en');if(se)se.textContent=x.en}
     else dlgMark(n);
     await dlgSay(w,n,rate);await new Promise(r=>setTimeout(r,350))}}
   finally{if(dlgPlay===my){dlgPlay=null;dlgMark(-1);dlgPatch()}}}
