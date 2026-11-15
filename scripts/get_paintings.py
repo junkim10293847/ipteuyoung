@@ -15,10 +15,15 @@ def get(url):
 
 def main():
     items = json.load(open(os.path.join(ROOT, 'scripts', 'paintings.json'), encoding='utf-8'))
-    idx = {}
+    try:
+        idx = json.load(open(os.path.join(OUT, 'index.json'), encoding='utf-8'))
+    except Exception:
+        idx = {}
     for it in items:
+        if it['id'] in idx and os.path.exists(os.path.join(OUT, it['id'] + '.jpg')) and not os.environ.get('FORCE'):
+            continue   # 이미 받은 그림은 그대로 (얼굴 위치 맞춰 둔 것이 바뀌지 않도록)
         q = {'action': 'query', 'format': 'json', 'generator': 'search', 'gsrsearch': it['search'] + ' filetype:bitmap',
-             'gsrnamespace': 6, 'gsrlimit': 5, 'prop': 'imageinfo', 'iiprop': 'url|extmetadata|size', 'iiurlwidth': 480}
+             'gsrnamespace': 6, 'gsrlimit': 5, 'prop': 'imageinfo', 'iiprop': 'url|extmetadata|size', 'iiurlwidth': it.get('w', 480)}
         j = json.loads(get(API + urllib.parse.urlencode(q)))
         pages = sorted((j.get('query') or {}).get('pages', {}).values(), key=lambda p: p.get('index', 99))
         pick = None
@@ -34,7 +39,7 @@ def main():
             continue
         p, ii, lic = pick
         open(os.path.join(OUT, it['id'] + '.jpg'), 'wb').write(get(ii['thumburl']))
-        idx[it['id']] = {**{k: it[k] for k in ('name', 'title', 'artist', 'year')}, 'file': p['title'], 'source': ii.get('descriptionurl'), 'license': lic}
+        idx[it['id']] = {**{k: it[k] for k in ('name', 'title', 'artist', 'year')}, **({'bg': True} if it.get('bg') else {}), 'file': p['title'], 'source': ii.get('descriptionurl'), 'license': lic}
         print('저장', it['id'], p['title'], lic)
     json.dump(idx, open(os.path.join(OUT, 'index.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
