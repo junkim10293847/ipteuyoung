@@ -1,52 +1,5 @@
-None prog=None title='The Most Productive Year Off' n=14 longAudio=False
-  0 T=True audio=audio/w20261109-s00.mp3 exists=False The Most Productive Year Off
-  1 T=False audio=audio/w20261109-s01.mp3 exists=False I’m a working mom raising a 14-month-old daughter.
-  2 T=False audio=audio/w20261109-s02.mp3 exists=False I had a lot of vague anxiety before I went on parental leave
-  3 T=False audio=audio/w20261109-s03.mp3 exists=False I was afraid that I would lose my identity as a person and e
-  4 T=False audio=audio/w20261109-s04.mp3 exists=False I developed postpartum depression.
-  5 T=False audio=audio/w20261109-s05.mp3 exists=False I decided to make the most of my time and started taking on 
-  6 T=False audio=audio/w20261109-s06.mp3 exists=False First, I studied economics by carefully reading a business n
-  7 T=False audio=audio/w20261109-s07.mp3 exists=False I also started a YouTube channel to document my daily life.
-  8 T=False audio=audio/w20261109-s08.mp3 exists=False My husband and I worked out together, and we even took body 
-  9 T=False audio=audio/w20261109-s09.mp3 exists=False Just before returning to work, we also spent two weeks livin
-  10 T=False audio=audio/w20261109-s10.mp3 exists=False Now that I’m back at work, I hardly have time for studying e
-  11 T=False audio=audio/w20261109-s11.mp3 exists=False But those busy and fulfilling days helped make me who I am t
-  12 T=False audio=audio/w20261109-s12.mp3 exists=False Parental leave wasn’t just a break from work.
-  13 T=False audio=audio/w20261109-s13.mp3 exists=False It was a valuable time of personal growth.
-None prog=gtv title='Canada and US Trade Talks Collapse into Tariff Standoff' n=10 longAudio=False
-  0 T=True audio=audio/w20261108-s00.mp3 exists=False Canada and US Trade Talks Collapse into Tariff Standoff
-  1 T=False audio=audio/w20261108-s01.mp3 exists=False Trade negotiations between Ottawa and Washington broke down,
-  2 T=False audio=audio/w20261108-s02.mp3 exists=False Canadian PM Mark Carney vowed to retaliate dollar-for-dollar
-  3 T=False audio=audio/w20261108-s03.mp3 exists=False The Canadian dollar slipped against several major currencies
-  4 T=False audio=audio/w20261108-s04.mp3 exists=False Both sides traded blame for the breakdown, with U.S. officia
-  5 T=False audio=audio/w20261108-s05.mp3 exists=False Carney fired back that his government would not even conside
-  6 T=False audio=audio/w20261108-s06.mp3 exists=False Sticking points reportedly included auto and metal tariffs, 
-  7 T=False audio=audio/w20261108-s07.mp3 exists=False Economists warn that Canada’s smaller economy has far more t
-  8 T=False audio=audio/w20261108-s08.mp3 exists=False While the tariffs affect a small share of Canada’s overall e
-  9 T=False audio=audio/w20261108-s09.mp3 exists=False Despite the risks, polling suggests many Canadians are in fa
-None prog=None title='A Dog for Life' n=14 longAudio=False
-  0 T=True audio=audio/w20261116-s00.mp3 exists=False A Dog for Life
-  1 T=False audio=audio/w20261116-s01.mp3 exists=False I love dogs.
-  2 T=False audio=audio/w20261116-s02.mp3 exists=False So, after I got married, my husband and I adopted a dachshun
-  3 T=False audio=audio/w20261116-s03.mp3 exists=False She had short legs and a long body, like a little sausage.
-  4 T=False audio=audio/w20261116-s04.mp3 exists=False We named her Coco, a pretty name.
-  5 T=False audio=audio/w20261116-s05.mp3 exists=False Coco was a huge source of comfort and strength for me when I
-  6 T=False audio=audio/w20261116-s06.mp3 exists=False I didn’t think of her as just a dog.
-  7 T=False audio=audio/w20261116-s07.mp3 exists=False She was my companion animal, someone I shared my life with.
-  8 T=False audio=audio/w20261116-s08.mp3 exists=False After four years together, Coco suddenly started limping on 
-  9 T=False audio=audio/w20261116-s09.mp3 exists=False We rushed her to the hospital, where we found out that she h
-  10 T=False audio=audio/w20261116-s10.mp3 exists=False She had surgery, but sadly, she eventually passed away.
-  11 T=False audio=audio/w20261116-s11.mp3 exists=False I think that was the most I’ve ever cried in my life.
-  12 T=False audio=audio/w20261116-s12.mp3 exists=False Since then, my husband and I have been volunteering regularl
-  13 T=False audio=audio/w20261116-s13.mp3 exists=False My beloved dog is no longer with me, but I feel proud and ha
-None prog=gtv title='제목 없음' n=10 longAudio=False
-  0 T=True audio= exists=False Bill Gates Cautions World Lacks a Plan for Coming AI Disrupt
-  1 T=False audio= exists=False Bill Gates has sounded the alarm over a lack of preparation 
-  2 T=False audio= exists=False The Microsoft co-founder argued that AI could either level t
-  3 T=False audio= exists=False He expressed concern that leaders are not yet confronting th
-  4 T=False audio= exists=False Gates warned that AI threatens to displace workers faster th
-  5 T=False audio= exists=False Industries like customer service, as well as blue-collar rol
-  6 T=False audio= exists=False He cautioned this dynamic could spiral into a self-reinforci
-  7 T=False audio= exists=False To manage the shift, Gates called for national coordinating 
-  8 T=False audio= exists=False He pointed to global frameworks like nuclear oversight and a
-  9 T=False audio= exists=False Despite the risks, he noted AI could also accelerate progres
+features (1.0, '{"res": {"ai": true, "tts": true}}')
+aiJson#0 (14.5, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'내일\'은 미래의 일이므로 과거형 \'had\'가 아닌 현재형 \'have\' 또는 미래형 \'will have\'를 사용해야 합니다."}}')
+aiJson#1 (10.4, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'내일\'(tomorrow)은 미래의 일이므로 과거시제 \'had\' 대신 현재시제 \'have\' 또는 미래시제 \'will have\'를 사용해야 합니다."}}')
+aiJson#2 (18.0, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'내일\'은 미래의 일이므로 과거형 \'had\'가 아닌 현재형 \'have\' 또는 미래형 \'will have\'를 사용해야 합니다."}}')
+aiText (9.3, '{"res": "Hi"}')
