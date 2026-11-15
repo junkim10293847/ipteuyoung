@@ -654,7 +654,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v187</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v188</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -683,7 +683,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v187</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v188</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -2373,7 +2373,12 @@ $('fCancel').onclick=()=>{$('addPanel').hidden=true};
 const PART_RE=/^(part|파트)\s*0*\d+\s*[.:]?$|^제?\s*\d+\s*부$/i;
 const SUP_RE=/\s?[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g;
 const unSup=t=>String(t||'').replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g,'').replace(/\s{2,}/g,' ').trim();
-const needFix=w=>w.sentences.some(x=>!x.isTitle&&PART_RE.test(String(x.en||'').trim())||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.en||'')||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.ch||''));
+/* 제목 알아보기: 문장 끝에 마침표가 있어도, 단어 대부분이 대문자로 시작하면(기사 제목 꼴) 제목으로 봄 */
+const TT_SMALL=/^(a|an|the|of|for|to|in|on|and|or|but|nor|with|at|by|from|as|vs\.?|into|over|amid|per)$/i;
+const titleLike=t=>{const ws=String(t||'').trim().replace(/[.!]$/,'').split(/\s+/).filter(Boolean);if(ws.length<2||ws.length>16)return false;
+  const big=ws.filter(x=>!TT_SMALL.test(x));return big.length>=2&&big.filter(x=>/^["“‘'(]?[A-Z0-9]/.test(x)).length/big.length>=0.8};
+const noTitleFix=w=>!w.sentences.some(x=>x.isTitle)&&w.sentences.length>2&&titleLike(w.sentences[0].en);
+const needFix=w=>noTitleFix(w)||w.sentences.some(x=>!x.isTitle&&PART_RE.test(String(x.en||'').trim())||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.en||'')||/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(x.ch||''));
 const fixTried={};
 async function fixWeek(w){fixTried[w.id]=1;const cur=weeks.find(y=>y.id===w.id)||w;
   const hasPart=cur.sentences.some(x=>!x.isTitle&&PART_RE.test(String(x.en||'').trim()));
@@ -2384,6 +2389,7 @@ async function fixWeek(w){fixTried[w.id]=1;const cur=weeks.find(y=>y.id===w.id)|
     if(!o.isTitle&&nextStart)nextStart=false;out.push(o)});
   /* 문장이 바뀐 것은 음성을 새로 만들도록 기존 음성 연결을 뗌 */
   out.forEach(o=>{const orig=cur.sentences.find(y=>y.en&&unSup(y.en)===o.en&&y.en!==o.en);if(orig){delete o.audio;delete o.alt}});
+  if(!out.some(o=>o.isTitle)&&out.length>2&&titleLike(out[0].en)){out[0].isTitle=true;delete out[0].pStart;if(out[1])delete out[1].pStart}   /* 긴 제목을 첫 문장으로 잘못 넣은 주차 바로잡기 */
   [w,cur].forEach(y=>{y.sentences=out});
   try{await db.doc('weeks/'+w.id).update({sentences:JSON.parse(JSON.stringify(out))})}catch(e){}
   if(w.id===curId)full()}
@@ -2393,7 +2399,7 @@ function splitText(raw,title){
   raw.replace(/\r/g,'').split('\n').map(x=>unSup(x)).filter(Boolean).forEach(l=>{if(PART_RE.test(l)){mark=true;return}L.push({l,p:mark});mark=false});
   const hasPart=/\n\s*(part|파트)\s*0*\d+|\n\s*제?\s*\d+\s*부\s*\n/i.test('\n'+raw.replace(/\r/g,''));
   let t=title.trim(), out=[];
-  if(L.length&&!L[0].p&&!/[.!?"”]$/.test(L[0].l)&&L[0].l.split(' ').length<=10){if(!t)t=L[0].l;L.shift()}
+  if(L.length>1&&!L[0].p&&((!/[.!?"”]$/.test(L[0].l)&&L[0].l.split(' ').length<=10)||titleLike(L[0].l))){if(!t)t=L[0].l.replace(/\.$/,'');L.shift()}
   const starts=new Set();
   for(const x of L){if(!hasPart||x.p)starts.add(out.length);out.push(...x.l.split(/(?<=[.!?]["”]?)\s+(?=[A-Z"“])/).map(y=>y.trim()).filter(Boolean))}
   const sentences=[];
