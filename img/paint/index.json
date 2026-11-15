@@ -138,15 +138,6 @@
   "source": "https://commons.wikimedia.org/wiki/File:Portrait_of_the_Postman_Joseph_Roulin_(1889)_van_Gogh_Kroller.jpg",
   "license": "Public domain"
  },
- "arlesienne": {
-  "name": "Marie",
-  "title": "아를의 여인 (지누 부인)",
-  "artist": "빈센트 반 고흐",
-  "year": "1888",
-  "file": "File:L'Arlésienne- Madame Joseph-Michel Ginoux.jpg",
-  "source": "https://commons.wikimedia.org/wiki/File:L%27Arl%C3%A9sienne-_Madame_Joseph-Michel_Ginoux.jpg",
-  "license": "Public domain"
- },
  "cavalier": {
   "name": "Willem",
   "title": "웃고 있는 기사",
@@ -154,15 +145,6 @@
   "year": "1624",
   "file": "File:Cavalier soldier Hals-1624x.jpg",
   "source": "https://commons.wikimedia.org/wiki/File:Cavalier_soldier_Hals-1624x.jpg",
-  "license": "Public domain"
- },
- "gachet": {
-  "name": "Paul",
-  "title": "가셰 박사의 초상",
-  "artist": "빈센트 반 고흐",
-  "year": "1890",
-  "file": "File:Vincent van Gogh - Dr Paul Gachet - Google Art Project.jpg",
-  "source": "https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_-_Dr_Paul_Gachet_-_Google_Art_Project.jpg",
   "license": "Public domain"
  },
  "bg-poppy": {
