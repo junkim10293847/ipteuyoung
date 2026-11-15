@@ -21,7 +21,7 @@ jobs:
       - run: python scripts/cutout.py "${{ inputs.chars }}" "${{ inputs.test }}"
       - run: |
           git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
-          git add img/anim img/paint
+          git add img/anim img/paint; git add diag/cut 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -qm "그림 속 대화: 인물 오려 내기 (${{ inputs.chars }})"
           for i in 1 2 3 4 5; do
