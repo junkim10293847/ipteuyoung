@@ -280,6 +280,8 @@ details.passage{margin-top:12px;padding:10px 14px}
 .ps-ko{display:block;font-size:.84rem;color:var(--muted);line-height:1.5;margin:0 0 8px}
 .skipnote{list-style:none;font-size:.82rem;color:var(--muted);margin:-4px 0 10px;padding:0 4px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
 .skipnote .alllink{font-size:.8rem}
+.tools-h{margin:18px 2px 8px;font-size:.9rem;font-weight:800;color:var(--fg);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}.tools-h span{font-weight:500;font-size:.8rem;color:var(--muted)}
+.t-title .tn{font-style:normal;display:inline-grid;place-items:center;width:1.45em;height:1.45em;border-radius:50%;background:var(--accent);color:#fff;font-size:.72em;font-weight:800;margin-right:6px;vertical-align:.12em}
 .sumrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:.85rem;color:var(--muted);margin:10px 0 12px}
 .sumrow b{color:var(--fg);font-size:.9rem}
 .sumrow .pc{font-variant-numeric:tabular-nums}
@@ -655,7 +657,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v190</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v191</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -684,7 +686,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v190</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v191</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1321,7 +1323,7 @@ document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWi
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
 let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null, seqAns={};
 const toolOpen={};
-document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='qqBox'||id==='mkBox'||id==='gsBox'||id==='dqaBox'||id==='dlgBox')toolOpen[id]=e.target.open;if(id==='dlgBox'){if(e.target.open)dlgPatch();else dlgPlay=null}if(id==='dqaBox'&&e.target.open)dqaPatch();if((id==='gsBox'||id==='mkBox')&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w){makeKey10(w);if(id==='gsBox'&&(!w.clues||mkItems(w).some(x=>!w.clues[x.i+'-'+x.j])))makeClues(w)}}if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
+document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='sumBox'||id==='qqBox'||id==='mkBox'||id==='gsBox'||id==='dqaBox'||id==='dlgBox')toolOpen[id]=e.target.open;if(id==='dlgBox'){if(e.target.open)dlgPatch();else dlgPlay=null}if(id==='dqaBox'&&e.target.open)dqaPatch();if((id==='gsBox'||id==='mkBox')&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w){makeKey10(w);if(id==='gsBox'&&(!w.clues||mkItems(w).some(x=>!w.clues[x.i+'-'+x.j])))makeClues(w)}}if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
 let psKo=false, psOpen=false;
 document.addEventListener('toggle',e=>{if(e.target.id==='psBox')psOpen=e.target.open},true);
 /* 내 표시(노랑·빨강): 문장에서 드래그해 고른 단어를 닉네임별로 저장 */
@@ -1440,12 +1442,13 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
        ${writeOpen.has(i)?writeHtml(w,i):''}
      </li>`}).join('')}
    </ol>
-   ${isG()?`<details class="tool" id="sumBox"${toolOpen.sumBox?' open':''}><summary><span class="t-title">🗣 듣고 요약해 말하기</span><span class="t-sub">지문을 듣고 영어 3문장으로 요약 · 놓친 내용과 표현 첨삭</span></summary><div id="sumBody">${sumHtml(w)}</div></details>`:''}
-   ${isG()?'':`<details class="tool" id="qqBox"${toolOpen.qqBox?' open':''}><summary><span class="t-title">❓ 질문에 답하기</span><span class="t-sub">질문을 듣고 외운 문장으로 대답하기</span></summary><div id="qqBody">${qqHtml(w)}</div></details>`}
-   <details class="tool" id="mkBox"${toolOpen.mkBox?' open':''}><summary><span class="t-title">✏️ 숙어로 문장 만들기</span><span class="t-sub">이번 주 핵심 표현 10개로 내 문장 말하고 첨삭 받기</span></summary><div id="mkBody">${mkHtml(w)}</div></details>
-   ${canDlg()?`<details class="tool" id="dlgBox"${toolOpen.dlgBox?' open':''}><summary><span class="t-title">🎭 그림 속 대화 <small class="beta">시험</small></span><span class="t-sub">명화 속 두 인물이 이번 주 주제로 나누는 대화 · 듣고 역할 맡아 말하기</span></summary><div id="dlgBody">${toolOpen.dlgBox?dlgHtml(w):''}</div></details>`:''}
-   <details class="tool" id="dqaBox"${toolOpen.dqaBox?' open':''}><summary><span class="t-title">✏️ 확인 퀴즈 모아 풀기</span><span class="t-sub">이번 주 단어·숙어 퀴즈를 한 문제씩 연속으로</span></summary><div id="dqaBody">${toolOpen.dqaBox?dqaHtml(w):''}</div></details>
-   <details class="tool" id="gsBox"${toolOpen.gsBox?' open':''}><summary><span class="t-title">🎯 영어로 설명하고 맞히기</span><span class="t-sub">핵심 표현 10개 · 설명 듣고 맞히기 / 내가 설명하기</span></summary><div id="gsBody">${gsHtml(w)}</div></details>
+   <p class="tools-h">📚 외우는 순서 <span>단어·숙어 → 표현 → 내 문장 → 대답 → 요약 → 대화</span></p>
+   <details class="tool" id="dqaBox"${toolOpen.dqaBox?' open':''}><summary><span class="t-title"><i class="tn">1</i>✏️ 확인 퀴즈 모아 풀기</span><span class="t-sub">이번 주 단어·숙어 퀴즈를 한 문제씩 연속으로</span></summary><div id="dqaBody">${toolOpen.dqaBox?dqaHtml(w):''}</div></details>
+   <details class="tool" id="gsBox"${toolOpen.gsBox?' open':''}><summary><span class="t-title"><i class="tn">2</i>🎯 영어로 설명하고 맞히기</span><span class="t-sub">핵심 표현 10개 · 설명 듣고 맞히기 / 내가 설명하기</span></summary><div id="gsBody">${gsHtml(w)}</div></details>
+   <details class="tool" id="mkBox"${toolOpen.mkBox?' open':''}><summary><span class="t-title"><i class="tn">3</i>✏️ 숙어로 문장 만들기</span><span class="t-sub">이번 주 핵심 표현 10개로 내 문장 말하고 첨삭 받기</span></summary><div id="mkBody">${mkHtml(w)}</div></details>
+   <details class="tool" id="qqBox"${toolOpen.qqBox?' open':''}><summary><span class="t-title"><i class="tn">4</i>❓ 질문에 답하기</span><span class="t-sub">질문을 듣고 외운 문장으로 대답하기</span></summary><div id="qqBody">${qqHtml(w)}</div></details>
+   <details class="tool" id="sumBox"${toolOpen.sumBox?' open':''}><summary><span class="t-title"><i class="tn">5</i>🗣 듣고 요약해 말하기</span><span class="t-sub">지문을 듣고 영어 3문장으로 요약 · 놓친 내용과 표현 첨삭</span></summary><div id="sumBody">${sumHtml(w)}</div></details>
+   <details class="tool" id="dlgBox"${toolOpen.dlgBox?' open':''}><summary><span class="t-title"><i class="tn">6</i>🎭 그림 속 대화</span><span class="t-sub">명화 속 두 인물이 이번 주 주제로 나누는 대화 · 듣고 역할 맡아 말하기</span></summary><div id="dlgBody">${toolOpen.dlgBox?dlgHtml(w):''}</div></details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
    <p class="note">외움 표시와 써보기 기록은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
    <p class="note">${(()=>{const vm=w.sentences.reduce((n,x)=>n+(x.vocab||[]).filter(v=>!v.audio).length,0),sOk=!!w.longAudio&&w.sentences.every(x=>x.audio&&x.alt);return sOk&&vm?`문장 음성은 준비돼 있습니다. 새로 정리된 단어·숙어 ${vm}개의 원어민 음성은 15~20분 안에 자동으로 만들어지고, 그동안은 기기 음성으로 재생됩니다.`:''})()||(hasAudio(w)?'원어민 스타일 음성 파일로 재생됩니다. 소리가 작으면 미디어 볼륨을 올려 주세요.':w.audioRequested?'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다.':'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다. 다 만들어지면 새로고침 시 자동으로 바뀝니다.')}</p>
@@ -1672,7 +1675,7 @@ JSON만: {"quizzes":[{"q":"...","a":"..."},{"q":"...","a":"..."},{"q":"...","a":
 /* 🎭 그림 속 대화 (시험 기능): 저작권이 끝난 명화 속 두 인물이 이번 주 주제로 이번 주 표현을 써서 대화
    대본은 AI가 만들어 주차에 저장(w.dlg), 원어민 음성은 서버가 인물마다 다른 목소리로 만듦(audio/d-xxxx.mp3, 없으면 기기 음성) */
 const DLG_USERS=['배라'];
-const canDlg=()=>{try{return DLG_USERS.includes(String(nick||'').trim())}catch(_){return false}};
+const canDlg=()=>true;   /* 모든 사용자에게 열림 */
 const CAST={
   mona:{name:'Mona',voice:'bf_isabella',g:'f',p:'calm, wise, gently curious; asks thoughtful questions',f:[.50,.26,.46,1.49],art:'레오나르도 다빈치 「모나리자」'},
   pearl:{name:'Griet',voice:'af_bella',g:'f',p:'shy but curious young woman; shares honest feelings',f:[.48,.45,.62,1.184],art:'페르메이르 「진주 귀걸이를 한 소녀」'},
@@ -2929,7 +2932,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.c
   try{micStop()}catch(_){}const myT=Date.now();sumBusy=myT;prog.sum[w.id]={u};sumPatch();
   const passage=w.sentences.filter(x=>!x.isTitle).map(x=>x.en).join(' ');
   try{const j=await sample.json(`너는 한국인 초중급 영어 학습자를 다정하게 가르치는 영어 듣기 강사다.
-학습자가 아래 뉴스 지문을 듣고 영어로 요약했다.
+학습자가 아래 지문을 듣고 영어로 요약했다.
 지문 제목: ${w.title}
 지문: ${passage}
 학습자 요약: ${u}
