@@ -4,7 +4,7 @@
 사용: python scripts/cutout.py [인물들(쉼표), 비우면 전부]"""
 import os, sys, glob, json, subprocess, shutil
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 from rembg import new_session, remove
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHARS = ['mona', 'pearl', 'vincent', 'rembrandt', 'ermine', 'milkmaid', 'castiglione', 'blueboy']
@@ -33,10 +33,17 @@ def mask(img, k=''):
     m = remove(img.convert('RGB'), session=sess(MODEL.get(k, 'isnet-general-use')), only_mask=True, post_process_mask=True)
     return np.asarray(m.convert('L'), dtype=np.float32)
 
+def tidy(m):
+    # 가장자리를 2픽셀 안쪽으로 줄이고 부드럽게 → 원래 그림 배경이 테두리에 남는 티를 없앰
+    im = Image.fromarray(np.clip(m, 0, 255).astype(np.uint8)).filter(ImageFilter.MinFilter(5)).filter(ImageFilter.GaussianBlur(1.3))
+    return np.asarray(im, dtype=np.float32)
+
+XF = 20   # 반복 이음새: 끝 20장면을 처음 20장면에 겹쳐 녹여서, 되감기 없이 자연스럽게 반복
+
 for k in want:
     src = f'{REPO}/img/paint/{k}.jpg'
     if os.path.exists(src):
-        im = Image.open(src).convert('RGB'); m = mask(im, k)
+        im = Image.open(src).convert('RGB'); m = tidy(mask(im, k))
         Image.fromarray(np.dstack([np.asarray(im), m.astype(np.uint8)])).save(f'{REPO}/img/paint/{k}-cut.png', optimize=True)
         print('still', k, flush=True)
     for t in ('idle', 'talk'):
@@ -48,15 +55,19 @@ for k in want:
         fs = sorted(glob.glob(f'{tmp}/f*.png')); n = len(fs) // 2   # 앞뒤로 이어 붙인 영상이라 앞 절반만 처리
         ms = [mask(Image.open(f), k) for f in fs[:n]]
         out = f'{tmp}/o'; os.makedirs(out)
-        for i in range(n):
-            mm = np.mean(ms[max(0, i - 1):i + 2], axis=0)   # 앞뒤 프레임과 평균 → 가장자리 떨림 줄이기
-            c = np.asarray(Image.open(fs[i]).convert('RGB'))
-            g = np.repeat(mm[:, :, None], 3, axis=2).astype(np.uint8)
-            Image.fromarray(np.vstack([c, g])).save(f'{out}/s{i:04d}.png')
+        cols = [np.asarray(Image.open(f).convert('RGB'), dtype=np.float32) for f in fs[:n]]
+        mks = [tidy(np.mean(ms[max(0, i - 2):i + 3], axis=0)) for i in range(n)]   # 앞뒤 2장면과 평균 → 테두리 떨림 줄이기
+        L = n - XF
+        for j in range(L):
+            c, g = cols[j], mks[j]
+            if j < XF:
+                a = (j + 1) / (XF + 1)
+                c = cols[L + j] * (1 - a) + c * a; g = mks[L + j] * (1 - a) + g * a
+            g3 = np.repeat(g[:, :, None], 3, axis=2)
+            Image.fromarray(np.vstack([c, g3]).clip(0, 255).astype(np.uint8)).save(f'{out}/s{j:04d}.png')
         dst = f'{REPO}/img/anim/{k}-{t}-a.mp4'
-        subprocess.run(['ffmpeg', '-y', '-v', 'error', '-framerate', '20', '-i', f'{out}/s%04d.png', '-filter_complex',
-                        '[0:v]split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1,format=yuv420p[v]', '-map', '[v]',
-                        '-c:v', 'libx264', '-crf', '26', '-preset', 'slow', '-movflags', '+faststart', dst], check=True)
+        subprocess.run(['ffmpeg', '-y', '-v', 'error', '-framerate', '20', '-i', f'{out}/s%04d.png', '-vf', 'format=yuv420p',
+                        '-c:v', 'libx264', '-crf', '24', '-preset', 'slow', '-movflags', '+faststart', dst], check=True)
         print(' ', k, t, n, 'frames ->', os.path.getsize(dst) // 1024, 'KB', flush=True)
 if not (len(sys.argv) > 1 and sys.argv[1]):   # 전체 실행일 때만 목록 갱신 (시험 실행은 목록을 건드리지 않음)
   names = sorted(os.path.basename(v) for v in glob.glob(f'{REPO}/img/anim/*.mp4') + glob.glob(f'{REPO}/img/paint/*-cut.png'))

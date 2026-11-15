@@ -16,6 +16,8 @@ for k in chars:
         t = time.time()
         cmd = ['python', 'inference.py', '-s', src, '-d', f'assets/examples/driving/{drv}', '-o', out,
                '--flag_force_cpu', '--animation_region', region]
+        if os.environ.get('MULT'):   # 움직임 세기 (1=원래, 0.6=차분하게) — 가만히·말하기 모두 같은 값을 써야 고개 움직임이 맞음
+            cmd += ['--driving_multiplier', os.environ['MULT']]
         try:
             r = subprocess.run(cmd, cwd=LP, capture_output=True, text=True, timeout=int(os.environ.get('CLIP_TIMEOUT', '2400')))
         except subprocess.TimeoutExpired:

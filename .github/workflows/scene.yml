@@ -1,0 +1,60 @@
+name: scene
+# 그림 속 대화 한 장면용 인물 영상 전체 다시 만들기: 인물마다 서버 1대씩 동시에 (움직이는 영상 → 오려 내기) 후 한 번에 저장
+on:
+  workflow_dispatch:
+    inputs:
+      chars: {description: '인물 (JSON 목록)', default: '["mona","pearl","vincent","rembrandt","ermine","milkmaid","castiglione","blueboy"]', required: false}
+      mult: {description: '움직임 세기 (1=원래)', default: '0.6', required: false}
+permissions:
+  contents: write
+concurrency: {group: animate, cancel-in-progress: false}
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        char: ${{ fromJSON(inputs.chars) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.10'}
+      - name: 준비
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          git clone -q --depth 1 https://github.com/KwaiVGI/LivePortrait.git /tmp/lp
+          sed -i '/gradio/d' /tmp/lp/requirements_base.txt
+          sed -i 's/flag_use_half_precision: bool = True/flag_use_half_precision: bool = False/' /tmp/lp/src/config/argument_config.py /tmp/lp/src/config/inference_config.py
+          sed -i "s/else driving_template_dct\['c_d_eyes_lst'\]/else driving_template_dct.get('c_d_eyes_lst')/; s/else driving_template_dct\['c_d_lip_lst'\]/else driving_template_dct.get('c_d_lip_lst')/" /tmp/lp/src/live_portrait_pipeline.py
+          pip install -q torch==2.3.0 torchvision==0.18.0 --extra-index-url https://download.pytorch.org/whl/cpu
+          pip install -q -r /tmp/lp/requirements_base.txt onnxruntime==1.18.0 "huggingface_hub[cli]<0.30" "rembg[cpu]==2.0.59"
+          huggingface-cli download KwaiVGI/LivePortrait --local-dir /tmp/lp/pretrained_weights --exclude "*.git*" "README.md" "docs" >/dev/null
+      - name: 움직이는 영상
+        env: {MULT: '${{ inputs.mult }}'}
+        run: python scripts/animate.py "${{ matrix.char }}" "talking.pkl:pose:idle,talking.pkl:all:talk"
+      - name: 오려 내기
+        run: python scripts/cutout.py "${{ matrix.char }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scene-${{ matrix.char }}
+          path: |
+            img/anim/${{ matrix.char }}-*.mp4
+            img/paint/${{ matrix.char }}-cut.png
+  save:
+    needs: make
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {path: /tmp/art, pattern: 'scene-*'}
+      - run: |
+          ls -R /tmp/art | head -50
+          for d in /tmp/art/scene-*; do cp -r $d/. . ; done
+          python3 -c "import glob,json,os;json.dump(sorted(os.path.basename(v) for v in glob.glob('img/anim/*.mp4')+glob.glob('img/paint/*-cut.png')),open('img/anim/index.json','w'),ensure_ascii=False)"
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git add img/anim img/paint
+          git diff --cached --quiet && exit 0
+          git commit -qm "그림 속 대화: 인물 영상 다시 만들기 (차분한 움직임·깔끔한 테두리·자연스러운 반복)"
+          for i in 1 2 3 4 5; do git pull -q --rebase -X theirs origin main && git push -q origin HEAD:main && break; sleep 5; done
