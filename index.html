@@ -397,7 +397,7 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 @keyframes scPan{from{transform:scale(1.04) translateX(-1%)}to{transform:scale(1.08) translateX(1%)}}
 .dlg-scene::after{content:'';position:absolute;left:0;right:0;bottom:0;height:28%;background:linear-gradient(transparent,rgba(0,0,0,.45));pointer-events:none;z-index:3}
 .sc-p{position:absolute;display:block;padding:0;border:0;border-radius:0;background:none;max-width:none;cursor:pointer;z-index:1;transition:filter .35s;-webkit-tap-highlight-color:transparent}
-.sc-p.spk{z-index:2}.dlg-scene.live .sc-p:not(.spk){filter:brightness(.8) saturate(.85)}
+.sc-p.spk{z-index:2}.sc-p.on,.sc-p:focus{background:none;border:0;outline:none}.dlg-scene.live .sc-p:not(.spk){filter:brightness(.8) saturate(.85)}
 .sc-p.on .dlg-tk{filter:drop-shadow(0 0 5px var(--accent))}.sc-p.mytn .dlg-tk{filter:drop-shadow(0 0 7px var(--done))}
 .sc-p .dlg-tk img,.sc-p canvas{position:absolute;left:0;top:0;width:100%;height:100%}
 .sc-p canvas{opacity:0}.sc-p canvas.on{opacity:1}
@@ -408,6 +408,15 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .sc-tag .dlg-mic{position:static;display:none;background:var(--done);border-radius:999px;padding:1px 7px;font-size:.7rem}.sc-tag.mytn .dlg-mic{display:inline}
 .sc-chg{position:absolute;top:6px;right:6px;z-index:4;border:0;border-radius:999px;background:rgba(0,0,0,.4);color:#fff;font-size:.85rem;padding:3px 8px;cursor:pointer}
 .sc-cr{font-size:.68rem;color:var(--muted);margin:2px 0 0;line-height:1.4}
+.dlg-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.dlg-steps button{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 4px;font:inherit;font-weight:700;font-size:.88rem;color:var(--muted);cursor:pointer}
+.dlg-steps button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.dlg-pr{display:grid;gap:8px;border:1.5px solid var(--accent);border-radius:14px;padding:10px 12px;background:var(--surface)}
+.dlg-pr-h{font-size:.85rem;color:var(--muted)}.dlg-pr-h b{color:var(--accent);margin-right:4px}
+.dlg-pr .s-en{font-size:1.05rem;font-weight:600;line-height:1.45}.dlg-pr .s-en.hid{color:transparent;background:var(--line);border-radius:6px;user-select:none}
+.dlg-pr .s-ko{font-size:.88rem;color:var(--muted)}.dlg-pr .dlg-x{justify-self:start}
+.dlg-pr textarea{width:100%;box-sizing:border-box;font:inherit;font-size:1rem;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--text);resize:vertical}
+.dlg-script summary{cursor:pointer;font-size:.88rem;color:var(--muted);padding:4px 0}
 @media (prefers-reduced-motion:reduce){.dlg-mv,.dlg-wave i,.dlg-scene .sc-bg{animation:none}}.dlg-who b{font-size:.95rem}.dlg-who small{font-size:.66rem;color:var(--muted);text-align:center;line-height:1.3}
 .dlg-vs{font-size:1.3rem}
 .dlg-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 1px 4px rgba(0,0,0,.25);background:#ccc}
@@ -641,7 +650,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v177</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v178</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -670,7 +679,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v177</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v178</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1671,6 +1680,11 @@ const CAST={
 const fnv=s=>{let h=0x811c9dc5;for(const b of new TextEncoder().encode(s)){h^=b;h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,'0')};
 const dlgName=(voice,en)=>'d-'+fnv(voice+'|'+en)+'.mp3';
 let dlgBusy=0,dlgErr='',dlgPlay=null,dlgRole='',dlgShowEn=true;
+/* 공부 순서: ① 듣기 → ② 한 줄씩 따라 말하기(채점) → ③ 한 사람 역할 맡아 말하기(채점) */
+let dlgStep=1,dlgPos=0,dlgRes={},dlgInV={},dlgFlow=0;
+const DLG_GUIDE={1:'두 사람의 대화를 자막과 함께 끝까지 들어 보세요. 모르는 표현은 아래 대본에서 확인해요.',
+  2:'한 줄씩 듣고 🎤 말하기를 눌러 똑같이 따라 말해요. 말한 영어를 원문과 비교해 채점해요.',
+  3:'한 사람 역할을 맡아요. 내 차례에는 한글만 보고 영어로 말하면 채점한 뒤 원어민 발음을 들려줘요.'};
 function dlgPick(w,prev){const ks=Object.keys(CAST);let seed=0;for(const c of (w.id+(prev||'')))seed=(seed*31+c.charCodeAt(0))>>>0;
   const fs=ks.filter(k=>CAST[k].g==='f'),ms=ks.filter(k=>CAST[k].g==='m');let a=fs[seed%fs.length],b=ms[(seed>>>3)%ms.length];
   if(prev&&prev===a+'|'+b){a=fs[(seed+1)%fs.length]}return [a,b]}
@@ -1696,7 +1710,7 @@ JSON only: {"lines":[{"who":"A","en":"...","ko":"...","x":"..."}]}`,{modelTier:'
     const L=(Array.isArray(j&&j.lines)?j.lines:[]).map(x=>{const xx=String(x.x||'').split(/[,/]/).map(t=>t.trim()).find(t=>kl.includes(t.toLowerCase()))||'';return {who:/^b/i.test(String(x.who||''))?'b':'a',en:String(x.en||'').trim(),ko:String(x.ko||'').trim(),x:xx}}).filter(x=>x.en).slice(0,14);
     if(L.length<4)throw{code:'invalid_json'};
     L.forEach(x=>{x.audio=dlgName(CAST[x.who==='a'?a:b].voice,x.en)});
-    const dlg={a,b,lines:L,at:Date.now(),by:nick||''};const cur=weeks.find(x=>x.id===w.id)||w;w.dlg=cur.dlg=dlg;
+    const dlg={a,b,lines:L,at:Date.now(),by:nick||''};dlgPos=0;dlgRes={};dlgInV={};dlgRole='';const cur=weeks.find(x=>x.id===w.id)||w;w.dlg=cur.dlg=dlg;
     try{await db.doc('weeks/'+w.id).update({dlg,sentences:JSON.parse(JSON.stringify(cur.sentences))})}catch(_){}   /* 문장도 같이 보내야 서버가 음성 만들기를 바로 시작 */
   }catch(e){dlgErr=e&&e.code==='network'?'답이 늦어 멈췄어요. 다시 눌러 주세요.':'대화를 만들지 못했어요. 다시 눌러 주세요.'}
   dlgBusy=0;dlgPatch()}
@@ -1707,14 +1721,17 @@ function dlgHtml(w){const D=w.dlg;
   const ready=D.lines.filter(x=>window.__ixHas&&window.__ixHas(x.audio)).length;
   return `<div class="dlg">
     ${canScene(D)?dlgScene(D):`<div class="dlg-stage" id="dlgStage">${[D.a,D.b].map(k=>`<button class="dlg-who${dlgRole===k?' on':''}" data-role="${k}" title="이 사람 역할 맡기">${dlgFrame(k)}<b>${esc(P(k).name)}</b><small>${esc(P(k).art)}</small></button>`).join('')}</div>`}
-    <div class="dlg-sub" id="dlgSub"><span class="s-ko">▶ 대화 듣기를 누르면 두 사람이 이야기를 시작해요</span></div>
-    <p class="hint">${dlgRole?`🎤 <b>${esc(P(dlgRole).name)}</b> 역할: 내 차례가 되면 한글을 보고 먼저 말해 본 뒤 원어민 음성이 나와요. (인물을 다시 누르면 해제)`:'인물을 누르면 그 사람 역할을 맡아 말하기 연습을 해요.'}${ready<D.lines.length?` · 원어민 음성 준비 중(${ready}/${D.lines.length}), 그동안은 기기 음성`:''}</p>
-    <div class="seq-act"><button class="primary" id="dlgGo">${dlgPlay?'■ 멈춤':'▶ 대화 듣기'}</button><button class="ghost" id="dlgEn">${dlgShowEn?'영어 가리기':'영어 보기'}</button><button class="ghost" id="dlgNew"${dlgBusy?' disabled':''}>${dlgBusy?'새로 만드는 중…':'↻ 다른 인물로 새 대화'}</button></div>
+    <div class="dlg-steps">${[[1,'① 듣기'],[2,'② 따라 말하기'],[3,'③ 역할 말하기']].map(([n,t])=>`<button class="${dlgStep===n?'on':''}" data-dstep="${n}">${t}</button>`).join('')}</div>
+    <p class="hint">${DLG_GUIDE[dlgStep]}${ready<D.lines.length?` · 원어민 음성 준비 중(${ready}/${D.lines.length}), 그동안은 기기 음성`:''}</p>
+    ${dlgStep===2?'':`<div class="dlg-sub" id="dlgSub"><span class="s-ko">${dlgStep===1?'▶ 대화 듣기를 누르면 두 사람이 이야기를 시작해요':'…'}</span></div>`}
+    ${dlgStep===1?`<div class="seq-act"><button class="primary" id="dlgGo">${dlgPlay?'■ 멈춤':'▶ 대화 듣기'}</button><button class="ghost" id="dlgEn">${dlgShowEn?'영어 가리기':'영어 보기'}</button></div>`:`<div id="dlgPr">${dlgPrHtml(w)}</div>`}
     ${dlgErr?`<p class="load">${esc(dlgErr)}</p>`:''}
-    <ol class="dlg-lines">${D.lines.map((x,n)=>{const k=x.who==='a'?D.a:D.b;const mine=dlgRole===k;
-      return `<li class="dlg-l ${x.who}${mine?' mine':''}" data-n="${n}">${av(k)}<div class="dlg-b"><span class="dlg-n">${esc(P(k).name)}</span>
-        <div class="dlg-en${dlgShowEn&&!mine?'':' hid'}">${esc(x.en)}</div><div class="dlg-ko">${esc(x.ko)}</div>${x.x?`<span class="dlg-x">${esc(x.x)}</span>`:''}</div>
-        <button class="dlg-say" data-n="${n}" aria-label="이 줄 듣기">🔊</button></li>`}).join('')}</ol>
+    <details class="dlg-script"${dlgStep===1?' open':''}><summary>📜 대본 전체 보기 (${D.lines.length}줄)</summary>
+    <ol class="dlg-lines">${D.lines.map((x,n)=>{const k=x.who==='a'?D.a:D.b;
+      return `<li class="dlg-l ${x.who}" data-n="${n}">${av(k)}<div class="dlg-b"><span class="dlg-n">${esc(P(k).name)}</span>
+        <div class="dlg-en${dlgShowEn||dlgStep!==1?'':' hid'}">${esc(x.en)}</div><div class="dlg-ko">${esc(x.ko)}</div>${x.x?`<span class="dlg-x">${esc(x.x)}</span>`:''}</div>
+        <button class="dlg-say" data-n="${n}" aria-label="이 줄 듣기">🔊</button></li>`}).join('')}</ol></details>
+    <div class="seq-act"><button class="ghost" id="dlgNew"${dlgBusy?' disabled':''}>${dlgBusy?'새로 만드는 중…':'↻ 다른 인물로 새 대화'}</button></div>
     <p class="hint">그림: ${[D.a,D.b].map(k=>esc(P(k).art)).join(', ')} — 저작권이 끝난 공공 그림(위키미디어 공용)</p></div>`}
 /* 그림 크게 보기: 얼굴(f=[가로 중심, 세로 중심, 얼굴 너비, 그림 세로/가로 비율])이 틀 가운데 오도록 */
 /* 움직이는 인물 영상(img/anim/{인물}-idle.mp4 가만히, -talk.mp4 말할 때)이 있으면 그림 위에 겹쳐 재생 */
@@ -1741,60 +1758,130 @@ function dlgScene(D){if(dlgBg<0){let h=0;for(const ch of D.a+D.b)h=(h*31+ch.char
   return `<div class="dlg-scene" id="dlgStage"><img class="sc-bg" src="img/paint/bg-${b[0]}.jpg" style="object-position:${b[1]}" alt="">${scPerson(D.a,'a')}${scPerson(D.b,'b')}${tag(D.a,'a')}${tag(D.b,'b')}<button class="sc-chg" id="dlgBgChg" title="배경 바꾸기">🖼 배경</button></div>
     <p class="sc-cr">${esc(A.name||'')} — ${esc(A.art||'')} · ${esc(B.name||'')} — ${esc(B.art||'')} · 배경 — ${esc(b[2])}</p>`}
 let scRaf=0;
+/* 입 움직임을 실제 목소리에 맞춤: 음성 파일의 소리 크기(0.04초 단위)를 미리 재 두고, 소리가 클 때만 '말하기' 영상을 섞어 보여 줌 */
+const dlgEnvC={};let dlgAC=null,dlgSpk=null,dlgSyn=0;
+async function dlgEnv(url){if(!url||dlgEnvC[url])return;dlgEnvC[url]='x';
+  try{const u=await window.__resolveAudio(url);const b=await (await fetch(u)).arrayBuffer();dlgAC=dlgAC||new (window.AudioContext||window.webkitAudioContext)();
+    const buf=await new Promise((ok,no)=>dlgAC.decodeAudioData(b,ok,no));const d=buf.getChannelData(0),st=Math.round(buf.sampleRate*.04),n=Math.ceil(d.length/st),e=new Float32Array(n);let mx=1e-4;
+    for(let i=0;i<n;i++){let q=0;const a=i*st,z=Math.min(d.length,a+st);for(let j=a;j<z;j+=4)q+=d[j]*d[j];e[i]=Math.sqrt(q/Math.max(1,(z-a)/4));if(e[i]>mx)mx=e[i]}
+    for(let i=0;i<n;i++)e[i]/=mx;dlgEnvC[url]=e}catch(_){}}
+function dlgMouth(k){if(!dlgSpk||dlgSpk.k!==k)return 0;const e=dlgSpk.url&&dlgEnvC[dlgSpk.url];
+  if(e&&e!=='x'){if(player.paused)return 0;const i=Math.floor(player.currentTime/.04),v=Math.max(e[i]||0,e[i+1]||0);return Math.min(1,Math.max(0,(v-.1)/.3))}
+  return dlgSyn}
+/* WebGL: 위쪽(색)·아래쪽(가림판)을 합쳐 인물만 그리고, 가만히/말하기 영상을 입 크기만큼 섞음 */
+function glInit(cv){let gl=null;try{gl=cv.getContext('webgl',{premultipliedAlpha:false,alpha:true,antialias:false})}catch(_){}if(!gl)return null;
+  const sh=(t,src)=>{const x=gl.createShader(t);gl.shaderSource(x,src);gl.compileShader(x);return x},pr=gl.createProgram();
+  gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 p;varying vec2 u;void main(){u=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}'));
+  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,'precision mediump float;varying vec2 u;uniform sampler2D A,B;uniform float m;void main(){vec2 c=vec2(u.x,u.y*.5),k=vec2(u.x,.5+u.y*.5);vec3 col=mix(texture2D(A,c).rgb,texture2D(B,c).rgb,m);float al=mix(texture2D(A,k).r,texture2D(B,k).r,m);al=clamp((al-.06)*1.1,0.,1.);gl_FragColor=vec4(col,al);}'));
+  gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return null;gl.useProgram(pr);
+  const bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const tex=()=>{const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,1,1,0,gl.RGB,gl.UNSIGNED_BYTE,new Uint8Array(3));return t};
+  const tA=tex(),tB=tex();gl.uniform1i(gl.getUniformLocation(pr,'A'),0);gl.uniform1i(gl.getUniformLocation(pr,'B'),1);
+  return {gl,tA,tB,um:gl.getUniformLocation(pr,'m')}}
+function glDraw(g,va,vb,m){const gl=g.gl;gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,g.tA);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,va);
+  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,g.tB);if(vb&&m>.01)gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,vb);
+  gl.uniform1f(g.um,vb&&m>.01?m:0);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}
 function scLoop(){cancelAnimationFrame(scRaf);const st=$('dlgStage');if(!st||!st.classList.contains('dlg-scene'))return;
-  const ps=[...st.querySelectorAll('.sc-p')].map(p=>{const cv=p.querySelector('canvas'),off=document.createElement('canvas');off.width=cv.width;off.height=cv.height*2;
-    return {p,cv,ctx:cv.getContext('2d'),off,ox:off.getContext('2d',{willReadFrequently:true}),iv:p.querySelector('.dlg-vid.idle'),tv:p.querySelector('.dlg-vid.talk'),last:-1}});
-  if(!ps.some(o=>o.iv||o.tv))return;
+  const w=weeks.find(x=>x.id===curId);if(w&&w.dlg)w.dlg.lines.forEach(x=>{if(window.__ixHas&&window.__ixHas(x.audio))dlgEnv('audio/'+x.audio)});
+  const ps=[...st.querySelectorAll('.sc-p')].map(p=>{const cv=p.querySelector('canvas');cv.width=360;cv.height=Math.round(360*cv.height/240);
+    return {p,k:p.dataset.role,cv,g:glInit(cv),iv:p.querySelector('.dlg-vid.idle'),tv:p.querySelector('.dlg-vid.talk'),m:0,last:-1,ctx:null,off:null}});
+  if(!ps.some(o=>o.iv))return;
   const tick=()=>{if(!st.isConnected)return;
-    for(const o of ps){const talk=o.p.classList.contains('spk')&&o.tv&&!o.tv.paused&&o.tv.readyState>=2,v=talk?o.tv:o.iv;if(!v||v.readyState<2)continue;
-      const key=(talk?1e5:0)+v.currentTime;if(key===o.last)continue;o.last=key;
-      try{const W=o.cv.width,H=o.cv.height;o.ox.drawImage(v,0,0,W,H*2);const a=o.ox.getImageData(0,0,W,H),m=o.ox.getImageData(0,H,W,H).data,d=a.data;
-        for(let i=3;i<d.length;i+=4)d[i]=m[i-3];o.ctx.putImageData(a,0,0);o.cv.classList.add('on')}catch(_){return}}
+    for(const o of ps){const iv=o.iv;if(!iv||iv.readyState<2)continue;
+      const tgt=dlgMouth(o.k),tv=o.tv&&!o.tv.paused&&o.tv.readyState>=2?o.tv:null;o.m+=((tv?tgt:0)-o.m)*.45;if(o.m<.005)o.m=0;
+      if(tv&&Math.abs(tv.currentTime-iv.currentTime)>.15&&!tv.seeking)try{tv.currentTime=iv.currentTime}catch(_){}
+      const key=iv.currentTime+o.m*7;if(key===o.last)continue;o.last=key;
+      try{if(o.g)glDraw(o.g,iv,tv,o.m);
+        else{/* WebGL이 안 되는 기기: 캔버스로 합성 (입 섞기 없이) */const W=o.cv.width,H=o.cv.height,v=o.m>.5&&tv?tv:iv;
+          if(!o.off){o.off=document.createElement('canvas');o.off.width=W;o.off.height=H*2;o.ox=o.off.getContext('2d',{willReadFrequently:true});o.ctx=o.cv.getContext('2d')}
+          o.ox.drawImage(v,0,0,W,H*2);const a=o.ox.getImageData(0,0,W,H),mm=o.ox.getImageData(0,H,W,H).data,d=a.data;for(let i=3;i<d.length;i+=4)d[i]=mm[i-3];o.ctx.putImageData(a,0,0)}
+        o.cv.classList.add('on')}catch(_){return}}
     scRaf=requestAnimationFrame(tick)};
   scRaf=requestAnimationFrame(tick)}
 /* 말하는 동안 고개·몸이 말소리 리듬에 맞춰 살짝 움직임 (음절마다 높낮이를 바꿔 자연스럽게) */
 let dlgTalkRaf=0;
-function dlgTalk(k){cancelAnimationFrame(dlgTalkRaf);document.querySelectorAll('.dlg-tk').forEach(e=>e.style.transform='');
+function dlgTalk(k,url){cancelAnimationFrame(dlgTalkRaf);dlgSpk=k?{k,url:url||''}:null;dlgSyn=0;document.querySelectorAll('.dlg-tk').forEach(e=>e.style.transform='');
   document.querySelectorAll('#dlgStage [data-role]').forEach(b=>{const on=!!k&&b.dataset.role===k;b.classList.toggle('spk',on);
     /* 가만히(idle)·말하기(talk) 영상은 고개 움직임이 같은 순서라, 같은 시점으로 맞춰 바꾸면 입만 움직이기 시작하는 것처럼 이어짐 */
     const v=b.querySelector('.dlg-vid.talk'),iv=b.querySelector('.dlg-vid.idle');
-    if(v){try{if(on){if(iv&&iv.duration)v.currentTime=iv.currentTime%(v.duration||1e9);else if(v.duration)v.currentTime=Math.random()*v.duration*.8;v.play().catch(()=>{})}
-      else if(!v.paused){if(iv)iv.currentTime=v.currentTime%(iv.duration||1e9);v.pause()}}catch(_){}}
+    const sc=!!b.closest('.dlg-scene');
+    if(v){try{if(on){clearTimeout(v._st);if(iv&&iv.duration)v.currentTime=iv.currentTime%(v.duration||1e9);else if(v.duration)v.currentTime=Math.random()*v.duration*.8;v.play().catch(()=>{})}
+      else if(!v.paused){clearTimeout(v._st);if(sc)v._st=setTimeout(()=>{try{v.pause()}catch(_){}},500);else{if(iv)iv.currentTime=v.currentTime%(iv.duration||1e9);v.pause()}}}catch(_){}}
     if(iv&&iv.paused)iv.play().catch(()=>{})});
-  if(!k||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  if(!k)return;
   const el=document.querySelector(`#dlgStage .dlg-who[data-role="${k}"] .dlg-tk`);if(!el)return;
-  const sv=!!el.closest('[data-role]').querySelector('.dlg-vid.talk'),G=sv?.2:1;   /* 영상이 있으면 몸 흔들림은 약하게 */
+  const sv=!!el.closest('[data-role]').querySelector('.dlg-vid.talk'),G=sv||matchMedia('(prefers-reduced-motion:reduce)').matches?0:1;   /* 영상이 있으면 몸을 따로 흔들지 않음 */   /* 영상이 있으면 몸 흔들림은 약하게 */
   let amp=0,tgt=0,next=0,t0=performance.now(),side=Math.random()<.5?-1:1;
   const step=t=>{if(t>next){const pause=Math.random()<.12;tgt=pause?0:.35+Math.random()*.65;next=t+(pause?260:90+Math.random()*90);if(Math.random()<.05)side=-side}
-    amp+=(tgt-amp)*.28;const s=(t-t0)/1000;
-    el.style.transform=`translateY(${(-amp*3*G).toFixed(2)}px) rotate(${((side*Math.sin(s*1.3)*1.1+(amp-.5)*.7)*G).toFixed(2)}deg) scale(${(1+(amp*.028+Math.sin(s*.9)*.006)*G).toFixed(4)})`;
+    amp+=(tgt-amp)*.28;dlgSyn=amp;const s=(t-t0)/1000;
+    if(G)el.style.transform=`translateY(${(-amp*3*G).toFixed(2)}px) rotate(${((side*Math.sin(s*1.3)*1.1+(amp-.5)*.7)*G).toFixed(2)}deg) scale(${(1+(amp*.028+Math.sin(s*.9)*.006)*G).toFixed(4)})`;
     dlgTalkRaf=requestAnimationFrame(step)};dlgTalkRaf=requestAnimationFrame(step)}
+const dlgLK=(D,n)=>D.lines[n].who==='a'?D.a:D.b;
+/* 말로 하면 쉼표·줄임말이 달라지므로 채점 전에 맞춰 줌 (I'm = I am …) */
+const dlgNorm=t=>String(t||'').replace(/[’‘]/g,"'").replace(/,/g,'').replace(/\bcan't\b/gi,'can not').replace(/\bwon't\b/gi,'will not').replace(/n't\b/gi,' not')
+  .replace(/'m\b/gi,' am').replace(/'re\b/gi,' are').replace(/'ll\b/gi,' will').replace(/'ve\b/gi,' have').replace(/'d\b/gi,' would');
+function dlgResHtml(r,x){return `<div class="wr-res${r.perfect?' perfect':r.almost?' almost':''}"><div class="wr-score"><b>${r.perfect?'🎉 완벽해요!':r.score>=80?`👍 ${r.score}점`:`${r.score}점 · 한 번 더 해 볼까요?`}</b></div>${r.perfect?'':diffHtml(r)}${dlgStep===3?`<div class="s-en">정답: ${esc(x.en)}</div>`:''}</div>`}
+function dlgPrHtml(w){const D=w.dlg,N=D.lines.length,P=k=>CAST[k]||{name:k};
+  if(dlgStep===3&&!dlgRole)return `<div class="dlg-pr"><b>누구 역할을 맡을까요?</b><div class="seq-act">${[D.a,D.b].map(k=>`<button class="primary" data-drole="${k}">🎭 ${esc(P(k).name)}</button>`).join('')}</div><p class="hint">장면 속 인물을 눌러도 돼요.</p></div>`;
+  if(dlgPos>=N){const sc=Object.values(dlgRes).map(r=>r.score),avg=sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length):0;
+    return `<div class="dlg-pr"><b>🎉 끝까지 했어요!</b><p>${sc.length?`말한 ${sc.length}줄 평균 <b>${avg}점</b>`:'채점한 줄이 없어요.'}</p><div class="seq-act"><button class="primary" id="dlgAgain">처음부터 다시</button>${dlgStep===2?'<button class="ghost" data-dstep="3">③ 역할 말하기로 →</button>':''}</div></div>`}
+  const x=D.lines[dlgPos],k=dlgLK(D,dlgPos),mine=dlgStep===2||k===dlgRole,r=dlgRes[dlgPos];
+  if(!mine)return `<div class="dlg-pr"><div class="dlg-pr-h"><b>${dlgPos+1}/${N}</b> ${esc(P(k).name)}의 말을 들어 보세요…</div><div class="seq-act"><button class="ghost" id="dlgCont">▶ 이어서</button></div></div>`;
+  return `<div class="dlg-pr">
+    <div class="dlg-pr-h"><b>${dlgPos+1}/${N}</b> ${esc(P(k).name)} ${dlgStep===2?'· 듣고 똑같이 따라 말하기':'· 🎤 내 차례 — 한글을 보고 영어로'}</div>
+    ${dlgStep===2?`<div class="s-en${dlgShowEn?'':' hid'}">${esc(x.en)}</div>`:''}<div class="s-ko">${esc(x.ko)}</div>${x.x?`<span class="dlg-x">${esc(x.x)}</span>`:''}
+    <div class="seq-act">${micBtn('dlgIn')}<button class="ghost" id="dlgHear">🔊 ${dlgStep===3&&!r?'정답 듣기':'다시 듣기'}</button>${dlgStep===2?`<button class="ghost" id="dlgEn">${dlgShowEn?'영어 가리기':'영어 보기'}</button>`:''}</div>
+    <textarea id="dlgIn" rows="2" placeholder="🎤 말하기를 누르고 영어로 말하세요 (직접 써도 돼요)">${esc(dlgInV[dlgPos]||'')}</textarea>
+    <div class="seq-act"><button class="primary" id="dlgChk">채점</button><button class="ghost" id="dlgPrev"${dlgPos?'':' disabled'}>◀ 이전</button><button class="ghost" id="dlgNext">${dlgPos+1<N?'다음 ▶':'마치기 ▶'}</button></div>
+    ${r?dlgResHtml(r,x):''}</div>`}
+function dlgPrPatch(){const b=$('dlgPr'),w=weeks.find(x=>x.id===curId);if(b&&w&&w.dlg)b.innerHTML=dlgPrHtml(w)}
+async function dlgGo(n,play=true){const w=weeks.find(x=>x.id===curId);if(!w||!w.dlg)return;const D=w.dlg,my=++dlgFlow;
+  try{stop()}catch(_){}dlgPos=Math.max(0,n);dlgPrPatch();
+  if(dlgPos>=D.lines.length){dlgMark(-1);return}
+  const k=dlgLK(D,dlgPos),rate=+$('rate').value||1;
+  if(dlgStep===3&&k!==dlgRole){dlgMark(dlgPos);await dlgSay(w,dlgPos,rate);if(my!==dlgFlow)return;await new Promise(r=>setTimeout(r,350));if(my!==dlgFlow)return;dlgGo(dlgPos+1);return}
+  if(dlgStep===3){dlgMark(dlgPos,'mine');return}
+  dlgMark(dlgPos);if(play)await dlgSay(w,dlgPos,rate)}
+function dlgCheck(){const w=weeks.find(x=>x.id===curId),i=$('dlgIn');if(!w||!w.dlg||!i)return;const u=i.value.trim();
+  if(!u){toast('먼저 🎤 말하기를 누르고 영어로 말해 보세요');return}
+  const x=w.dlg.lines[dlgPos],r=gradeText(dlgNorm(x.en),dlgNorm(u));if(!r)return;dlgRes[dlgPos]=r;dlgInV[dlgPos]=u;dlgPrPatch();
+  if(dlgStep===3){const n=dlgPos,my=++dlgFlow;dlgMark(n,'reveal');dlgSay(w,n,+$('rate').value||1).then(()=>{if(my===dlgFlow)dlgMark(n,'reveal')})}}
 function dlgPatch(){const b=$('dlgBody'),w=weeks.find(x=>x.id===curId);if(b&&w&&!wbView){const y=$('dlgBox')?$('dlgBox').getBoundingClientRect().top:0;b.innerHTML=dlgHtml(w);const d=$('dlgBox')?$('dlgBox').getBoundingClientRect().top-y:0;if(Math.abs(d)>1)scrollBy(0,d)}}
 async function dlgSay(w,n,rate){const D=w.dlg,x=D.lines[n];const k=x.who==='a'?D.a:D.b;
-  dlgTalk(k);try{await dlgSay0(w,x,k,rate)}finally{dlgTalk(null)}}
-async function dlgSay0(w,x,k,rate){
-  const url=window.__ixHas&&window.__ixHas(x.audio)?'audio/'+x.audio:'';if(url){const ok=await playUrl(url,rate);if(ok)return}
+  const url=window.__ixHas&&window.__ixHas(x.audio)?'audio/'+x.audio:'';if(url)dlgEnv(url);
+  dlgTalk(k,url);try{await dlgSay0(w,x,k,rate,url)}finally{dlgTalk(null)}}
+async function dlgSay0(w,x,k,rate,url){
+  if(url){const ok=await playUrl(url,rate);if(ok)return;if(dlgSpk)dlgSpk.url=''}
   await new Promise(res=>{try{const u=new SpeechSynthesisUtterance(x.en);u.lang=CAST[k]&&CAST[k].voice[0]==='b'?'en-GB':'en-US';u.rate=rate;u.pitch=CAST[k]&&CAST[k].g==='m'?0.85:1.1;u.onend=res;u.onerror=res;speechSynthesis.speak(u)}catch(_){res()}})}
 function dlgMark(n,mode){document.querySelectorAll('.dlg-l').forEach(li=>{li.classList.toggle('now',+li.dataset.n===n);if(+li.dataset.n===n&&mode)li.dataset.mode=mode;else delete li.dataset.mode});
   const st=$('dlgStage'),sub=$('dlgSub'),w=weeks.find(x=>x.id===curId),D=w&&w.dlg,x=D&&D.lines[n];
   if(st){st.classList.toggle('live',n>=0);const k=x?(x.who==='a'?D.a:D.b):'';st.querySelectorAll('[data-role]').forEach(b=>b.classList.toggle('mytn',mode==='mine'&&b.dataset.role===k));
-    if(sub)sub.innerHTML=x?(mode==='mine'?`<span class="s-ko">🎤 ${esc(x.ko)}</span><span class="s-ko">영어로 먼저 말해 보세요</span>`:`<span class="s-en">${dlgShowEn&&dlgRole!==k?esc(x.en):'🔊 …'}</span><span class="s-ko">${esc(x.ko)}</span>`):'<span class="s-ko">▶ 대화 듣기를 누르면 두 사람이 이야기를 시작해요</span>';
+    const showEn=mode==='reveal'||(dlgStep===1?dlgShowEn:dlgStep===3?k!==dlgRole:true);
+    if(sub)sub.innerHTML=x?(mode==='mine'?`<span class="s-ko">🎤 ${esc(x.ko)}</span><span class="s-ko">영어로 말해 보세요</span>`:`<span class="s-en">${showEn?esc(x.en):'🔊 …'}</span><span class="s-ko">${esc(x.ko)}</span>`):`<span class="s-ko">${dlgStep===1?'▶ 대화 듣기를 누르면 두 사람이 이야기를 시작해요':'…'}</span>`;
     if(n>=0){const r=st.getBoundingClientRect();if(r.top<50||r.top>innerHeight*.4)scrollBy({top:r.top-60,behavior:'smooth'})}return}
   const li=document.querySelector(`.dlg-l[data-n="${n}"]`);if(li){const r=li.getBoundingClientRect(),dk=document.querySelector('.dock'),bot=dk?dk.getBoundingClientRect().top:innerHeight;if(r.bottom>bot-10||r.top<60)scrollBy({top:r.top-(bot/2),behavior:'smooth'})}}
 async function dlgRun(w){const my={};dlgPlay=my;dlgPatch();const rate=+$('rate').value||1;
   try{for(let n=0;n<w.dlg.lines.length;n++){if(dlgPlay!==my)return;const x=w.dlg.lines[n],k=x.who==='a'?w.dlg.a:w.dlg.b;
-    if(dlgRole===k){dlgMark(n,'mine');const sec=Math.min(9,2+x.en.split(' ').length*0.45);await new Promise(r=>setTimeout(r,sec*1000));if(dlgPlay!==my)return;
-      const li=document.querySelector(`.dlg-l[data-n="${n}"] .dlg-en`);if(li)li.classList.remove('hid');dlgMark(n);const se=document.querySelector('#dlgSub .s-en');if(se)se.textContent=x.en}
-    else dlgMark(n);
+    dlgMark(n);
     await dlgSay(w,n,rate);await new Promise(r=>setTimeout(r,350))}}
   finally{if(dlgPlay===my){dlgPlay=null;dlgMark(-1);dlgPatch()}}}
-document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#dlgMake,#dlgNew,#dlgGo,#dlgEn,#dlgBgChg,.dlg-who,.dlg-say');if(!t)return;e.preventDefault();
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#dlgMake,#dlgNew,#dlgGo,#dlgEn,#dlgBgChg,.dlg-who,.dlg-say,[data-dstep],[data-drole],#dlgChk,#dlgNext,#dlgPrev,#dlgHear,#dlgCont,#dlgAgain');if(!t)return;e.preventDefault();
   const w=weeks.find(x=>x.id===curId);if(!w)return;
   if(t.id==='dlgMake'||t.id==='dlgNew'){dlgPlay=null;makeDlg(w);return}
-  if(t.id==='dlgEn'){dlgShowEn=!dlgShowEn;dlgPatch();return}
+  if(t.id==='dlgEn'){dlgShowEn=!dlgShowEn;if(dlgStep===1)dlgPatch();else dlgPrPatch();return}
+  if(t.dataset.dstep){dlgPlay=null;dlgFlow++;try{stop()}catch(_){}dlgStep=+t.dataset.dstep;dlgPos=0;dlgRes={};dlgInV={};dlgPatch();dlgMark(-1);if(dlgStep===2||(dlgStep===3&&dlgRole))dlgGo(0);return}
+  if(t.dataset.drole){dlgRole=t.dataset.drole;dlgPos=0;dlgRes={};dlgInV={};dlgPatch();dlgGo(0);return}
+  if(t.id==='dlgChk'){dlgCheck();return}
+  if(t.id==='dlgNext'){dlgGo(dlgPos+1);return}
+  if(t.id==='dlgPrev'){dlgGo(dlgPos-1);return}
+  if(t.id==='dlgCont'||t.id==='dlgAgain'){if(t.id==='dlgAgain'){dlgRes={};dlgInV={}}dlgGo(t.id==='dlgAgain'?0:dlgPos);return}
+  if(t.id==='dlgHear'){dlgFlow++;try{stop()}catch(_){}const n=dlgPos;dlgMark(n,dlgStep===3?'reveal':'');dlgSay(w,n,+$('rate').value||1);return}
   if(t.id==='dlgBgChg'){dlgBg=(dlgBg+1)%BGS.length;if(!dlgPlay)dlgPatch();else{const st=$('dlgStage'),b=BGS[dlgBg],im=st&&st.querySelector('.sc-bg');if(im){im.src='img/paint/bg-'+b[0]+'.jpg';im.style.objectPosition=b[1]}}return}
-  if(t.classList.contains('dlg-who')){dlgRole=dlgRole===t.dataset.role?'':t.dataset.role;dlgPlay=null;try{stop()}catch(_){}dlgPatch();return}
-  if(t.id==='dlgGo'){if(dlgPlay){dlgPlay=null;try{stop()}catch(_){}try{speechSynthesis.cancel()}catch(_){}dlgPatch();return}try{stop()}catch(_){}dlgRun(w);return}
+  if(t.classList.contains('dlg-who')){if(dlgStep===3&&dlgRole===t.dataset.role)return;dlgRole=t.dataset.role;dlgStep=3;dlgPlay=null;dlgFlow++;try{stop()}catch(_){}dlgPos=0;dlgRes={};dlgInV={};dlgPatch();dlgGo(0);return}
+  if(t.id==='dlgGo'){dlgFlow++;if(dlgPlay){dlgPlay=null;try{stop()}catch(_){}try{speechSynthesis.cancel()}catch(_){}dlgPatch();return}try{stop()}catch(_){}dlgRun(w);return}
   if(t.classList.contains('dlg-say')){try{stop()}catch(_){}dlgPlay=null;const n=+t.dataset.n;dlgMark(n);dlgSay(w,n,+$('rate').value||1).then(()=>dlgMark(-1));return}});
 
 /* ✏️ 확인 퀴즈 모아 풀기: 이번 주 모든 단어·숙어의 확인 퀴즈를 한 문제씩 (퀴즈 화면·첨삭·기록은 설명 속 퀴즈와 같은 것을 씀) */
@@ -2945,7 +3032,7 @@ function weakHtml(w){
     ${top.length?`<div class="wk-sec">자주 틀린 단어</div><div class="wk-words">${top.map(([k,n])=>`<span>${esc(k)}<i>${n}</i></span>`).join('')}</div>`:''}
     <button class="ghost" id="weakReset">기록 초기화</button></div>`;
 }
-document.addEventListener('input',e=>{if(e.target.id==='mockIn'&&mock)mock.ans[mock.pos]=e.target.value;if(e.target.id==='seqIn'&&curId!=null)seqAns[curId+'|'+seqPos]=e.target.value});
+document.addEventListener('input',e=>{if(e.target.id==='dlgIn')dlgInV[dlgPos]=e.target.value;if(e.target.id==='mockIn'&&mock)mock.ans[mock.pos]=e.target.value;if(e.target.id==='seqIn'&&curId!=null)seqAns[curId+'|'+seqPos]=e.target.value});
 /* 🎤 말하기: 브라우저 음성 인식(영어)으로 말한 내용을 입력칸에 넣음. 지원 안 하는 브라우저는 키보드 마이크 안내 */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let micRec=null,micId=null,micState='',micFail=0,micDog=null;
 const MIC_GUIDE='입력칸을 누른 뒤 키보드의 🎤(마이크) 버튼을 눌러 영어로 말하세요.\n※ 키보드를 영어로 바꾼 뒤(🌐) 마이크를 눌러야 영어로 받아 적어요.';
@@ -2968,7 +3055,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   r.onerror=ev=>{if(micRec!==r)return;const e2=ev.error;
     if(e2==='not-allowed'||e2==='service-not-allowed'){micStop();alert('마이크 사용이 막혀 있어요.\n\n주소창 옆 자물쇠(또는 ⋮ 메뉴) → 권한 → 마이크 허용 후 다시 눌러 주세요.\n\n또는 '+MIC_GUIDE);return}
     if(e2==='aborted')return;micGiveUp(ta,e2==='no-speech'?'소리가 들리지 않았어요.':e2==='network'?'인터넷 연결이 약해요.':'잘 못 알아들었어요.')};
-  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop()};
+  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop();if(id==='dlgIn')setTimeout(dlgCheck,50)};
   micRec=r;micId=id;micState='wait';micUI();
   micDog=setTimeout(()=>{if(micRec===r&&micState==='wait')micGiveUp(ta,'마이크가 켜지지 않았어요.')},4000);
   try{r.start()}catch(_){micGiveUp(ta,'마이크가 켜지지 않았어요.')}
