@@ -512,7 +512,8 @@ mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-sha
 .acts .play::after{content:"";position:absolute;inset:0;background:var(--done);transform:scaleX(0);transform-origin:left;opacity:.55;pointer-events:none}
 .acts .play.pressing::after{transform:scaleX(1);transition:transform 1s linear}
 .acts .play.looping{background:var(--done);border-color:var(--done)}
-.hint.press{margin:10px 0 10px;display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap}.hint.press .alllink{margin-left:auto;white-space:nowrap}
+.hint.press{margin:10px 0 10px;display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap}.hint.press .alllink{white-space:nowrap}.hint.press #vHideBtn{margin-left:auto}
+.vbw{white-space:nowrap}.vb{font:inherit;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:0 8px;margin:0 1px;cursor:pointer;font-size:.82em;font-weight:700;line-height:1.5}.vb.op{font-size:1em;color:var(--fg);background:#fff3b0;border-bottom-color:#e0b400}
 .acts .wr-check{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
 li.card:has(.wr) > .ko,li.card:has(.wr) .body > .ko{display:none}   /* 쓰는 동안엔 한글이 쓰기 칸 바로 위에 한 번만 */
 .acts .write[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
@@ -658,7 +659,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v194</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v195</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -687,7 +688,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v194</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v195</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -888,6 +889,9 @@ function palPopRender(){const pp=$('palPop');if(!pp||pp.hidden)return;const rnd=
   pp.innerHTML=`<div class="pal-mode"><button type="button" data-pal="random" aria-pressed="${rnd}">🎲 매일 바뀜</button><button type="button" data-pal="${rnd?k:(PALS[palRaw(curProg)]?palRaw(curProg):k)}" class="pm-pick" aria-pressed="${!rnd}">🎨 직접 고르기</button></div>`+
   Object.entries(PALS).map(([id,[n,c]])=>`<button type="button" data-pal="${id}" aria-pressed="${!rnd&&id===k}"${rnd&&id===k?' class="today"':''}><i style="background:${c}"></i>${n}</button>`).join('')+
   (rnd?`<p class="pal-note">오늘의 색: <b>${PALS[k][0]}</b> · 내일은 다른 색으로 바뀌어요. 색을 누르면 직접 고르기로 바뀌어요.</p>`:'')}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.vb');if(!b)return;e.preventDefault();e.stopPropagation();
+  const key=b.dataset.vb,i=+key.split('-')[0];vShown.has(key)?vShown.delete(key):vShown.add(key);
+  const w=weeks.find(x=>x.id===curId),en=document.querySelector(`#c${i} .en`);if(w&&en)en.innerHTML=wordsHtml(w.sentences[i].en,i)},true);
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#palBtn,#palPop [data-pal]');if(!b)return;e.preventDefault();
   const pp=$('palPop');if(b.id==='palBtn'){pp.hidden=!pp.hidden;palPopRender();return}
   const id=b.dataset.pal;if(!PALS[id]&&id!=='random')return;ls.set('pal_'+curProg,id);prog.theme={...(prog.theme||{}),[curProg]:id};try{saveProg()}catch(_){}
@@ -1322,6 +1326,19 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
 document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches('textarea,.qa-form input'))setTimeout(()=>{const a=document.activeElement;if(!(a&&a.matches&&a.matches('textarea,.qa-form input')))document.body.classList.remove('typing')},150)});
 document.addEventListener('input',e=>{const el=e.target;if(el.id&&el.id.startsWith('wr-'))writeDraft[curId+'|'+el.dataset.i]=el.value});
 const revealed=new Set(), hiddenEn=new Set(), doneSeen=new Set();
+/* 어휘 가리기: 문장 속 핵심 단어·숙어를 뜻만 보이는 빈칸으로 가리고, 눌러서 확인 */
+let vHide=false;try{vHide=localStorage.getItem('vhide')==='1'}catch(_){}
+const vShown=new Set();
+const vTok=x=>String(x||'').toLowerCase().replace(/[^a-z0-9']/g,'').replace(/'s$/,'');
+const vSkip=/^(one's|ones|someone|somebody|something|sth|sb|oneself|a|an|the)$/;
+const vSame=(a,b)=>{if(!a||!b)return false;if(a===b)return true;const n=Math.max(3,Math.min(a.length,b.length)-2);return a.length>=3&&b.length>=3&&a.slice(0,n)===b.slice(0,n)};
+function vocabSpans(t,s){const toks=t.split(' ').map(vTok),out=[];
+  (s&&s.vocab||[]).forEach((v,k)=>{const vw=String(v.t||'').split(/\s+/).map(vTok).filter(x=>x&&!vSkip.test(x));if(!vw.length)return;
+    for(let a=0;a<toks.length;a++){if(!vSame(toks[a],vw[0]))continue;let j=a,q=1,ok=true;
+      while(q<vw.length){let f=-1;for(let z=j+1;z<=Math.min(toks.length-1,j+3);z++)if(vSame(toks[z],vw[q])){f=z;break}if(f<0){ok=false;break}j=f;q++}
+      if(ok&&!out.some(o=>!(j<o.a||a>o.b))){out.push({a,b:j,k,m:String(v.m||'').split(/[,;·(]/)[0].trim().slice(0,14)});break}}});
+  return out}
+
 let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null, seqAns={};
 const toolOpen={};
 document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='sumBox'||id==='qqBox'||id==='mkBox'||id==='gsBox'||id==='dqaBox'||id==='dlgBox')toolOpen[id]=e.target.open;if(id==='dlgBox'){if(e.target.open)dlgPatch();else dlgPlay=null}if(id==='dqaBox'&&e.target.open)dqaPatch();if((id==='gsBox'||id==='mkBox')&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w){makeKey10(w);if(id==='gsBox'&&(!w.clues||mkItems(w).some(x=>!w.clues[x.i+'-'+x.j])))makeClues(w)}}if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
@@ -1351,7 +1368,13 @@ function chunkEnds(t,ch){if(!ch||!isG())return null;const ws=t.split(' ');const 
 function wordsHtml(t,i){
   const hid=hiddenEn.has(i), m=marksOf(curId,i);
   const wk=isG()&&weeks.find(x=>x.id===curId),E=!hid&&wk&&wk.sentences[i]&&wk.sentences[i].en===t?chunkEnds(t,wk.sentences[i].ch):null;
-  return t.split(' ').map((w,k)=>`<span class="w${hid?' hid':''}" data-w="${k}">${esc(w)}</span>${E&&E.has(k)?'<i class="cut"> /</i>':''}`).join(' ');
+  const S=vHide&&!hid?(weeks.find(x=>x.id===curId)||{}).sentences:null,sp=S&&S[i]&&S[i].en===t?vocabSpans(t,S[i]):[];
+  const ws=t.split(' '),out=[];
+  for(let k=0;k<ws.length;k++){const g=sp.find(o=>o.a===k);
+    if(g){const key=i+'-'+g.k,op=vShown.has(key),txt=ws.slice(g.a,g.b+1).join(' '),tail=txt.match(/[.,!?;:"”’)]+$/);
+      out.push(`<span class="vbw"><button type="button" class="vb${op?' op':''}" data-vb="${key}">${op?esc(tail?txt.slice(0,-tail[0].length):txt):esc(g.m||'?')}</button>${tail?esc(tail[0]):''}</span>`);k=g.b;continue}
+    out.push(`<span class="w${hid?' hid':''}" data-w="${k}">${esc(ws[k])}</span>${E&&E.has(k)?'<i class="cut"> /</i>':''}`)}
+  return out.join(' ');
 }
 function render(){
   const main=$('main');
@@ -1423,7 +1446,7 @@ function render(){
      ${askAllHtml()}
    </header>
 ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은 이 기기에 저장되고, 새 주차 추가는 Claude에 로그인한 멤버가 할 수 있습니다.</p>`:''}
-   <p class="hint press"><span>💡 ▶ 듣기를 <b>1초 누르면</b> 그 문장을 계속 반복합니다</span><button class="alllink" id="hideAll">${idx.every(j=>hiddenEn.has(j))?"영어 모두 보기":"영어 모두 가리기"}</button></p>
+   <p class="hint press"><span>💡 ▶ 듣기를 <b>1초 누르면</b> 그 문장을 계속 반복합니다</span><button class="alllink" id="vHideBtn" aria-pressed="${vHide}">${vHide?'🙉 어휘 보기':'🙈 어휘 가리기'}</button><button class="alllink" id="hideAll">${idx.every(j=>hiddenEn.has(j))?"영어 모두 보기":"영어 모두 가리기"}</button></p>
    <ol id="list">
     ${listIdx.map(i=>{if(i==='__H')return `<li class="revhead"><b>📖 오늘 ${idx.length}문장${nRev?` · 🔁 어제 복습 ${nRev}`:''}${nSkip?` · ✓ 이미 외움 ${nSkip}`:''}</b><span>번호 순서대로 이어서 보여 줘요.${nRev?' 어제 복습 문장은 영어를 가려 두었어요.':''}${behind?` 앞에서 아직 못 외운 ${behind}문장도 오늘 분량에 넣었어요.`:''}</span></li>`;if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__S')return skipHtml;if(i==='__T'){const behind=idx.filter(j=>j<prevMax).length;return `<li class="revhead today"><b>📖 오늘 문장 · ${idx.length}문장</b>${behind?`<span>앞에서 아직 못 외운 ${behind}문장을 먼저 넣었어요.</span>`:''}</li>`+skipHtml};const s=w.sentences[i];const v=s.vocab||[];return `
      <li class="card${done[i]?' done':''}" id="c${i}">
@@ -1959,7 +1982,7 @@ document.addEventListener('click',async e=>{
 [학습자 답] ${u}
 (음성 인식으로 받아 적어 철자가 이상하거나 한국어가 섞였을 수 있다. 뜻을 짐작해 고친다. 모범 답과 달라도 뜻이 맞고 표현을 맞게 썼으면 ok.)
 "ok"(true/false), "fixed"(학습자 답을 가장 적게 고친 올바른 문장), "better"(더 자연스러운 문장, 같으면 빈 문자열), "tip"(한국어 한 문장).
-JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'default',limit:50000});
+JSON만: {"ok":true,"fixed":"...","better":"...","tip":"..."}`,{modelTier:'default',limit:75000});
     const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
     prog.dq[L.key]={u,q:Q.q,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};ok=!!j.ok}
   catch(err){prog.dq[L.key]={u,err:err&&err.code==='network'?'답이 늦어 멈췄어요. [첨삭 받기]를 다시 눌러 주세요.':'첨삭을 받지 못했어요. 다시 눌러 주세요.'}}
@@ -2291,6 +2314,8 @@ document.addEventListener('click',async e=>{
   if(t.id==='mockGrade'){gradeMock(w,false);return}
   if(t.id==='weakReset'){if(t.dataset.sure){if(prog.weak)delete prog.weak[w.id];saveProg();render()}else{t.dataset.sure='1';t.textContent='한 번 더 누르면 초기화';}return}
   if(t.classList.contains('weakgo')){const j=+t.dataset.j;view='all';hiddenEn.delete(j);render();setTimeout(()=>{const c=$('c'+j);if(c){c.scrollIntoView({block:'center',behavior:'smooth'});c.classList.add('playing');setTimeout(()=>c.classList.remove('playing'),1500)}},60);return}
+  if(t.id==='vHideBtn'){vHide=!vHide;vShown.clear();if(vHide)hiddenEn.clear();   /* 어휘 가리기를 켜면 문장은 보이고 핵심 표현만 빈칸 */
+    try{localStorage.setItem('vhide',vHide?'1':'0')}catch(_){}stay(-1,render);return}
   if(t.id==='hideAll'){const ids=[...document.querySelectorAll('#list .card')].map(c=>+c.id.slice(1));const allH=ids.every(j=>hiddenEn.has(j));ids.forEach(j=>allH?hiddenEn.delete(j):hiddenEn.add(j));
     /* 화면 전체를 다시 그리지 않고 카드마다 영어 부분만 바꿈 */
     ids.forEach(j=>patchCardState(w,j));t.textContent=allH?'영어 모두 가리기':'영어 모두 보기';return}

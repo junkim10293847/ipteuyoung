@@ -1,5 +1,0 @@
-features (1.0, '{"res": {"ai": true, "tts": true}}')
-aiJson#0 (14.5, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'내일\'은 미래의 일이므로 과거형 \'had\'가 아닌 현재형 \'have\' 또는 미래형 \'will have\'를 사용해야 합니다."}}')
-aiJson#1 (10.4, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'내일\'(tomorrow)은 미래의 일이므로 과거시제 \'had\' 대신 현재시제 \'have\' 또는 미래시제 \'will have\'를 사용해야 합니다."}}')
-aiJson#2 (18.0, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'내일\'은 미래의 일이므로 과거형 \'had\'가 아닌 현재형 \'have\' 또는 미래형 \'will have\'를 사용해야 합니다."}}')
-aiText (9.3, '{"res": "Hi"}')
