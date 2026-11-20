@@ -515,7 +515,7 @@ mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-sha
 .hint.press{margin:10px 0 10px;display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap}.hint.press .alllink{margin-left:auto;white-space:nowrap}
 .vbw{white-space:nowrap}.vbq{display:grid;gap:10px}.vbq-h{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--accent)}.vbq-h .bar{flex:1;height:6px;border-radius:9px;background:var(--line);overflow:hidden}.vbq-h .bar i{display:block;height:100%;background:var(--accent)}
 .vbq-ko{background:var(--accent-soft);border-radius:12px;padding:16px 14px;font-size:1.1rem;line-height:1.5}
-.vbq-en{font-size:1.3rem;line-height:1.9;padding:6px 2px}.vb-tabs{grid-template-columns:1fr 1fr;margin-bottom:10px}
+.vbq-en{font-size:1.3rem;line-height:1.9;padding:6px 2px}.vb-tabs{grid-template-columns:1fr 1fr 1fr;margin-bottom:10px}.vb-w{width:100%;box-sizing:border-box;font:inherit;font-size:1.05rem;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);color:var(--fg);resize:vertical}
 .vbq-en.all{line-height:2.3}.vb-in{font:inherit;font-size:1rem;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:2px 6px;margin:0 2px;color:var(--fg);min-width:3ch;max-width:100%;letter-spacing:.02em}
 .vb-in:focus{outline:2px solid var(--accent);background:#fff}.vb-in::placeholder{color:var(--muted);opacity:.7;letter-spacing:.08em}
 .vb-a{border-radius:8px;padding:1px 6px;font-weight:700}.vb-a.ok{background:#dcf5e3;color:#18794e}.vb-a.no{background:#fde2e2;color:#c0392b;text-decoration:line-through}.vb-c{background:#fff3b0;border-radius:8px;padding:1px 6px;margin-left:3px;font-weight:700}
@@ -667,7 +667,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v197</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v198</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -696,7 +696,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v197</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v198</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1965,35 +1965,46 @@ function dqaHtml(w){const L=dqaItems(w);if(!L.length)return `<p class="hint" sty
     <div class="seq-act"><button class="ghost" id="dqaPrev"${p===0?' disabled':''}>◀ 이전</button><button class="primary" id="dqaNext">${p===L.length-1?'처음부터':'다음 ▶'}</button>${tried<L.length?`<button class="ghost" id="dqaSkip">안 푼 문제로</button>`:''}</div></div>`}
 /* 7. 빈칸 암기: 한글 문장을 보고 영어 빈칸을 직접 써서 채우기 (핵심 어휘만 / 문장 전체), 길이 보기·말하기 */
 let vbPos=0,vbKnow={},vbMode='v',vbLen=false,vbVal={},vbDone=null;
-try{vbMode=localStorage.getItem('vbMode')||'v'}catch(_){}
+try{vbMode=localStorage.getItem('vbMode')||'v'}catch(_){}if(!/^[vaw]$/.test(vbMode))vbMode='v';
 const vbNorm=x=>String(x||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9' ]/g,' ').replace(/\s+/g,' ').trim();
-function vbList(w){const L=[];w.sentences.forEach((x,i)=>{if(x.isTitle||!x.en)return;const sp=vocabSpans(x.en,x);if(vbMode==='a'||sp.length)L.push({i,sp})});return L}
+function vbList(w){const L=[];w.sentences.forEach((x,i)=>{if(x.isTitle||!x.en)return;const sp=vocabSpans(x.en,x);if(vbMode!=='v'||sp.length)L.push({i,sp})});return L}
 /* 이 문장에서 가릴 칸: 핵심 어휘 모드면 단어·숙어 덩어리, 전체 모드면 모든 단어 */
 function vbSlots(x,it){const ws=x.en.split(' '),S=[];
   if(vbMode==='a'){ws.forEach((t,k)=>{const m=t.match(/^(["“‘(]*)(.*?)([.,!?;:"”’)]*)$/);if(m[2])S.push({a:k,b:k,pre:m[1],ans:m[2],tail:m[3]})});return S}
   it.sp.forEach(g=>{const txt=ws.slice(g.a,g.b+1).join(' '),m=txt.match(/^(["“‘(]*)(.*?)([.,!?;:"”’)]*)$/);S.push({a:g.a,b:g.b,pre:m[1],ans:m[2],tail:m[3]})});return S.sort((p,q)=>p.a-q.a)}
 const vbHint=a=>a.split(' ').map(t=>t.replace(/[a-zA-Z0-9]/g,'_')).join('  ');
 function vbHtml(w){const L=vbList(w);
-  const tabs=`<div class="dlg-steps vb-tabs"><button class="${vbMode==='v'?'on':''}" data-vbm="v">핵심 어휘만 가리기</button><button class="${vbMode==='a'?'on':''}" data-vbm="a">문장 전체 가리기</button></div>`;
+  const tabs=`<div class="dlg-steps vb-tabs"><button class="${vbMode==='v'?'on':''}" data-vbm="v">핵심 어휘</button><button class="${vbMode==='a'?'on':''}" data-vbm="a">단어 전부</button><button class="${vbMode==='w'?'on':''}" data-vbm="w">✍ 통째로 쓰기</button></div>`;
   if(!L.length)return tabs+'<p class="hint">이번 주 문장에서 가릴 단어·숙어를 찾지 못했어요.</p>';
   if(vbPos>=L.length){const n=Object.values(vbKnow).filter(Boolean).length;return tabs+`<div class="vbq"><b>🎉 ${L.length}문장 끝!</b><p>한 번에 맞힌 문장 ${n}/${L.length}</p><div class="seq-act"><button class="primary" id="vbAgain">처음부터 다시</button></div></div>`}
   const it=L[vbPos],x=w.sentences[it.i],ws=x.en.split(' '),S=vbSlots(x,it),out=[];let n=0;
+  if(vbMode==='w'){const r=vbDone&&vbDone.w;
+    return tabs+`<div class="vbq"><div class="vbq-h"><b>${vbPos+1}/${L.length}</b><span class="bar"><i style="width:${vbPos/L.length*100}%"></i></span></div>
+    <div class="vbq-ko">${esc(x.ko||'')}</div>
+    <textarea id="vbW" class="vb-w" rows="3" placeholder="한글을 보고 영어 문장 전체를 써 보세요" autocapitalize="sentences" spellcheck="false">${esc(vbVal.w||'')}</textarea>
+    ${r?`<div class="wr-res${r.perfect?' perfect':r.almost?' almost':''}"><div class="wr-score"><b>${r.perfect?'🎉 완벽해요!':r.score>=80?`👍 ${r.score}점`:`${r.score}점 · 정답과 비교해 보세요`}</b></div>${r.perfect?'':diffHtml(r)}</div>`:''}
+    <div class="vbq-tool">${micBtn('vbW')}<button class="ghost" id="vbHear">🔊 듣기</button></div>
+    <div class="vbq-act">${r?`<button class="ghost" id="vbRetry">다시 쓰기</button><button class="primary" id="vbNext">다음 문제 ▶</button>`:`<button class="ghost" id="vbShow">정답 보기</button><button class="primary" id="vbChk">✓ 확인</button>`}</div></div>`}
   for(let k=0;k<ws.length;k++){const g=S.find(o=>o.a===k);
     if(!g){out.push(esc(ws[k]));continue}
-    const id=n++,v=vbVal[id]||'',st=vbDone&&vbDone[id],ch=Math.max(3,g.ans.length+1);
+    const id=n++,v=vbVal[id]||'',st=vbDone&&vbDone[id],ch=vbMode==='a'?5:8;   /* 길이 힌트가 되지 않게 칸 크기는 같게 */
     out.push(`<span class="vbw">${esc(g.pre)}${st?`<span class="vb-a ${st.ok?'ok':'no'}">${esc(st.ok?g.ans:(v||'—'))}</span>${st.ok?'':`<span class="vb-c">${esc(g.ans)}</span>`}`:
-      `<input class="vb-in" data-vbi="${id}" value="${esc(v)}" style="width:${ch}ch" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${vbLen?esc(vbHint(g.ans)):''}">`}${esc(g.tail)}</span>`);k=g.b}
+      `<input class="vb-in" data-vbi="${id}" value="${esc(v)}" style="width:${ch}ch" autocomplete="off" autocapitalize="off" spellcheck="false" >`}${esc(g.tail)}</span>`);k=g.b}
   const fin=!!vbDone,allOk=fin&&Object.values(vbDone).every(z=>z.ok);
   return tabs+`<div class="vbq"><div class="vbq-h"><b>${vbPos+1}/${L.length}</b><span class="bar"><i style="width:${vbPos/L.length*100}%"></i></span></div>
     <div class="vbq-ko">${esc(x.ko||'')}</div>
     <div class="vbq-en${vbMode==='a'?' all':''}">${out.join(' ')}</div>
     ${fin?`<p class="vb-r ${allOk?'ok':''}">${allOk?'🎉 정답!':'✏️ 빨간 칸의 정답을 확인하고 소리 내어 읽어 보세요'}</p>`:''}
     <textarea id="vbSay" hidden></textarea>
-    <div class="vbq-tool"><button class="ghost" id="vbLenB" aria-pressed="${vbLen}">↔ 길이 ${vbLen?'숨기기':'보기'}</button>${fin?'':micBtn('vbSay')}<button class="ghost" id="vbHear">🔊 듣기</button></div>
+    <div class="vbq-tool">${fin?'':micBtn('vbSay')}<button class="ghost" id="vbHear">🔊 듣기</button></div>
     <div class="vbq-act">${fin?`<button class="ghost" id="vbRetry">다시 쓰기</button><button class="primary" id="vbNext">다음 문제 ▶</button>`:`<button class="ghost" id="vbShow">정답 보기</button><button class="primary" id="vbChk">✓ 확인</button>`}</div></div>`}
 function vbPatch(focus){const b=$('vbBody'),w=weeks.find(x=>x.id===curId);if(!b||!w)return;b.innerHTML=vbHtml(w);
   if(focus){const f=[...b.querySelectorAll('.vb-in')].find(e=>!e.value);if(f)try{f.focus({preventScroll:true})}catch(_){}}}
 function vbCheck(show){const w=weeks.find(x=>x.id===curId);if(!w)return;const L=vbList(w),it=L[vbPos];if(!it)return;const S=vbSlots(w.sentences[it.i],it);
+  if(vbMode==='w'){const ta=$('vbW'),x=w.sentences[it.i];if(ta)vbVal.w=ta.value;if(show)vbVal.w=vbVal.w||'';const u=show?'':String(vbVal.w||'').trim();
+    if(!u&&!show){toast('먼저 영어 문장을 써 보세요');return}
+    const r=gradeText(dlgNorm(x.en),dlgNorm(u||'-'));if(!r)return;vbDone={w:r};if(vbKnow[it.i]===undefined)vbKnow[it.i]=!show&&r.perfect;
+    vbPatch();if(r.perfect)playOne(x,it.i,+$('rate').value||1,(stop(),token),true);return}
   document.querySelectorAll('#vbBody .vb-in').forEach(e=>vbVal[+e.dataset.vbi]=e.value);
   vbDone={};S.forEach((g,id)=>{vbDone[id]={ok:!show&&vbNorm(vbVal[id])===vbNorm(g.ans)}});
   if(vbKnow[it.i]===undefined)vbKnow[it.i]=!show&&Object.values(vbDone).every(z=>z.ok);
@@ -2006,7 +2017,7 @@ function vbVoice(){const w=weeks.find(x=>x.id===curId),ta=$('vbSay');if(!w||!ta)
   vbPatch(true)}
 document.addEventListener('keydown',e=>{const t=e.target;if(!t.classList||!t.classList.contains('vb-in')||e.key!=='Enter')return;e.preventDefault();
   const all=[...document.querySelectorAll('#vbBody .vb-in')],k=all.indexOf(t);if(k<all.length-1)all[k+1].focus();else vbCheck()});
-document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('vb-in'))vbVal[+t.dataset.vbi]=t.value});
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('vb-in'))vbVal[+t.dataset.vbi]=t.value;if(t.id==='vbW')vbVal.w=t.value});
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#vbNext,#vbHear,#vbAgain,#vbChk,#vbShow,#vbRetry,#vbLenB,[data-vbm]');if(!t)return;e.preventDefault();
   const w=weeks.find(x=>x.id===curId);if(!w)return;const L=vbList(w),it=L[vbPos];
   if(t.dataset.vbm){vbMode=t.dataset.vbm;try{localStorage.setItem('vbMode',vbMode)}catch(_){}vbPos=0;vbKnow={};vbVal={};vbDone=null;vbPatch();return}
@@ -3191,7 +3202,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   r.onerror=ev=>{if(micRec!==r)return;const e2=ev.error;
     if(e2==='not-allowed'||e2==='service-not-allowed'){micStop();alert('마이크 사용이 막혀 있어요.\n\n주소창 옆 자물쇠(또는 ⋮ 메뉴) → 권한 → 마이크 허용 후 다시 눌러 주세요.\n\n또는 '+MIC_GUIDE);return}
     if(e2==='aborted')return;micGiveUp(ta,e2==='no-speech'?'소리가 들리지 않았어요.':e2==='network'?'인터넷 연결이 약해요.':'잘 못 알아들었어요.')};
-  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop();if(id==='dlgIn')setTimeout(dlgCheck,50);if(id==='vbSay')setTimeout(vbVoice,50)};
+  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop();if(id==='dlgIn')setTimeout(dlgCheck,50);if(id==='vbSay')setTimeout(vbVoice,50);if(id==='vbW')setTimeout(()=>vbCheck(),50)};
   micRec=r;micId=id;micState='wait';micUI();
   micDog=setTimeout(()=>{if(micRec===r&&micState==='wait')micGiveUp(ta,'마이크가 켜지지 않았어요.')},4000);
   try{r.start()}catch(_){micGiveUp(ta,'마이크가 켜지지 않았어요.')}
