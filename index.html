@@ -514,8 +514,14 @@ mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-sha
 .acts .play.looping{background:var(--done);border-color:var(--done)}
 .hint.press{margin:10px 0 10px;display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap}.hint.press .alllink{margin-left:auto;white-space:nowrap}
 .vbw{white-space:nowrap}.vbq{display:grid;gap:10px}.vbq-h{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--accent)}.vbq-h .bar{flex:1;height:6px;border-radius:9px;background:var(--line);overflow:hidden}.vbq-h .bar i{display:block;height:100%;background:var(--accent)}
-.vbq-ko{background:var(--accent-soft);border-radius:12px;padding:10px 12px;font-size:1rem;line-height:1.5}.vbq-ko .tag{font-size:.72rem;font-weight:800;background:var(--muted);color:#fff;border-radius:6px;padding:1px 6px;margin-right:6px;vertical-align:.1em}
-.vbq-en{font-size:1.3rem;line-height:1.9;padding:6px 2px}.vbq-act{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px}.vbq-act button{padding:12px 6px;font-size:.95rem;border-radius:14px}.vb{font:inherit;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:0 8px;margin:0 1px;cursor:pointer;font-size:.82em;font-weight:700;line-height:1.5}.vb.op{font-size:1em;color:var(--fg);background:#fff3b0;border-bottom-color:#e0b400}
+.vbq-ko{background:var(--accent-soft);border-radius:12px;padding:16px 14px;font-size:1.1rem;line-height:1.5}
+.vbq-en{font-size:1.3rem;line-height:1.9;padding:6px 2px}.vb-tabs{grid-template-columns:1fr 1fr;margin-bottom:10px}
+.vbq-en.all{line-height:2.3}.vb-in{font:inherit;font-size:1rem;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:2px 6px;margin:0 2px;color:var(--fg);min-width:3ch;max-width:100%;letter-spacing:.02em}
+.vb-in:focus{outline:2px solid var(--accent);background:#fff}.vb-in::placeholder{color:var(--muted);opacity:.7;letter-spacing:.08em}
+.vb-a{border-radius:8px;padding:1px 6px;font-weight:700}.vb-a.ok{background:#dcf5e3;color:#18794e}.vb-a.no{background:#fde2e2;color:#c0392b;text-decoration:line-through}.vb-c{background:#fff3b0;border-radius:8px;padding:1px 6px;margin-left:3px;font-weight:700}
+.vb-r{margin:0;font-weight:700;color:#c0392b}.vb-r.ok{color:#18794e}
+.vbq-tool{display:flex;flex-wrap:wrap;gap:8px}.vbq-tool button{padding:9px 12px;border-radius:12px;font-size:.92rem}
+.vbq-act{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}.vbq-act button{padding:12px 6px;font-size:.95rem;border-radius:14px}.vb{font:inherit;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:0 8px;margin:0 1px;cursor:pointer;font-size:.82em;font-weight:700;line-height:1.5}.vb.op{font-size:1em;color:var(--fg);background:#fff3b0;border-bottom-color:#e0b400}
 .acts .wr-check{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
 li.card:has(.wr) > .ko,li.card:has(.wr) .body > .ko{display:none}   /* 쓰는 동안엔 한글이 쓰기 칸 바로 위에 한 번만 */
 .acts .write[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
@@ -661,7 +667,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v196</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v197</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -690,7 +696,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v196</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v197</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -891,8 +897,6 @@ function palPopRender(){const pp=$('palPop');if(!pp||pp.hidden)return;const rnd=
   pp.innerHTML=`<div class="pal-mode"><button type="button" data-pal="random" aria-pressed="${rnd}">🎲 매일 바뀜</button><button type="button" data-pal="${rnd?k:(PALS[palRaw(curProg)]?palRaw(curProg):k)}" class="pm-pick" aria-pressed="${!rnd}">🎨 직접 고르기</button></div>`+
   Object.entries(PALS).map(([id,[n,c]])=>`<button type="button" data-pal="${id}" aria-pressed="${!rnd&&id===k}"${rnd&&id===k?' class="today"':''}><i style="background:${c}"></i>${n}</button>`).join('')+
   (rnd?`<p class="pal-note">오늘의 색: <b>${PALS[k][0]}</b> · 내일은 다른 색으로 바뀌어요. 색을 누르면 직접 고르기로 바뀌어요.</p>`:'')}
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.vb');if(!b)return;e.preventDefault();e.stopPropagation();
-  const key=b.dataset.vb;vShown.has(key)?vShown.delete(key):vShown.add(key);vbPatch()},true);
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#palBtn,#palPop [data-pal]');if(!b)return;e.preventDefault();
   const pp=$('palPop');if(b.id==='palBtn'){pp.hidden=!pp.hidden;palPopRender();return}
   const id=b.dataset.pal;if(!PALS[id]&&id!=='random')return;ls.set('pal_'+curProg,id);prog.theme={...(prog.theme||{}),[curProg]:id};try{saveProg()}catch(_){}
@@ -1466,14 +1470,14 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
        ${writeOpen.has(i)?writeHtml(w,i):''}
      </li>`}).join('')}
    </ol>
-   <p class="tools-h">📚 외우는 순서 <span>단어·숙어 → 표현 → 내 문장 → 대답 → 요약 → 대화 → 어휘 점검</span></p>
+   <p class="tools-h">📚 외우는 순서 <span>단어·숙어 → 표현 → 내 문장 → 대답 → 요약 → 대화 → 빈칸 쓰기</span></p>
    <details class="tool" id="dqaBox"${toolOpen.dqaBox?' open':''}><summary><span class="t-title"><i class="tn">1</i>✏️ 확인 퀴즈 모아 풀기</span><span class="t-sub">이번 주 단어·숙어 퀴즈를 한 문제씩 연속으로</span></summary><div id="dqaBody">${toolOpen.dqaBox?dqaHtml(w):''}</div></details>
    <details class="tool" id="gsBox"${toolOpen.gsBox?' open':''}><summary><span class="t-title"><i class="tn">2</i>🎯 영어로 설명하고 맞히기</span><span class="t-sub">핵심 표현 10개 · 설명 듣고 맞히기 / 내가 설명하기</span></summary><div id="gsBody">${gsHtml(w)}</div></details>
    <details class="tool" id="mkBox"${toolOpen.mkBox?' open':''}><summary><span class="t-title"><i class="tn">3</i>✏️ 숙어로 문장 만들기</span><span class="t-sub">이번 주 핵심 표현 10개로 내 문장 말하고 첨삭 받기</span></summary><div id="mkBody">${mkHtml(w)}</div></details>
    <details class="tool" id="qqBox"${toolOpen.qqBox?' open':''}><summary><span class="t-title"><i class="tn">4</i>❓ 질문에 답하기</span><span class="t-sub">질문을 듣고 외운 문장으로 대답하기</span></summary><div id="qqBody">${qqHtml(w)}</div></details>
    <details class="tool" id="sumBox"${toolOpen.sumBox?' open':''}><summary><span class="t-title"><i class="tn">5</i>🗣 듣고 요약해 말하기</span><span class="t-sub">지문을 듣고 영어 3문장으로 요약 · 놓친 내용과 표현 첨삭</span></summary><div id="sumBody">${sumHtml(w)}</div></details>
    <details class="tool" id="dlgBox"${toolOpen.dlgBox?' open':''}><summary><span class="t-title"><i class="tn">6</i>🎭 그림 속 대화</span><span class="t-sub">명화 인물의 대화 듣고 역할 맡아 말하기</span></summary><div id="dlgBody">${toolOpen.dlgBox?dlgHtml(w):''}</div></details>
-   <details class="tool" id="vbBox"${toolOpen.vbBox?' open':''}><summary><span class="t-title"><i class="tn">7</i>🔎 핵심 어휘 빈칸 암기</span><span class="t-sub">문장 속 단어·숙어를 가리고 떠올려 확인</span></summary><div id="vbBody">${toolOpen.vbBox?vbHtml(w):''}</div></details>
+   <details class="tool" id="vbBox"${toolOpen.vbBox?' open':''}><summary><span class="t-title"><i class="tn">7</i>🔎 빈칸 채워 쓰기</span><span class="t-sub">한글 보고 가린 영어를 직접 써서 채우기</span></summary><div id="vbBody">${toolOpen.vbBox?vbHtml(w):''}</div></details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
    <p class="note">외움 표시와 써보기 기록은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
    <p class="note">${(()=>{const vm=w.sentences.reduce((n,x)=>n+(x.vocab||[]).filter(v=>!v.audio).length,0),sOk=!!w.longAudio&&w.sentences.every(x=>x.audio&&x.alt);return sOk&&vm?`문장 음성은 준비돼 있습니다. 새로 정리된 단어·숙어 ${vm}개의 원어민 음성은 15~20분 안에 자동으로 만들어지고, 그동안은 기기 음성으로 재생됩니다.`:''})()||(hasAudio(w)?'원어민 스타일 음성 파일로 재생됩니다. 소리가 작으면 미디어 볼륨을 올려 주세요.':w.audioRequested?'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다.':'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다. 다 만들어지면 새로고침 시 자동으로 바뀝니다.')}</p>
@@ -1959,31 +1963,61 @@ function dqaHtml(w){const L=dqaItems(w);if(!L.length)return `<p class="hint" sty
     <div class="dqa-t"><b>${esc(it.v.t)}</b> <span>${esc(it.v.m||'')}</span> <small>· ${it.i+1}번 문장</small></div>
     ${dqHtml(k,'dqa-')}
     <div class="seq-act"><button class="ghost" id="dqaPrev"${p===0?' disabled':''}>◀ 이전</button><button class="primary" id="dqaNext">${p===L.length-1?'처음부터':'다음 ▶'}</button>${tried<L.length?`<button class="ghost" id="dqaSkip">안 푼 문제로</button>`:''}</div></div>`}
-/* 7. 핵심 어휘 빈칸 암기: 한 문장씩 — 한글 해석 + 영어 문장(핵심 표현은 뜻만 보이는 빈칸) → 빈칸 눌러 확인 */
-let vbPos=0,vbKnow={};
-function vbList(w){const L=[];w.sentences.forEach((x,i)=>{if(x.isTitle)return;const sp=vocabSpans(x.en,x);if(sp.length)L.push({i,sp})});return L}
-function vbHtml(w){const L=vbList(w);if(!L.length)return '<p class="hint">이번 주 문장에서 가릴 단어·숙어를 찾지 못했어요.</p>';
-  if(vbPos>=L.length){const n=Object.values(vbKnow).filter(Boolean).length;return `<div class="vbq"><b>🎉 ${L.length}문장 끝!</b><p>바로 떠올린 문장 ${n}/${L.length}</p><div class="seq-act"><button class="primary" id="vbAgain">처음부터 다시</button></div></div>`}
-  const it=L[vbPos],x=w.sentences[it.i],ws=x.en.split(' '),out=[];
-  for(let k=0;k<ws.length;k++){const g=it.sp.find(o=>o.a===k);
-    if(g){const key=it.i+'-'+g.k,op=vShown.has(key),txt=ws.slice(g.a,g.b+1).join(' '),tail=txt.match(/[.,!?;:"”’)]+$/),v=(x.vocab||[])[g.k]||{};
-      out.push(`<span class="vbw"><button type="button" class="vb${op?' op':''}" data-vb="${key}">${op?esc(tail?txt.slice(0,-tail[0].length):txt):esc(g.m||'?')}</button>${tail?esc(tail[0]):''}</span>`);k=g.b;continue}
-    out.push(esc(ws[k]))}
-  const all=it.sp.every(g=>vShown.has(it.i+'-'+g.k));
-  return `<div class="vbq"><div class="vbq-h"><b>${vbPos+1}/${L.length}</b><span class="bar"><i style="width:${vbPos/L.length*100}%"></i></span></div>
-    <div class="vbq-ko"><span class="tag">해석</span>${esc(x.ko||'')}</div>
-    <div class="vbq-en">${out.join(' ')}</div>
-    <p class="hint">${all?'뜻과 영어를 비교해 보고 다음으로':'보라 칸의 뜻을 보고 영어를 먼저 말해 본 뒤, 칸을 눌러 확인하세요'}</p>
-    <div class="vbq-act"><button class="ghost" id="vbSlow">🐢 천천히</button><button class="ghost" id="vbHear">🔊 듣기</button><button class="primary" id="vbNext">${all?'다음 문제 ▶':'모두 보기'}</button></div></div>`}
-function vbPatch(){const b=$('vbBody'),w=weeks.find(x=>x.id===curId);if(b&&w)b.innerHTML=vbHtml(w)}
-document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#vbNext,#vbHear,#vbSlow,#vbAgain');if(!t)return;e.preventDefault();
+/* 7. 빈칸 암기: 한글 문장을 보고 영어 빈칸을 직접 써서 채우기 (핵심 어휘만 / 문장 전체), 길이 보기·말하기 */
+let vbPos=0,vbKnow={},vbMode='v',vbLen=false,vbVal={},vbDone=null;
+try{vbMode=localStorage.getItem('vbMode')||'v'}catch(_){}
+const vbNorm=x=>String(x||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9' ]/g,' ').replace(/\s+/g,' ').trim();
+function vbList(w){const L=[];w.sentences.forEach((x,i)=>{if(x.isTitle||!x.en)return;const sp=vocabSpans(x.en,x);if(vbMode==='a'||sp.length)L.push({i,sp})});return L}
+/* 이 문장에서 가릴 칸: 핵심 어휘 모드면 단어·숙어 덩어리, 전체 모드면 모든 단어 */
+function vbSlots(x,it){const ws=x.en.split(' '),S=[];
+  if(vbMode==='a'){ws.forEach((t,k)=>{const m=t.match(/^(["“‘(]*)(.*?)([.,!?;:"”’)]*)$/);if(m[2])S.push({a:k,b:k,pre:m[1],ans:m[2],tail:m[3]})});return S}
+  it.sp.forEach(g=>{const txt=ws.slice(g.a,g.b+1).join(' '),m=txt.match(/^(["“‘(]*)(.*?)([.,!?;:"”’)]*)$/);S.push({a:g.a,b:g.b,pre:m[1],ans:m[2],tail:m[3]})});return S.sort((p,q)=>p.a-q.a)}
+const vbHint=a=>a.split(' ').map(t=>t.replace(/[a-zA-Z0-9]/g,'_')).join('  ');
+function vbHtml(w){const L=vbList(w);
+  const tabs=`<div class="dlg-steps vb-tabs"><button class="${vbMode==='v'?'on':''}" data-vbm="v">핵심 어휘만 가리기</button><button class="${vbMode==='a'?'on':''}" data-vbm="a">문장 전체 가리기</button></div>`;
+  if(!L.length)return tabs+'<p class="hint">이번 주 문장에서 가릴 단어·숙어를 찾지 못했어요.</p>';
+  if(vbPos>=L.length){const n=Object.values(vbKnow).filter(Boolean).length;return tabs+`<div class="vbq"><b>🎉 ${L.length}문장 끝!</b><p>한 번에 맞힌 문장 ${n}/${L.length}</p><div class="seq-act"><button class="primary" id="vbAgain">처음부터 다시</button></div></div>`}
+  const it=L[vbPos],x=w.sentences[it.i],ws=x.en.split(' '),S=vbSlots(x,it),out=[];let n=0;
+  for(let k=0;k<ws.length;k++){const g=S.find(o=>o.a===k);
+    if(!g){out.push(esc(ws[k]));continue}
+    const id=n++,v=vbVal[id]||'',st=vbDone&&vbDone[id],ch=Math.max(3,g.ans.length+1);
+    out.push(`<span class="vbw">${esc(g.pre)}${st?`<span class="vb-a ${st.ok?'ok':'no'}">${esc(st.ok?g.ans:(v||'—'))}</span>${st.ok?'':`<span class="vb-c">${esc(g.ans)}</span>`}`:
+      `<input class="vb-in" data-vbi="${id}" value="${esc(v)}" style="width:${ch}ch" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${vbLen?esc(vbHint(g.ans)):''}">`}${esc(g.tail)}</span>`);k=g.b}
+  const fin=!!vbDone,allOk=fin&&Object.values(vbDone).every(z=>z.ok);
+  return tabs+`<div class="vbq"><div class="vbq-h"><b>${vbPos+1}/${L.length}</b><span class="bar"><i style="width:${vbPos/L.length*100}%"></i></span></div>
+    <div class="vbq-ko">${esc(x.ko||'')}</div>
+    <div class="vbq-en${vbMode==='a'?' all':''}">${out.join(' ')}</div>
+    ${fin?`<p class="vb-r ${allOk?'ok':''}">${allOk?'🎉 정답!':'✏️ 빨간 칸의 정답을 확인하고 소리 내어 읽어 보세요'}</p>`:''}
+    <textarea id="vbSay" hidden></textarea>
+    <div class="vbq-tool"><button class="ghost" id="vbLenB" aria-pressed="${vbLen}">↔ 길이 ${vbLen?'숨기기':'보기'}</button>${fin?'':micBtn('vbSay')}<button class="ghost" id="vbHear">🔊 듣기</button></div>
+    <div class="vbq-act">${fin?`<button class="ghost" id="vbRetry">다시 쓰기</button><button class="primary" id="vbNext">다음 문제 ▶</button>`:`<button class="ghost" id="vbShow">정답 보기</button><button class="primary" id="vbChk">✓ 확인</button>`}</div></div>`}
+function vbPatch(focus){const b=$('vbBody'),w=weeks.find(x=>x.id===curId);if(!b||!w)return;b.innerHTML=vbHtml(w);
+  if(focus){const f=[...b.querySelectorAll('.vb-in')].find(e=>!e.value);if(f)try{f.focus({preventScroll:true})}catch(_){}}}
+function vbCheck(show){const w=weeks.find(x=>x.id===curId);if(!w)return;const L=vbList(w),it=L[vbPos];if(!it)return;const S=vbSlots(w.sentences[it.i],it);
+  document.querySelectorAll('#vbBody .vb-in').forEach(e=>vbVal[+e.dataset.vbi]=e.value);
+  vbDone={};S.forEach((g,id)=>{vbDone[id]={ok:!show&&vbNorm(vbVal[id])===vbNorm(g.ans)}});
+  if(vbKnow[it.i]===undefined)vbKnow[it.i]=!show&&Object.values(vbDone).every(z=>z.ok);
+  vbPatch();if(Object.values(vbDone).every(z=>z.ok))playOne(w.sentences[it.i],it.i,+$('rate').value||1,(stop(),token),true)}
+/* 말하기: 문장을 소리 내어 말하면, 빈칸 위치의 말을 알아들은 문장에서 찾아 채움 */
+function vbVoice(){const w=weeks.find(x=>x.id===curId),ta=$('vbSay');if(!w||!ta)return;const said=vbNorm(ta.value).split(' ');ta.value='';
+  const L=vbList(w),it=L[vbPos];if(!it)return;const x=w.sentences[it.i],S=vbSlots(x,it);
+  if(vbMode==='a'){said.forEach((t,id)=>{if(id<S.length)vbVal[id]=t})}
+  else S.forEach((g,id)=>{const aw=vbNorm(g.ans).split(' ');for(let a=0;a+aw.length<=said.length;a++){if(aw.every((q,z)=>vSame(said[a+z],q))){vbVal[id]=said.slice(a,a+aw.length).join(' ');break}}});
+  vbPatch(true)}
+document.addEventListener('keydown',e=>{const t=e.target;if(!t.classList||!t.classList.contains('vb-in')||e.key!=='Enter')return;e.preventDefault();
+  const all=[...document.querySelectorAll('#vbBody .vb-in')],k=all.indexOf(t);if(k<all.length-1)all[k+1].focus();else vbCheck()});
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('vb-in'))vbVal[+t.dataset.vbi]=t.value});
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#vbNext,#vbHear,#vbAgain,#vbChk,#vbShow,#vbRetry,#vbLenB,[data-vbm]');if(!t)return;e.preventDefault();
   const w=weeks.find(x=>x.id===curId);if(!w)return;const L=vbList(w),it=L[vbPos];
-  if(t.id==='vbAgain'){vbPos=0;vbKnow={};vShown.clear();vbPatch();return}
+  if(t.dataset.vbm){vbMode=t.dataset.vbm;try{localStorage.setItem('vbMode',vbMode)}catch(_){}vbPos=0;vbKnow={};vbVal={};vbDone=null;vbPatch();return}
+  if(t.id==='vbAgain'){vbPos=0;vbKnow={};vbVal={};vbDone=null;vbPatch();return}
   if(!it)return;
-  if(t.id==='vbHear'||t.id==='vbSlow'){stop();const my=token;playOne(w.sentences[it.i],it.i,t.id==='vbSlow'?0.75:(+$('rate').value||1),my,true);return}
-  const all=it.sp.every(g=>vShown.has(it.i+'-'+g.k));
-  if(!all){if(vbKnow[it.i]===undefined)vbKnow[it.i]=false;it.sp.forEach(g=>vShown.add(it.i+'-'+g.k));vbPatch();return}
-  if(vbKnow[it.i]===undefined)vbKnow[it.i]=true;vbPos++;vbPatch();const b=$('vbBox');if(b){const r=b.getBoundingClientRect();if(r.top<0)b.scrollIntoView({block:'start'})}});
+  if(t.id==='vbHear'){stop();const my=token;playOne(w.sentences[it.i],it.i,+$('rate').value||1,my,true);return}
+  if(t.id==='vbLenB'){document.querySelectorAll('#vbBody .vb-in').forEach(e=>vbVal[+e.dataset.vbi]=e.value);vbLen=!vbLen;vbPatch();return}
+  if(t.id==='vbChk'){vbCheck();return}
+  if(t.id==='vbShow'){vbCheck(true);return}
+  if(t.id==='vbRetry'){vbVal={};vbDone=null;vbPatch(true);return}
+  if(t.id==='vbNext'){vbPos++;vbVal={};vbDone=null;vbPatch();const b=$('vbBox');if(b){const r=b.getBoundingClientRect();if(r.top<0)b.scrollIntoView({block:'start'})}}});
 function dqaPatch(){const b=$('dqaBody'),w=weeks.find(x=>x.id===curId);if(b&&w&&!wbView)b.innerHTML=dqaHtml(w)}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#dqaPrev,#dqaNext,#dqaSkip');if(!t)return;e.preventDefault();
   const w=weeks.find(x=>x.id===curId);if(!w)return;const L=dqaItems(w),p=Math.max(0,Math.min(dqaPos,L.length-1));try{micStop()}catch(_){}
@@ -3157,7 +3191,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   r.onerror=ev=>{if(micRec!==r)return;const e2=ev.error;
     if(e2==='not-allowed'||e2==='service-not-allowed'){micStop();alert('마이크 사용이 막혀 있어요.\n\n주소창 옆 자물쇠(또는 ⋮ 메뉴) → 권한 → 마이크 허용 후 다시 눌러 주세요.\n\n또는 '+MIC_GUIDE);return}
     if(e2==='aborted')return;micGiveUp(ta,e2==='no-speech'?'소리가 들리지 않았어요.':e2==='network'?'인터넷 연결이 약해요.':'잘 못 알아들었어요.')};
-  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop();if(id==='dlgIn')setTimeout(dlgCheck,50)};
+  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop();if(id==='dlgIn')setTimeout(dlgCheck,50);if(id==='vbSay')setTimeout(vbVoice,50)};
   micRec=r;micId=id;micState='wait';micUI();
   micDog=setTimeout(()=>{if(micRec===r&&micState==='wait')micGiveUp(ta,'마이크가 켜지지 않았어요.')},4000);
   try{r.start()}catch(_){micGiveUp(ta,'마이크가 켜지지 않았어요.')}
