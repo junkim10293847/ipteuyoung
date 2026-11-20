@@ -1,0 +1,5 @@
+features (1.3, '{"res": {"ai": true, "tts": true}}')
+aiJson#0 (60.2, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'tomorrow morning(내일 오전)\'은 미래이므로 과거형 \'had\' 대신 현재형 \'have\'나 미래형 \'will have\'/\'am having\'을 사용해야 합니다. 또한 \'큰 수술\'은 \'major surgery\'로 표현하면 더 자연스럽습니다."}}')
+aiJson#1 (75.2, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'내일 오전(tomorrow morning)\'은 미래이므로 과거형 \'had\' 대신 현재형 \'have\'나 가까운 미래를 나타내는 진행형 \'am having\'을 써야 합니다. \'큰 수술\'은 \'major surgery\'로 표현하면 더욱 자연스럽습니다."}}')
+aiJson#2 (108.4, '{"res": {"ok": false, "fixed": "I have a big surgery tomorrow morning.", "tip": "\'tomorrow morning(내일 오전)\'은 미래이므로 과거형 \'had\' 대신 현재형 \'have\' 또는 미래형 \'will have\'를 써야 합니다. \'큰 수술\'은 \'major surgery\'로 표현하기도 합니다."}}')
+aiText (101.7, '{"res": "Hi"}')
