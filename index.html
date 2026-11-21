@@ -667,7 +667,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v199</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v200</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -696,7 +696,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v199</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v200</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -2929,8 +2929,8 @@ function gsHtml(w){
       <div class="seq-q gs-clue"><span>영어 설명${C.pos?` · <i>${esc(C.pos)}</i>`:''} <button class="vplay" id="gsSay" aria-label="설명 듣기">🔊</button></span><b>${esc(clue)}</b>
         ${gsHints(C,it).slice(0,gsHint).map((h,n)=>`<em class="gs-h"><span>힌트 ${'①②③④⑤'[n]} ${h[0]}</span> ${esc(h[1])}</em>`).join('')}
         ${C.old&&gsClueBusy[w.id]?'<em class="load">더 자세한 설명으로 새로 만드는 중…</em>':''}</div>
-      <input class="qz-in" id="gsIn" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="어떤 표현일까요? (영어로)" value="${esc(gsDraft[key]||'')}">
-      <div class="seq-act">${micBtn('gsIn')}<button class="primary" id="gsCheck"${gsGot.has(key)?' disabled':''}>${gsGot.has(key)?'✓ 맞힘':'정답 확인'}</button>${gsHint<gsHints(C,it).length?`<button class="ghost" id="gsHintBtn">💡 힌트 ${gsHint+1}/${gsHints(C,it).length}</button>`:''}<button class="ghost" id="gsShowBtn">정답 보기</button></div>
+      <input class="qz-in" id="gsIn" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="영어로 쓰면 바로 채점돼요" value="${esc(gsDraft[key]||'')}">
+      <div class="seq-act">${micBtn('gsIn')}<button class="ghost" id="gsCheck"${gsGot.has(key)?' disabled':''}>${gsGot.has(key)?'✓ 맞힘':'채점'}</button>${gsHint<gsHints(C,it).length?`<button class="ghost" id="gsHintBtn">💡 힌트 ${gsHint+1}/${gsHints(C,it).length}</button>`:''}<button class="ghost" id="gsShowBtn">정답 보기</button></div>
       ${res?`<div class="seq-r ${res.ok?'ok':''}"><b>${res.ok?'🎉 정답!':'🤔 아쉬워요, 다시 해 보세요'}</b>${res.ok?`<div class="wr-diff">${esc(it.v.t)} · ${esc(it.v.m||'')}</div>`:''}</div>`:''}
       ${gsShow&&!(res&&res.ok)?`<div class="seq-q"><span>정답</span><b>${esc(it.v.t)}</b><em>${esc(it.v.m||'')}</em></div>`:''}
       ${(gsShow||(res&&res.ok))?gsNote(C,it):''}
@@ -2947,7 +2947,11 @@ function gsHtml(w){
     ${res?`<div class="seq-r ${res.ok?'ok':''}"><b>${res.ok?'🎉 AI가 맞혔어요!':'🤔 AI는 다른 걸 떠올렸어요'}</b><em>AI의 추측: <b>${esc(res.guess||'?')}</b></em>${res.used?`<em>⚠️ 설명에 정답 단어가 들어 있어요. 게임에서는 반칙!</em>`:''}${res.fixed?`<em>고친 설명: ${esc(res.fixed)}</em>`:''}${res.better?`<em>이렇게 설명해도 좋아요: ${esc(res.better)}</em>`:''}${res.tip?`<em>${esc(res.tip)}</em>`:''}</div>`:''}
     ${nav}</div>`;
 }
-document.addEventListener('input',e=>{const id=e.target.id;if(id!=='gsIn'&&id!=='gsEx')return;const w=weeks.find(x=>x.id===curId);if(!w)return;const L=gsItems(w),it=L[Math.min(gsPos,L.length-1)];if(!it)return;const key=w.id+'|'+it.i+'-'+it.j;gsDraft[id==='gsIn'?key:'ex|'+key]=e.target.value});
+document.addEventListener('input',e=>{const id=e.target.id;if(id!=='gsIn'&&id!=='gsEx')return;const w=weeks.find(x=>x.id===curId);if(!w)return;const L=gsItems(w),it=L[Math.min(gsPos,L.length-1)];if(!it)return;const key=w.id+'|'+it.i+'-'+it.j;gsDraft[id==='gsIn'?key:'ex|'+key]=e.target.value;
+  /* 쓰면 바로 채점: 맞으면 즉시, 아니면 손을 멈추고 1.5초 뒤 (정답 확인을 따로 누르지 않아도 됨) */
+  if(id==='gsIn'&&!gsGot.has(key)){clearTimeout(gsTypeT);const v=e.target.value.trim(),cl=()=>{const b=$('gsCheck');if(b&&!b.disabled)b.click()};
+    if(v&&gsMatch(it.v.t,v))cl();else if(v.replace(/\s/g,'').length>=Math.max(2,Math.round(String(it.v.t).replace(/\s/g,'').length*.6)))gsTypeT=setTimeout(()=>{const i2=$('gsIn');if(i2&&i2.value.trim()===v&&document.activeElement===i2)cl()},1500)}});
+let gsTypeT=0;
 document.addEventListener('keydown',e=>{if(e.target.id==='gsIn'&&e.key==='Enter'){e.preventDefault();const b=$('gsCheck');if(b)b.click()}});
 document.addEventListener('click',async e=>{
   const t=e.target.closest&&e.target.closest('#gsTabG,#gsTabE,#gsMake,#gsSay,#gsCheck,#gsHintBtn,#gsShowBtn,#gsPrev,#gsNext,#gsTime,#gsJudge,#gsExRe');if(!t)return;
@@ -2969,7 +2973,7 @@ document.addEventListener('click',async e=>{
     gsRes={key,ok};gsPatch();
     const rb=document.querySelector('#gsBody .seq-r');
     if(ok){celebrateBox(rb);clearTimeout(gsAuto);const C0=clueOf(w,it.i+'-'+it.j);if(!C0||C0.old)gsAuto=setTimeout(()=>{const nb=$('gsNext');if(nb&&gsRes&&gsRes.key===key)nb.click()},2600)}   // 사전 노트가 있으면 다 읽고 직접 넘어감
-    else{perfRun=0;const inp=$('gsIn');if(inp)inp.select()}return}
+    else{perfRun=0;const inp=$('gsIn');if(inp){try{inp.focus({preventScroll:true});const n=inp.value.length;inp.setSelectionRange(n,n)}catch(_){}}}   /* 틀리면 이어서 고쳐 쓰도록 커서를 끝에 */return}
   if(t.id==='gsTime'){clearInterval(gsTimer);gsLeft=60;gsPatch();gsTimer=setInterval(()=>{gsLeft--;const b=$('gsTime');if(b)b.textContent=gsLeft>0?`⏱ ${gsLeft}초`:'⏰ 시간 끝!';if(gsLeft<=0){clearInterval(gsTimer);try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(_){}}},1000);return}
   if(t.id==='gsExRe'){micStop();gsDraft['ex|'+key]='';gsRes=null;gsErr='';gsPatch();return}
   if(t.id==='gsJudge'){const ex=(($('gsEx')||{}).value||'').trim();if(!ex){toast('먼저 영어로 설명을 써 보거나 🎤로 말해 보세요');return}
@@ -3202,7 +3206,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   r.onerror=ev=>{if(micRec!==r)return;const e2=ev.error;
     if(e2==='not-allowed'||e2==='service-not-allowed'){micStop();alert('마이크 사용이 막혀 있어요.\n\n주소창 옆 자물쇠(또는 ⋮ 메뉴) → 권한 → 마이크 허용 후 다시 눌러 주세요.\n\n또는 '+MIC_GUIDE);return}
     if(e2==='aborted')return;micGiveUp(ta,e2==='no-speech'?'소리가 들리지 않았어요.':e2==='network'?'인터넷 연결이 약해요.':'잘 못 알아들었어요.')};
-  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop();if(id==='dlgIn')setTimeout(dlgCheck,50);if(id==='vbSay')setTimeout(vbVoice,50);if(id==='vbW')setTimeout(()=>vbCheck(),50)};
+  r.onend=()=>{if(micRec!==r)return;if(!got){micGiveUp(ta,'잘 못 알아들었어요.');return}micStop();if(id==='dlgIn')setTimeout(dlgCheck,50);if(id==='vbSay')setTimeout(vbVoice,50);if(id==='vbW')setTimeout(()=>vbCheck(),50);if(id==='gsIn')setTimeout(()=>{const b=$('gsCheck');if(b&&!b.disabled)b.click()},50)};
   micRec=r;micId=id;micState='wait';micUI();
   micDog=setTimeout(()=>{if(micRec===r&&micState==='wait')micGiveUp(ta,'마이크가 켜지지 않았어요.')},4000);
   try{r.start()}catch(_){micGiveUp(ta,'마이크가 켜지지 않았어요.')}
