@@ -1,0 +1,9 @@
+A0 espeak: ˌaʊɚ lˈuːluː ɪz ɐ sˈɪksjˈɪɹˈoʊld mˈeɪl kˈæt.
+A1 espeak: maɪ jˈʌŋɡɚ sˈɪblɪŋ bɹˈɔːt hˌɪm hˈoʊm sˈɪks jˈɪɹz ɐɡˈoʊ wɛn hiː wʌz sˌoʊ sˈɪk ðæt hiː kˌʊdənt ˈiːvən ˈoʊpən hɪz ˈaɪz.
+A2 espeak: aɪ wʌz plˈænɪŋ tə hæv hˌɪm ɡɛt ɐ hˈɛlθ tʃˈɛkʌp ðɪs jˈɪɹ wɛn aɪ hˈæpənd tə lˈɜːn ɐbˌaʊt blˈʌd doʊnˈeɪʃən fɔːɹ kˈæts.
+B0 espeak: ˌaʊɚ lˈuːluː ɪz ɐ sˈɪksjˈɪɹˈoʊld mˈeɪl kˈæt.
+B1 espeak: maɪ jˈʌŋɡɚ sˈɪblɪŋ bɹˈɔːt hˌɪm hˈoʊm sˈɪks jˈɪɹz ɐɡˈoʊ wɛn hiː wʌz sˌoʊ sˈɪk ðæt hiː kˌʊdənt ˈiːvən ˈoʊpən hɪz ˈaɪz.
+B2 espeak: aɪ wʌz plˈænɪŋ tə hæv hˌɪm ɡɛt ɐ hˈɛlθ tʃˈɛkʌp ðɪs jˈɪɹ wɛn aɪ hˈæpənd tə lˈɜːn ɐbˌaʊt blˈʌd doʊnˈeɪʃən fɔːɹ kˈæts.
+C0 misaki: ˌWəɹ lˈulˌu ɪz ɐ sˈɪksjˌɪɹˈOld mˈAl kˈæt.
+C1 misaki: mˌI jˈʌŋɡəɹ sˈɪblɪŋ bɹˈɔt hˌɪm hˈOm sˈɪks jˈɪɹz əɡˈO wˌɛn hi wʌz sˌO sˈɪk ðæt hi kˌʊdᵊnt ˈivən ˈOpᵊn hɪz ˈIz.
+C2 misaki: ˌI wʌz plˈænɪŋ tə hæv hˌɪm ɡɛt ɐ hˈɛlθ ʧˈɛkˌʌp ðɪs jˈɪɹ wˌɛn ˌI hˈæpənd tə lˈɜɹn əbˈWt blˈʌd dOnˈAʃən fɔɹ kˈæts.
