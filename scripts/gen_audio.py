@@ -154,6 +154,21 @@ def tkey(t):
     return t + SAY_V if ACR.search(t or '') else t
 
 
+ENGINE = 'k1-fp32-misaki'   # 음성 엔진 판: 바뀌면 기존 음성을 모두 새 엔진으로 다시 만듦
+ENGINE_F = os.path.join(AUDIO, 'engine.json')
+
+
+def load_engine():
+    try:
+        d = json.load(open(ENGINE_F, encoding='utf-8'))
+        return set(d.get('files', [])) if d.get('engine') == ENGINE else set()
+    except Exception:
+        return set()
+
+
+NEWV = None
+
+
 def plan(weeks, have, texts=None):
     """화면이 찾을 음성 파일 중 없거나, 같은 이름인데 문장이 바뀐 것(같은 날짜에 새 지문을 올린 경우)을 고름.
     texts.json 에 파일별로 어떤 문장을 읽었는지 기록해 두고 비교함"""
@@ -162,6 +177,8 @@ def plan(weeks, have, texts=None):
     def stale(n, text):
         if n not in have:
             return False
+        if NEWV is not None and n not in NEWV:   # 예전 엔진으로 만든 음성
+            return True
         if ACR.search(text or ''):  # 약어 문장: 새 읽기 방식으로 만든 기록이 없으면 다시 만듦
             return texts.get(n) != tkey(text)
         return texts.get(n) not in (None, text)
@@ -205,7 +222,7 @@ def plan(weeks, have, texts=None):
                 continue
             v = cast.get(ln_.get('who'), 'af_heart')
             n = 'd-' + fnv(v + '|' + en) + '.mp3'
-            if n not in have:
+            if n not in have or stale(n, en):
                 jobs[n] = (en, v)
         ln = name(w.get('longAudio'), f'{wk}-long2.mp3')
         sig = '|'.join(src)
@@ -248,6 +265,8 @@ def main():
         out('data', 1)
     have = set(os.listdir(AUDIO))
     texts = load_texts()
+    global NEWV
+    NEWV = load_engine()
     jobs, longs = plan(weeks, have, texts)
     # 써보기 완벽할 때 들려줄 칭찬 음성 (미국 여성 목소리, 한 번만 만듦)
     for n, t in PRAISE.items():
@@ -262,13 +281,25 @@ def main():
         return
     sys.path.insert(0, os.path.dirname(__file__))
     from tts import synth, save_mp3
-    for k, (name, job) in enumerate(sorted(jobs.items(), key=lambda kv: ('-slow' in kv[0], kv[0])), 1):   # 보통 속도 먼저
+    import time
+    t0, budget = time.time(), int(os.environ.get('MAX_SEC', '5400'))
+    wk = lambda n: (re.search(r'w(\d{8})', n) or re.search(r'(\d+)', '0')).group(1)
+    order = sorted(jobs.items(), key=lambda kv: ('-slow' in kv[0], -int(wk(kv[0]) or 0), kv[0]))   # 보통 속도 → 최근 주차 먼저
+    for k, (name, job) in enumerate(order, 1):
+        if time.time() - t0 > budget:
+            print('시간이 다 되어 나머지는 다음 실행에서 만듭니다'); out('more', 1); break
         text, v = job[0], job[1]
         sp = job[2] if len(job) > 2 else 1.0
         print(f'[{k}/{len(jobs)}] {name}: {text[:60]}')
-        save_mp3(synth(text, VOICE.get(v, v), sp), os.path.join(AUDIO, name), 64 if sp != 1.0 else 48)
+        save_mp3(synth(text, VOICE.get(v, v), sp), os.path.join(AUDIO, name), 64)
+        NEWV.add(name)
         texts[name] = tkey(text)
+        if k % 50 == 0:
+            json.dump({'engine': ENGINE, 'files': sorted(NEWV)}, open(ENGINE_F, 'w'))
+    json.dump({'engine': ENGINE, 'files': sorted(NEWV)}, open(ENGINE_F, 'w'))
     for ln, src in longs:
+        if any(n not in NEWV for n in src):
+            print('연속 듣기는 문장 음성을 다 새로 만든 뒤에:', ln); continue
         files = [os.path.join(AUDIO, n) for n in src if os.path.exists(os.path.join(AUDIO, n))]
         if len(files) != len(src):
             print('연속 듣기 건너뜀(문장 음성 부족):', ln); continue
@@ -280,7 +311,9 @@ def main():
                         '-ar', '24000', '-ac', '1', '-b:a', '64k', os.path.join(AUDIO, ln)], check=True)
         os.remove(lst)
         texts[ln] = '|'.join(src)
+        NEWV.add(ln)
         print('연속 듣기:', ln)
+    json.dump({'engine': ENGINE, 'files': sorted(NEWV)}, open(ENGINE_F, 'w'))
     save_texts(texts)
     update_longmap()
     write_index()

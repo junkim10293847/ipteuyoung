@@ -1,4 +1,4 @@
-"""Kokoro(오픈소스, 무료) 음성 합성 — espeak-ng로 발음기호를 만든 뒤 ONNX 모델로 읽음"""
+"""Kokoro(오픈소스, 무료) 음성 합성 — misaki(Kokoro 공식 발음 변환, 없으면 espeak-ng)로 발음기호를 만든 뒤 ONNX 모델로 읽음"""
 import json, os, re, subprocess, wave
 import numpy as np
 import onnxruntime as rt
@@ -43,7 +43,41 @@ def spoken(text):
     return t
 
 
+_G2P = {}
+# espeak 표기 → Kokoro(misaki) 표기 (약어 글자 이름용)
+MIS = [('eɪ', 'A'), ('aɪ', 'I'), ('oʊ', 'O'), ('aʊ', 'W'), ('ɔɪ', 'Y'), ('dʒ', 'ʤ'), ('tʃ', 'ʧ'), ('iː', 'i'), ('uː', 'u'), ('ɑː', 'ɑ')]
+
+
+def _misaki(british):
+    if british not in _G2P:
+        try:
+            from misaki import en, espeak
+            _G2P[british] = en.G2P(trf=False, british=british, fallback=espeak.EspeakFallback(british=british))
+        except Exception as e:
+            print('misaki 없음 → espeak 사용:', e)
+            _G2P[british] = None
+    return _G2P[british]
+
+
 def phonemize(text, lang='en-us'):
+    g = _misaki(lang == 'en-gb')
+    if g is not None and not os.environ.get('TTS_ESPEAK'):
+        text = spoken(text)
+        res = ''
+        for k, part in enumerate(ACR.split(text)):
+            if k % 2:
+                letters = re.sub(r'[^A-Za-z]', '', part).lower()
+                ipa = ' '.join(LETTER[c] for c in letters)
+                for a, b in MIS:
+                    ipa = ipa.replace(a, b)
+                res += ipa + ' '
+            elif part.strip():
+                res += g(part)[0] + ' '
+        return ''.join(c for c in res.strip() if c in VOCAB)
+    return phonemize_espeak(text, lang)
+
+
+def phonemize_espeak(text, lang='en-us'):
     text = spoken(text)
     res = ''
     for k, part in enumerate(ACR.split(text)):
