@@ -76,10 +76,10 @@ def synth(text, voice='af_heart', speed=1.0):
     return sess.run(None, inputs)[0].squeeze()
 
 
-def save_mp3(audio, path):
+def save_mp3(audio, path, kbps=48):
     pcm = (np.clip(audio, -1, 1) * 32767).astype(np.int16)
     wav = path + '.wav'
     with wave.open(wav, 'wb') as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(24000); w.writeframes(pcm.tobytes())
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', wav, '-af', 'apad=pad_dur=0.25', '-b:a', '48k', '-ac', '1', path], check=True)
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', wav, '-af', 'apad=pad_dur=0.25', '-b:a', f'{kbps}k', '-ac', '1', path], check=True)
     os.remove(wav)

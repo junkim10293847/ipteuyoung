@@ -11,6 +11,7 @@ import json, os, re, subprocess, sys, urllib.request
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 AUDIO = os.path.join(ROOT, 'audio')
+SLOW = 0.8
 VOICE = {'af': 'af_heart', 'am': 'am_michael', 'bf': 'bf_emma'}
 PRAISE = {'praise-1.mp3': 'Perfect!', 'praise-2.mp3': 'Excellent!', 'praise-3.mp3': 'Awesome! You nailed it!',
           'praise-4.mp3': 'Wonderful!', 'praise-5.mp3': 'Great job!', 'praise-6.mp3': 'Fantastic!',
@@ -183,6 +184,12 @@ def plan(weeks, have, texts=None):
                     jobs[n] = (en, v)
                 elif n not in texts:
                     texts[n] = tkey(en)
+                # 🐢 천천히: 브라우저로 느리게 틀면 소리가 깨지므로, 처음부터 느린 속도(0.8)로 읽은 파일을 따로 만듦
+                sn = n[:-4] + '-slow.mp3'
+                if sn not in have or stale(sn, en) or n in jobs:
+                    jobs[sn] = (en, v, SLOW)
+                elif sn not in texts:
+                    texts[sn] = tkey(en)
             for vc in s.get('vocab') or []:
                 n = name(vc.get('audio'), f'v-{vkey(vc.get("t"))}.mp3')
                 t = clean(vc.get('t'))
@@ -255,9 +262,11 @@ def main():
         return
     sys.path.insert(0, os.path.dirname(__file__))
     from tts import synth, save_mp3
-    for k, (name, (text, v)) in enumerate(sorted(jobs.items()), 1):
+    for k, (name, job) in enumerate(sorted(jobs.items(), key=lambda kv: ('-slow' in kv[0], kv[0])), 1):   # 보통 속도 먼저
+        text, v = job[0], job[1]
+        sp = job[2] if len(job) > 2 else 1.0
         print(f'[{k}/{len(jobs)}] {name}: {text[:60]}')
-        save_mp3(synth(text, VOICE.get(v, v)), os.path.join(AUDIO, name))
+        save_mp3(synth(text, VOICE.get(v, v), sp), os.path.join(AUDIO, name), 64 if sp != 1.0 else 48)
         texts[name] = tkey(text)
     for ln, src in longs:
         files = [os.path.join(AUDIO, n) for n in src if os.path.exists(os.path.join(AUDIO, n))]
