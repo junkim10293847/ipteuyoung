@@ -12,6 +12,8 @@ import json, os, re, subprocess, sys, urllib.request
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 AUDIO = os.path.join(ROOT, 'audio')
 SLOW = 0.8
+import datetime as _dt
+SLOW_FROM = (_dt.date.today() - _dt.timedelta(days=14)).isoformat()   # 최근 2주 주차부터 느린 음성 생성
 VOICE = {'af': 'af_heart', 'am': 'am_michael', 'bf': 'bf_emma'}
 PRAISE = {'praise-1.mp3': 'Perfect!', 'praise-2.mp3': 'Excellent!', 'praise-3.mp3': 'Awesome! You nailed it!',
           'praise-4.mp3': 'Wonderful!', 'praise-5.mp3': 'Great job!', 'praise-6.mp3': 'Fantastic!',
@@ -154,7 +156,7 @@ def tkey(t):
     return t + SAY_V if ACR.search(t or '') else t
 
 
-ENGINE = 'k1-fp32-misaki'   # 음성 엔진 판: 바뀌면 기존 음성을 모두 새 엔진으로 다시 만듦
+ENGINE = 'k1-fp32-misaki'   # 음성 엔진 판 기록 (이미 만든 예전 음성은 다시 만들지 않고, 새로 만드는 음성부터 이 엔진 사용)
 ENGINE_F = os.path.join(AUDIO, 'engine.json')
 
 
@@ -177,8 +179,6 @@ def plan(weeks, have, texts=None):
     def stale(n, text):
         if n not in have:
             return False
-        if NEWV is not None and n not in NEWV:   # 예전 엔진으로 만든 음성
-            return True
         if ACR.search(text or ''):  # 약어 문장: 새 읽기 방식으로 만든 기록이 없으면 다시 만듦
             return texts.get(n) != tkey(text)
         return texts.get(n) not in (None, text)
@@ -203,6 +203,8 @@ def plan(weeks, have, texts=None):
                     texts[n] = tkey(en)
                 # 🐢 천천히: 브라우저로 느리게 틀면 소리가 깨지므로, 처음부터 느린 속도(0.8)로 읽은 파일을 따로 만듦
                 sn = n[:-4] + '-slow.mp3'
+                if wid < SLOW_FROM and sn not in have:   # 지난 주차는 느린 음성을 새로 만들지 않음
+                    continue
                 if sn not in have or stale(sn, en) or n in jobs:
                     jobs[sn] = (en, v, SLOW)
                 elif sn not in texts:
@@ -298,8 +300,6 @@ def main():
             json.dump({'engine': ENGINE, 'files': sorted(NEWV)}, open(ENGINE_F, 'w'))
     json.dump({'engine': ENGINE, 'files': sorted(NEWV)}, open(ENGINE_F, 'w'))
     for ln, src in longs:
-        if any(n not in NEWV for n in src):
-            print('연속 듣기는 문장 음성을 다 새로 만든 뒤에:', ln); continue
         files = [os.path.join(AUDIO, n) for n in src if os.path.exists(os.path.join(AUDIO, n))]
         if len(files) != len(src):
             print('연속 듣기 건너뜀(문장 음성 부족):', ln); continue
