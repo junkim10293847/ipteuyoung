@@ -747,8 +747,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 :root[data-xmas="1"][data-theme="dark"] li.card::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='16'%3E%3Cpath d='M0 3Q14 10 28 3T56 3T84 3T112 3' fill='none' stroke='%238fa596' stroke-width='1.1'/%3E%3Crect x='12.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='14' cy='10.8' rx='2.9' ry='3.9' fill='%23d9404c'/%3E%3Cellipse cx='13.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='40.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='42' cy='10.8' rx='2.9' ry='3.9' fill='%23f0bd45'/%3E%3Cellipse cx='41.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='68.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='70' cy='10.8' rx='2.9' ry='3.9' fill='%233aa565'/%3E%3Cellipse cx='69.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='96.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='98' cy='10.8' rx='2.9' ry='3.9' fill='%234b8fd6'/%3E%3Cellipse cx='97.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3C/svg%3E");filter:drop-shadow(0 0 3px rgba(255,220,150,.35))}
 :root[data-xmas="1"] #list>li.card{margin-top:6px}
 .redo{display:none}
-.card.done .redo{display:grid;place-items:center;width:36px;height:36px;margin:4px 0 0 -9px;padding:0;border:0;border-radius:50%;background:none;color:var(--done);font-size:1.45rem;line-height:1;cursor:pointer;transition:transform .15s,background .15s}
-.card.done .redo:hover,.card.done .redo:active{background:var(--done-soft);transform:scale(1.08)}
+.card.done .redo{display:block;position:relative;width:1em;height:1em;margin:5px auto 0;padding:0;border:0;background:none;color:var(--done);font-size:.95rem;line-height:1;cursor:pointer;transition:transform .15s}
+.card.done .redo::after{content:'';position:absolute;inset:-12px}   /* 별은 작게, 누르는 자리는 넉넉하게 */
+.card.done .redo:hover,.card.done .redo:active{transform:scale(1.25)}
 :root[data-xmas="1"] .card.done .redo{color:var(--gold);text-shadow:0 0 8px color-mix(in srgb,var(--gold) 45%,transparent)}
 .redo-pop{position:absolute;right:10px;top:10px;max-width:calc(100% - 20px);z-index:8;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:6px 6px 6px 14px;box-shadow:0 8px 22px -10px rgba(0,0,0,.35);display:flex;align-items:center;gap:6px;font-size:.9rem;white-space:nowrap;animation:wrPop .2s ease-out}
 .redo-pop b{font-weight:700;margin-right:4px}
@@ -756,19 +757,21 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .redo-pop button.go{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 
 /* 카드 버튼: 늘 한 줄, 글자만. 버튼 크기는 평소(4개)든 써보기(6개)든 똑같이 한 칸 = 줄의 1/6 */
-.card .acts{display:flex;flex-wrap:nowrap;gap:5px;--bw:calc((100% - 25px)/6)}
+.card .acts{display:flex;flex-wrap:nowrap;gap:5px;--bw:calc((100% - 25px)/6);container-type:inline-size}
 .card .acts button{flex:0 0 var(--bw);width:var(--bw);min-width:0;padding:10px 0;font-size:.8rem;letter-spacing:-.03em;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:clip;text-align:center;border-radius:11px}
 .card .acts:has(.wr-check) .write{order:9}   /* 써보기를 열면: 듣기·천천히·영어·채점·지우기·닫기 */
-@media (max-width:380px){.card .acts button{font-size:.74rem}}
+@container (max-width:330px){.card .acts button{font-size:.74rem}.card .acts .hideen{font-size:.64rem;letter-spacing:-.06em}}
+@container (max-width:235px){.card .acts .hideen{font-size:.58rem}}
+@container (min-width:331px) and (max-width:370px){.card .acts .hideen{font-size:.74rem;letter-spacing:-.06em}}
 @media (min-width:700px){.card .acts button{font-size:.92rem}}
-/* 눌린 상태도 모양은 같게 — 지금 상태는 글자(보기↔숨기기, 써보기↔닫기)로만 알려 줌 */
+/* 눌린 상태도 모양은 같게 — 지금 상태는 글자(영어 보기↔영어 숨김, 써보기↔닫기)로만 알려 줌 */
 .card .acts .hideen[aria-pressed="true"],.card .acts .write[aria-pressed="true"]{background:var(--bg);border-color:var(--line);color:var(--fg);font-weight:600}
 /* 🎄 카드 버튼: 초록·빨강 번갈아 (보이는 순서 기준) */
 :root[data-xmas="1"]{--xg:#1f5a43;--xr:#9b2c35}
 @media (prefers-color-scheme:dark){:root[data-xmas="1"]:not([data-theme="light"]){--xg:#2f7d58;--xr:#b8424c}}
 :root[data-xmas="1"][data-theme="dark"]{--xg:#2f7d58;--xr:#b8424c}
 :root[data-xmas="1"] .card .acts button,:root[data-xmas="1"] .card .acts button[aria-pressed="true"]{--xb:var(--xg);background:var(--xb);border-color:var(--xb);color:#fffaf1;font-weight:700;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 6px -3px rgba(0,0,0,.35)}
-:root[data-xmas="1"] .card .acts .slow,:root[data-xmas="1"] .card .acts .write,:root[data-xmas="1"] .card .acts .wr-check{--xb:var(--xr)}
+:root[data-xmas="1"] .card .acts button.slow,:root[data-xmas="1"] .card .acts button.write[aria-pressed],:root[data-xmas="1"] .card .acts button.write,:root[data-xmas="1"] .card .acts button.wr-check{--xb:var(--xr)}
 :root[data-xmas="1"] .card .acts .play.looping{--xb:#a97a1f}
 :root[data-xmas="1"] .card .acts .play.waiting{opacity:.75}
 </style>
@@ -788,7 +791,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v221</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v222</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="xmas-btn" id="xmasBtn" title="크리스마스 테마 켜기/끄기 (베타 · 나만 보임)" aria-label="크리스마스 테마" hidden>🎄</button><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -817,7 +820,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v221</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v222</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1038,7 +1041,7 @@ function snowStart(b){if(xSnow||!b||matchMedia('(prefers-reduced-motion: reduce)
 function actsDeco(){const mn=$('main');if(!mn)return;mn.querySelectorAll('.card .acts button').forEach(b=>{const c=b.classList,t=b.textContent,p=b.getAttribute('aria-pressed')==='true';let lb;
   if(c.contains('play')){lb=c.contains('looping')?'반복 중':'듣기'}
   else if(c.contains('slow')){lb='천천히'}
-  else if(c.contains('hideen')){lb=/보기/.test(t)?'보기':'숨기기'}
+  else if(c.contains('hideen')){{const nb=b.clientWidth&&b.clientWidth<44?'':' ';lb=/보기/.test(t)?'영어'+nb+'보기':'영어'+nb+'숨김'}}
   else if(c.contains('write')){const op=p||/접기|닫기/.test(t);lb=op?'닫기':(/받아쓰기/.test(t)?'받아쓰기':'써보기')}
   else if(c.contains('wr-check')){lb='채점'}
   else if(c.contains('wr-clear')){lb='지우기'}
