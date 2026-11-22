@@ -696,7 +696,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 :root[data-xmas="1"] .card.done.playing{box-shadow:inset 5px 0 0 var(--gold),0 0 0 2px var(--accent-soft)}
 :root[data-xmas="1"] .card.done .en .hid,:root[data-xmas="1"] .card.done .ttl .hid{background:rgba(255,255,255,.8)}
 :root[data-xmas="1"] .card.done .num{color:var(--accent)}
-:root[data-xmas="1"] .card.done .num::after{content:'✦';display:block;font-size:.62rem;color:var(--gold);margin-top:2px;text-align:center}
 :root[data-xmas="1"] .acts .mark[aria-pressed="true"]{background:#9b2c35;border-color:#9b2c35;color:#fff8ee}
 @media (prefers-color-scheme:dark){:root[data-xmas="1"]:not([data-theme="light"]) .card.done{background:linear-gradient(135deg,color-mix(in srgb,#8fd1ad 14%,var(--surface)),color-mix(in srgb,#8fd1ad 6%,var(--surface)))}:root[data-xmas="1"]:not([data-theme="light"]) .card.done .en .hid,:root[data-xmas="1"]:not([data-theme="light"]) .card.done .ttl .hid{background:rgba(255,255,255,.12)}:root[data-xmas="1"]:not([data-theme="light"]) .acts .mark[aria-pressed="true"]{background:#b8424c;border-color:#b8424c}}
 :root[data-xmas="1"][data-theme="dark"] .card.done{background:linear-gradient(135deg,color-mix(in srgb,#8fd1ad 14%,var(--surface)),color-mix(in srgb,#8fd1ad 6%,var(--surface)))}
@@ -747,6 +746,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 @media (prefers-color-scheme:dark){:root[data-xmas="1"]:not([data-theme="light"]) li.card::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='16'%3E%3Cpath d='M0 3Q14 10 28 3T56 3T84 3T112 3' fill='none' stroke='%238fa596' stroke-width='1.1'/%3E%3Crect x='12.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='14' cy='10.8' rx='2.9' ry='3.9' fill='%23d9404c'/%3E%3Cellipse cx='13.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='40.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='42' cy='10.8' rx='2.9' ry='3.9' fill='%23f0bd45'/%3E%3Cellipse cx='41.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='68.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='70' cy='10.8' rx='2.9' ry='3.9' fill='%233aa565'/%3E%3Cellipse cx='69.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='96.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='98' cy='10.8' rx='2.9' ry='3.9' fill='%234b8fd6'/%3E%3Cellipse cx='97.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3C/svg%3E");filter:drop-shadow(0 0 3px rgba(255,220,150,.35))}}
 :root[data-xmas="1"][data-theme="dark"] li.card::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='16'%3E%3Cpath d='M0 3Q14 10 28 3T56 3T84 3T112 3' fill='none' stroke='%238fa596' stroke-width='1.1'/%3E%3Crect x='12.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='14' cy='10.8' rx='2.9' ry='3.9' fill='%23d9404c'/%3E%3Cellipse cx='13.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='40.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='42' cy='10.8' rx='2.9' ry='3.9' fill='%23f0bd45'/%3E%3Cellipse cx='41.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='68.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='70' cy='10.8' rx='2.9' ry='3.9' fill='%233aa565'/%3E%3Cellipse cx='69.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3Crect x='96.4' y='5.3999999999999995' width='3.2' height='2.4' rx='.6' fill='%238fa596'/%3E%3Cellipse cx='98' cy='10.8' rx='2.9' ry='3.9' fill='%234b8fd6'/%3E%3Cellipse cx='97.1' cy='9.7' rx='.9' ry='1.3' fill='%23fff' opacity='.65'/%3E%3C/svg%3E");filter:drop-shadow(0 0 3px rgba(255,220,150,.35))}
 :root[data-xmas="1"] #list>li.card{margin-top:6px}
+.redo{display:none}
+.card.done .redo{display:grid;place-items:center;width:36px;height:36px;margin:4px 0 0 -9px;padding:0;border:0;border-radius:50%;background:none;color:var(--done);font-size:1.45rem;line-height:1;cursor:pointer;transition:transform .15s,background .15s}
+.card.done .redo:hover,.card.done .redo:active{background:var(--done-soft);transform:scale(1.08)}
+:root[data-xmas="1"] .card.done .redo{color:var(--gold);text-shadow:0 0 8px color-mix(in srgb,var(--gold) 45%,transparent)}
+.redo-pop{position:absolute;left:48px;top:10px;z-index:8;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 10px 28px -10px rgba(0,0,0,.35);display:grid;gap:10px;font-size:.92rem;animation:wrPop .2s ease-out;max-width:calc(100% - 64px)}
+.redo-pop b{font-weight:700}.redo-pop small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+.redo-pop .rp-a{display:flex;gap:6px}.redo-pop button{font:inherit;font-size:.88rem;font-weight:700;border-radius:999px;padding:7px 14px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.redo-pop button.go{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 </style>
 </head>
 <body>
@@ -764,7 +771,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v215</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v216</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="xmas-btn" id="xmasBtn" title="크리스마스 테마 켜기/끄기 (베타 · 나만 보임)" aria-label="크리스마스 테마" hidden>🎄</button><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -793,7 +800,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v215</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v216</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1650,7 +1657,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    <ol id="list">
     ${listIdx.map(i=>{if(i==='__H')return `<li class="revhead"><b>📖 오늘 ${idx.length}문장${nRev?` · 🔁 어제 복습 ${nRev}`:''}${nSkip?` · ✓ 이미 외움 ${nSkip}`:''}</b><span>번호 순서대로 이어서 보여 줘요.${nRev?' 어제 복습 문장은 영어를 가려 두었어요.':''}${behind?` 앞에서 아직 못 외운 ${behind}문장도 오늘 분량에 넣었어요.`:''}</span></li>`;if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__S')return skipHtml;if(i==='__T'){const behind=idx.filter(j=>j<prevMax).length;return `<li class="revhead today"><b>📖 오늘 문장 · ${idx.length}문장</b>${behind?`<span>앞에서 아직 못 외운 ${behind}문장을 먼저 넣었어요.</span>`:''}</li>`+skipHtml};const s=w.sentences[i];const v=s.vocab||[];return `
      <li class="card${done[i]?' done':''}" id="c${i}">
-       <span class="num">${numLabel(w,i)}${todaySet.has(i)?`<i class="tdot${done[i]?' got':''}" title="${done[i]?'오늘 외울 문장 · 외움 완료':'오늘 외울 문장'}"></i>`:''}</span>
+       <span class="num">${numLabel(w,i)}${todaySet.has(i)?`<i class="tdot${done[i]?' got':''}" title="${done[i]?'오늘 외울 문장 · 외움 완료':'오늘 외울 문장'}"></i>`:''}<button type="button" class="redo" data-ri="${i}" title="외운 문장 · 눌러서 다시 외우기" aria-label="외운 문장. 눌러서 다시 외우기">✦</button></span>
        ${(view&&view[0]==='d'&&listIdx[0]==='__H')?(r=>r==='rev'?'<span class="ctag rev">🔁 어제 복습</span>':r==='skip'?'<span class="ctag skip">✓ 이미 외움</span>':'<span class="ctag today">📖 오늘</span>')(roleOf(i)):''}${(T=>T?`<div class="enw">${ttlHtml(T,i)}<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div></div>`:`<div class="en" data-i="${i}">${wordsHtml(s.en,i)}</div>`)(ttlOf(w,i))}
        <div class="ko${s.ko?'':' empty'}">${(T=>T&&T.ko?`<b class="ttl-k">${esc(T.ko)}</b> · `:'')(ttlOf(w,i))}${s.ko?esc(s.ko):'해석 없음'}</div>
        ${(()=>{const e=weakOf(w.id,i);return e&&!vocItems(w,i).length?wbadgeHtml(e):''})()}
@@ -1661,7 +1668,6 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
          <button class="slow" data-i="${i}">▶ 천천히</button>
          <button class="hideen" data-i="${i}" aria-pressed="${hiddenEn.has(i)}">${hiddenEn.has(i)?"영어 보기":"영어 가리기"}</button>
          <button class="write" data-i="${i}" aria-pressed="${writeOpen.has(i)}">${writeOpen.has(i)?"✍ 접기":isG()?"🎧 받아쓰기":"✍ 써보기"}</button>${writeOpen.has(i)?`<button class="primary wr-check" data-i="${i}">채점</button><button class="ghost wr-clear" data-i="${i}">다시 쓰기</button>`:''}
-         <button class="mark" data-i="${i}" aria-pressed="${!!done[i]}">${done[i]?'✓ 외움':'☐ 외움'}</button>
        </div>
        ${writeOpen.has(i)?writeHtml(w,i):''}
      </li>`}).join('')}
@@ -2202,7 +2208,7 @@ function vbPatch(focus){const b=$('vbBody'),w=weeks.find(x=>x.id===curId);if(!b|
 function vbCheck(show){const w=weeks.find(x=>x.id===curId);if(!w)return;const L=vbList(w),it=L[vbPos];if(!it)return;const S=vbSlots(w.sentences[it.i],it);
   if(vbMode==='w'){const ta=$('vbW'),x=w.sentences[it.i];if(ta)vbVal.w=ta.value;if(show)vbVal.w=vbVal.w||'';const u=show?'':String(vbVal.w||'').trim();
     if(!u&&!show){toast('먼저 영어 문장을 써 보세요');return}
-    const r=gradeText(dlgNorm(x.en),dlgNorm(u||'-'));if(!r)return;vbDone={w:r};if(vbKnow[it.i]===undefined)vbKnow[it.i]=!show&&r.perfect;
+    const r=gradeText(dlgNorm(x.en),dlgNorm(u||'-'));if(!r)return;vbDone={w:r};if(vbKnow[it.i]===undefined)vbKnow[it.i]=!show&&r.perfect;if(!show&&r.perfect&&!doneOf(w.id)[it.i]){prog.done[w.id]={...doneOf(w.id),[it.i]:true};doneSeen.add(it.i);saveProg();try{patchCardState(w,it.i)}catch(_){}}
     vbPatch();if(r.perfect)playOne(x,it.i,+$('rate').value||1,(stop(),token),true);return}
   document.querySelectorAll('#vbBody .vb-in').forEach(e=>vbVal[+e.dataset.vbi]=e.value);
   vbDone={};S.forEach((g,id)=>{vbDone[id]={ok:!show&&vbNorm(vbVal[id])===vbNorm(g.ans)}});
@@ -2228,6 +2234,18 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   if(t.id==='vbShow'){vbCheck(true);return}
   if(t.id==='vbRetry'){vbVal={};vbDone=null;vbPatch(true);return}
   if(t.id==='vbNext'){vbPos++;vbVal={};vbDone=null;vbPatch();const b=$('vbBox');if(b){const r=b.getBoundingClientRect();if(r.top<0)b.scrollIntoView({block:'start'})}}});
+
+/* ✦ 외운 문장 별: 누르면 '다시 외울까요?' → 외움 해제 (외움 버튼 대신) */
+document.addEventListener('click',e=>{const pop=document.querySelector('.redo-pop');
+  const rb=e.target.closest&&e.target.closest('.redo');
+  if(pop&&!e.target.closest('.redo-pop')&&!rb){pop.remove();return}
+  if(rb){e.preventDefault();e.stopPropagation();const c=rb.closest('.card');if(pop){const same=pop.parentNode===c;pop.remove();if(same)return}
+    const p=document.createElement('div');p.className='redo-pop';p.dataset.ri=rb.dataset.ri;
+    p.innerHTML='<div><b>다시 외울까요?</b><small>외움 표시를 풀고 다시 연습할 문장으로 돌려요.</small></div><div class="rp-a"><button type="button" class="go rp-yes">다시 외우기</button><button type="button" class="rp-no">취소</button></div>';
+    c.appendChild(p);return}
+  const y=e.target.closest&&e.target.closest('.rp-yes,.rp-no');if(!y)return;e.preventDefault();const p=y.closest('.redo-pop'),i=+p.dataset.ri;p.remove();if(y.classList.contains('rp-no'))return;
+  const w=weeks.find(x=>x.id===curId);if(!w)return;const d={...doneOf(w.id)};delete d[i];hiddenEn.delete(i);doneSeen.delete(i);prog.done[w.id]=d;saveProg();
+  if(!patchCardState(w,i))stay(i,render);toast('↺ 다시 외울 문장으로 돌렸어요. 써보기에서 완벽하게 쓰면 다시 외움이 돼요')},true);
 function dqaPatch(){const b=$('dqaBody'),w=weeks.find(x=>x.id===curId);if(b&&w&&!wbView)b.innerHTML=dqaHtml(w)}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#dqaPrev,#dqaNext,#dqaSkip');if(!t)return;e.preventDefault();
   const w=weeks.find(x=>x.id===curId);if(!w)return;const L=dqaItems(w),p=Math.max(0,Math.min(dqaPos,L.length-1));try{micStop()}catch(_){}
