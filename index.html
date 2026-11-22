@@ -11,6 +11,7 @@
 <script>try{var pr=JSON.parse(localStorage.getItem('prog')||'"ipt"')==='gtv'?'gtv':'ipt',pl=JSON.parse(localStorage.getItem('pal_'+pr)||'null')||(pr==='gtv'?'rose':'indigo');if(pl==='random'){var K=["indigo", "lavender", "navy", "ocean", "sky", "teal", "mint", "forest", "olive", "sakura", "pink", "rose", "wine", "sunset", "cocoa", "ink"],d=new Date(),day=Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/864e5),h=function(n){var x=(n*2654435761+(pr==='gtv'?97:13))>>>0;x=(x^(x>>>15))>>>0;x=Math.imul(x,2246822519)>>>0;x=(x^(x>>>13))>>>0;return x%K.length},i=h(day);if(i===h(day-1))i=(i+1)%K.length;pl=K[i]}document.documentElement.dataset.prog=pr;document.documentElement.dataset.pal=pl}catch(e){}</script>
 <script>/* 🎄 크리스마스 테마(베타): 관리자에게만 */try{if(localStorage.getItem('isOwner')==='true'&&localStorage.getItem('xmas')!=='false')document.documentElement.dataset.xmas='1'}catch(e){}</script>
 <script>/* 🌓 화면 모드: 자동(휴대폰 설정) / 밝게 / 어둡게 */try{var sc=JSON.parse(localStorage.getItem('scheme')||'null');if(sc==='light'||sc==='dark')document.documentElement.dataset.theme=sc}catch(e){}</script>
+<script>/* ⏱ 열기 속도 재기: 앱이 다시 열린(새 버전) 경우 처음 연 시각부터 잼 */try{window.__T={start:performance.timeOrigin,marks:{}};var g=JSON.parse(sessionStorage.getItem('verGo')||'null');if(g&&Date.now()-g.at<30000){window.__T.reload=g;sessionStorage.removeItem('verGo')}}catch(e){}</script>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -784,6 +785,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .ps-ctl select{font:inherit;font-size:.85rem;padding:4px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
 .stop-fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:40;font:inherit;font-weight:700;font-size:.92rem;padding:10px 22px;border-radius:999px;border:0;background:var(--fg);color:var(--bg);box-shadow:0 8px 22px -8px rgba(0,0,0,.45);cursor:pointer}
 body.typing .stop-fab{display:none}
+
+.ver-row{display:flex;gap:10px;align-items:baseline}.ver-sw{opacity:.6}
+.speed-pop{margin:6px 0 10px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:.86rem;display:grid;gap:6px}
+.speed-pop h4{margin:0;font-size:.92rem}.speed-pop .sp-r{display:flex;justify-content:space-between;gap:10px}.speed-pop .sp-r b{font-variant-numeric:tabular-nums}
+.speed-pop .sp-r.slow b{color:var(--warn)}.speed-pop .sp-bar{height:6px;border-radius:9px;background:var(--line);overflow:hidden}.speed-pop .sp-bar i{display:block;height:100%;background:var(--accent)}
+.speed-pop small{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -801,7 +808,7 @@ body.typing .stop-fab{display:none}
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v226</button>
+  <div class="ver-row"><button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v227</button><button type="button" class="ver-top ver-sw" id="speedBtn" title="이번에 열린 속도 보기">⏱ 열기 속도</button></div><div class="speed-pop" id="speedPop" hidden></div>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="xmas-btn" id="xmasBtn" title="크리스마스 테마 켜기/끄기 (베타 · 나만 보임)" aria-label="크리스마스 테마" hidden>🎄</button><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -830,7 +837,7 @@ body.typing .stop-fab{display:none}
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v226</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v227</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -919,7 +926,7 @@ body.typing .stop-fab{display:none}
   const tries={has:()=>{try{const c=localStorage.getItem('weeksCache');return !!(c&&c.length>2)}catch(_){return false}}};
   async function refresh(force){
     for(let t=0;;t++){
-      try{const [wk]=await Promise.all([run('getWeeks'),loadIndex()]);
+      try{const _t0=performance.now();const [wk]=await Promise.all([run('getWeeks').then(v=>{if(window.__T&&!__T.marks.server)__T.marks.server=[_t0,performance.now(),JSON.stringify(v||{}).length];return v}),loadIndex()]);
         /* 서버가 잠깐 빈 목록을 주면(드라이브 일시 오류) 이미 가진 주차를 지우지 않고 오류로 보고 다시 시도 */
         if((!wk||!Object.keys(wk).length)&&(Object.keys(cache).length||tries.has()))throw{code:'upstream_error',message:'empty_weeks'};
         loadedOnce=true;const next=attach(wk||{}),sig=JSON.stringify(next);if(!force&&sig===lastSig)return;lastSig=sig;cache=next;try{if(Object.keys(next).length)localStorage.setItem('weeksCache',sig)}catch(_){};emitSafe();return}
@@ -2712,6 +2719,23 @@ document.addEventListener('click',async e=>{
   if(my===token)hl(null);
 });
 $('stop').onclick=()=>{stop();const la=$('longAudio');if(la)la.pause()};
+
+/* ⏱ 열기 속도: 이번에 앱이 열린 단계별 시간 (내 휴대폰에서 직접 확인) */
+(()=>{const mn=$('main');if(!mn||!window.__T)return;const T=__T;
+  new MutationObserver((_,o)=>{if(mn.querySelector('li.card')&&!T.marks.first){T.marks.first=performance.now();o.disconnect()}}).observe(mn,{childList:true,subtree:true});
+  const f=ms=>ms==null?'—':ms<1000?Math.round(ms)+'ms':(ms/1000).toFixed(1)+'초';
+  function show(){const p=$('speedPop'),nav=performance.getEntriesByType('navigation')[0]||{},M=T.marks,rows=[];
+    const R=T.reload,pre=R?Math.max(0,T.start-R.start):0;
+    if(R)rows.push(['① 예전 버전으로 열림 → 새 버전 발견',pre,`v${R.from} → v${R.to}, 자동으로 다시 열었어요`]);
+    rows.push([(R?'② ':'① ')+'앱 화면 파일 받기',nav.responseEnd,nav.transferSize===0?'휴대폰에 저장된 파일 사용':`인터넷에서 받음 ${Math.round((nav.encodedBodySize||0)/1024)}KB`]);
+    rows.push([(R?'③ ':'② ')+'앱 준비(코드 읽기)',nav.domContentLoadedEventEnd&&nav.responseEnd?nav.domContentLoadedEventEnd-nav.responseEnd:null,'']);
+    rows.push([(R?'④ ':'③ ')+'첫 화면(문장 카드) 표시',M.first,'저장해 둔 주차 자료로 먼저 그림']);
+    rows.push([(R?'⑤ ':'④ ')+'서버에서 최신 주차 자료 받기',M.server?M.server[1]-M.server[0]:null,M.server?`${(M.server[2]/1048576).toFixed(2)}MB · 화면 뒤에서 받아요`:'아직 받는 중']);
+    const total=pre+(M.first||0),max=Math.max(...rows.map(r=>r[1]||0),1);
+    p.innerHTML=`<h4>⏱ 이번 열기: 화면이 뜨기까지 <b>${f(total)}</b></h4>`+rows.map(([n,ms,sub])=>`<div class="sp-r${ms>1500?' slow':''}"><span>${n}${sub?`<br><small>${sub}</small>`:''}</span><b>${f(ms)}</b></div><div class="sp-bar"><i style="width:${Math.min(100,(ms||0)/max*100)}%"></i></div>`).join('')+
+      `<small>${navigator.connection&&navigator.connection.effectiveType?'연결: '+navigator.connection.effectiveType+' · ':''}이 화면을 캡처해 보내 주시면 원인을 바로 볼 수 있어요</small>`;p.hidden=false}
+  document.addEventListener('click',e=>{if(e.target&&e.target.id==='speedBtn'){e.preventDefault();const p=$('speedPop');if(!p.hidden){p.hidden=true;return}show()}});
+})();
 /* 아래 고정 바 대신: 속도·반복·목소리·쉼은 '전체 지문 보기' 안에, 재생 중에만 작은 ■ 정지 버튼 */
 (()=>{const mn=$('main'),ctl=$('psCtl');if(!mn||!ctl)return;
   try{const r=ls.get('rateSel',null);if(r&&[...$('rate').options].some(o=>o.value===String(r)))$('rate').value=String(r)}catch(_){}
@@ -3597,7 +3621,7 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
     if(res.ok&&'caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.open(k).then(c=>c.put(base,res.clone()))))}
     const busy=()=>{const a=document.activeElement;return (a&&a.closest&&a.closest('#main')&&(a.tagName==='TEXTAREA'||a.tagName==='INPUT')&&a.value)||(typeof mock!=='undefined'&&mock&&!mock.res&&mock.ans.some(x=>x))};
     /* 새 화면 주소(?fresh=…)로 바로 열면 저장된 예전 화면을 거치지 않고 인터넷에서 새 버전을 받음 */
-    const go=()=>{if(busy()){setTimeout(go,5000);return}try{saveUi();sessionStorage.setItem('verDone',nv)}catch(_){}location.replace(base+'?fresh='+Date.now())};
+    const go=()=>{if(busy()){setTimeout(go,5000);return}try{saveUi();sessionStorage.setItem('verDone',nv);sessionStorage.setItem('verGo',JSON.stringify({from:cur,to:nv,start:(window.__T||{}).start||Date.now(),shown:(window.__T&&__T.marks.first)||0,at:Date.now()}))}catch(_){}location.replace(base+'?fresh='+Date.now())};
     setTimeout(go,800);
   }catch(_){}}
   /* 버전 번호를 누르면: 휴대폰에 저장된 화면을 모두 지우고 인터넷에서 최신 버전을 바로 받음 (아이패드 등에서 예전 화면이 남을 때) */
