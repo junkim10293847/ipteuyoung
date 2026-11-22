@@ -668,7 +668,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v204</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v205</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -697,7 +697,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v204</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v205</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1896,7 +1896,7 @@ function dlgResHtml(r,x){return `<div class="wr-res${r.perfect?' perfect':r.almo
 function dlgPrHtml(w){const D=w.dlg,N=D.lines.length,P=k=>CAST[k]||{name:k};
   if(dlgStep===3&&!dlgRole)return `<div class="dlg-pr"><b>누구 역할을 맡을까요?</b><div class="seq-act">${[D.a,D.b].map(k=>`<button class="primary" data-drole="${k}">🎭 ${esc(P(k).name)}</button>`).join('')}</div><p class="hint">장면 속 인물을 눌러도 돼요.</p></div>`;
   if(dlgPos>=N){const sc=Object.values(dlgRes).map(r=>r.score),avg=sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length):0;
-    return `<div class="dlg-pr"><b>🎉 끝까지 했어요!</b><p>${sc.length?`말한 ${sc.length}줄 평균 <b>${avg}점</b>`:'채점한 줄이 없어요.'}</p><div class="seq-act"><button class="primary" id="dlgAgain">처음부터 다시</button>${dlgStep===2?'<button class="ghost" data-dstep="3">③ 역할 말하기로 →</button>':''}</div></div>`}
+    return `<div class="dlg-pr"><b>🎉 끝까지 했어요!</b><p>${sc.length?`말한 ${sc.length}줄 평균 <b>${avg}점</b>`:'채점한 줄이 없어요.'}</p><div class="seq-act"><button class="primary" id="dlgAgain">새로 섞어서 다시</button>${dlgStep===2?'<button class="ghost" data-dstep="3">③ 역할 말하기로 →</button>':''}</div></div>`}
   const x=D.lines[dlgPos],k=dlgLK(D,dlgPos),mine=dlgStep===2||k===dlgRole,r=dlgRes[dlgPos];
   if(!mine)return `<div class="dlg-pr"><div class="dlg-pr-h"><b>${dlgPos+1}/${N}</b> ${esc(P(k).name)}의 말을 들어 보세요…</div><div class="seq-act"><button class="ghost" id="dlgCont">▶ 이어서</button></div></div>`;
   return `<div class="dlg-pr">
@@ -1987,10 +1987,13 @@ function dqaHtml(w){const L=dqaItems(w);if(!L.length)return `<p class="hint" sty
     ${dqHtml(k,'dqa-')}
     <div class="seq-act"><button class="ghost" id="dqaPrev"${p===0?' disabled':''}>◀ 이전</button><button class="primary" id="dqaNext">${p===L.length-1?'처음부터':'다음 ▶'}</button>${tried<L.length?`<button class="ghost" id="dqaSkip">안 푼 문제로</button>`:''}</div></div>`}
 /* 7. 빈칸 암기: 한글 문장을 보고 영어 빈칸을 직접 써서 채우기 (핵심 어휘만 / 문장 전체), 길이 보기·말하기 */
-let vbPos=0,vbKnow={},vbMode='v',vbLen=false,vbVal={},vbDone=null;
+let vbPos=0,vbKnow={},vbMode='v',vbLen=false,vbVal={},vbDone=null,vbSeed=0,vbOrd={};
 try{vbMode=localStorage.getItem('vbMode')||'v'}catch(_){}if(!/^[vaw]$/.test(vbMode))vbMode='v';
 const vbNorm=x=>String(x||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9' ]/g,' ').replace(/\s+/g,' ').trim();
-function vbList(w){const L=[];w.sentences.forEach((x,i)=>{if(x.isTitle||!x.en)return;const sp=vocabSpans(x.en,x);if(vbMode!=='v'||sp.length)L.push({i,sp})});return L}
+function vbList(w){const L=[];w.sentences.forEach((x,i)=>{if(x.isTitle||!x.en)return;const sp=vocabSpans(x.en,x);if(vbMode!=='v'||sp.length)L.push({i,sp})});
+  /* 순서대로가 아니라 섞어서 — 같은 회차·모드에서는 순서 유지, 모드를 바꾸거나 다시 하면 새로 섞음 */
+  const key=w.id+'|'+vbMode+'|'+L.length+'|'+vbSeed;if(vbOrd.key!==key){const o=L.map((_,k)=>k);for(let k=o.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[o[k],o[j]]=[o[j],o[k]]}vbOrd={key,o}}
+  return vbOrd.o.map(k=>L[k])}
 /* 이 문장에서 가릴 칸: 핵심 어휘 모드면 단어·숙어 덩어리, 전체 모드면 모든 단어 */
 function vbSlots(x,it){const ws=x.en.split(' '),S=[];
   if(vbMode==='a'){ws.forEach((t,k)=>{const m=t.match(/^(["“‘(]*)(.*?)([.,!?;:"”’)]*)$/);if(m[2])S.push({a:k,b:k,pre:m[1],ans:m[2],tail:m[3]})});return S}
@@ -1999,7 +2002,7 @@ const vbHint=a=>a.split(' ').map(t=>t.replace(/[a-zA-Z0-9]/g,'_')).join('  ');
 function vbHtml(w){const L=vbList(w);
   const tabs=`<div class="dlg-steps vb-tabs"><button class="${vbMode==='v'?'on':''}" data-vbm="v">핵심 어휘</button><button class="${vbMode==='a'?'on':''}" data-vbm="a">단어 전부</button><button class="${vbMode==='w'?'on':''}" data-vbm="w">✍ 통째로 쓰기</button></div>`;
   if(!L.length)return tabs+'<p class="hint">이번 주 문장에서 가릴 단어·숙어를 찾지 못했어요.</p>';
-  if(vbPos>=L.length){const n=Object.values(vbKnow).filter(Boolean).length;return tabs+`<div class="vbq"><b>🎉 ${L.length}문장 끝!</b><p>한 번에 맞힌 문장 ${n}/${L.length}</p><div class="seq-act"><button class="primary" id="vbAgain">처음부터 다시</button></div></div>`}
+  if(vbPos>=L.length){const n=Object.values(vbKnow).filter(Boolean).length;return tabs+`<div class="vbq"><b>🎉 ${L.length}문장 끝!</b><p>한 번에 맞힌 문장 ${n}/${L.length}</p><div class="seq-act"><button class="primary" id="vbAgain">새로 섞어서 다시</button></div></div>`}
   const it=L[vbPos],x=w.sentences[it.i],ws=x.en.split(' '),S=vbSlots(x,it),out=[];let n=0;
   if(vbMode==='w'){const r=vbDone&&vbDone.w;
     return tabs+`<div class="vbq"><div class="vbq-h"><b>${vbPos+1}/${L.length}</b><span class="bar"><i style="width:${vbPos/L.length*100}%"></i></span></div>
@@ -2043,8 +2046,8 @@ document.addEventListener('keydown',e=>{const t=e.target;if(!t.classList||!t.cla
 document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('vb-in'))vbVal[+t.dataset.vbi]=t.value;if(t.id==='vbW')vbVal.w=t.value});
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#vbNext,#vbHear,#vbAgain,#vbChk,#vbShow,#vbRetry,#vbLenB,[data-vbm]');if(!t)return;e.preventDefault();
   const w=weeks.find(x=>x.id===curId);if(!w)return;const L=vbList(w),it=L[vbPos];
-  if(t.dataset.vbm){vbMode=t.dataset.vbm;try{localStorage.setItem('vbMode',vbMode)}catch(_){}vbPos=0;vbKnow={};vbVal={};vbDone=null;vbPatch();return}
-  if(t.id==='vbAgain'){vbPos=0;vbKnow={};vbVal={};vbDone=null;vbPatch();return}
+  if(t.dataset.vbm){vbMode=t.dataset.vbm;try{localStorage.setItem('vbMode',vbMode)}catch(_){}vbSeed++;vbPos=0;vbKnow={};vbVal={};vbDone=null;vbPatch();return}
+  if(t.id==='vbAgain'){vbSeed++;vbPos=0;vbKnow={};vbVal={};vbDone=null;vbPatch();return}
   if(!it)return;
   if(t.id==='vbHear'){stop();const my=token;playOne(w.sentences[it.i],it.i,+$('rate').value||1,my,true);return}
   if(t.id==='vbLenB'){document.querySelectorAll('#vbBody .vb-in').forEach(e=>vbVal[+e.dataset.vbi]=e.value);vbLen=!vbLen;vbPatch();return}
