@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="입트영">
 <meta name="theme-color" content="#5146a8">
 <script>try{var pr=JSON.parse(localStorage.getItem('prog')||'"ipt"')==='gtv'?'gtv':'ipt',pl=JSON.parse(localStorage.getItem('pal_'+pr)||'null')||(pr==='gtv'?'rose':'indigo');if(pl==='random'){var K=["indigo", "lavender", "navy", "ocean", "sky", "teal", "mint", "forest", "olive", "sakura", "pink", "rose", "wine", "sunset", "cocoa", "ink"],d=new Date(),day=Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/864e5),h=function(n){var x=(n*2654435761+(pr==='gtv'?97:13))>>>0;x=(x^(x>>>15))>>>0;x=Math.imul(x,2246822519)>>>0;x=(x^(x>>>13))>>>0;return x%K.length},i=h(day);if(i===h(day-1))i=(i+1)%K.length;pl=K[i]}document.documentElement.dataset.prog=pr;document.documentElement.dataset.pal=pl}catch(e){}</script>
+<script>/* 🎄 크리스마스 테마(베타): 관리자에게만 */try{if(localStorage.getItem('isOwner')==='true'&&localStorage.getItem('xmas')!=='false')document.documentElement.dataset.xmas='1'}catch(e){}</script>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -484,7 +485,7 @@ mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-sha
 .qa-q{display:flex;align-items:baseline;gap:8px}.qa-q span{flex:1;min-width:0}
 .qa-q .qa-it{flex:none}
 .qa-del{flex:none;border:0;background:none;padding:0 2px;font:inherit;font-size:.74rem;color:var(--muted);cursor:pointer;text-decoration:underline}
-.askall{margin-top:12px;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.askall{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .askall .qa{border-top:0;padding-top:0}
 .askall h4{margin:0;font-size:.95rem}
 .qa-old summary{font-size:.8rem;color:var(--muted);cursor:pointer}
@@ -659,6 +660,35 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 @media (min-width:700px){.wr textarea,.mock textarea,.seq textarea{min-height:8rem;font-size:1.2rem;line-height:2.2;padding:16px 18px;background-image:repeating-linear-gradient(transparent 0 calc(2.2em - 1px),var(--line) calc(2.2em - 1px) 2.2em);background-position:0 16px}}
 @media (pointer:coarse) and (min-width:700px){.wr textarea,.mock textarea,.seq textarea{min-height:9.2rem}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+
+/* ───────── 🎄 크리스마스 테마 (베타 · 관리자만) — C 혼합형: 위는 사진 배너, 아래로 갈수록 흐린 트리 빛망울 ───────── */
+:root[data-xmas="1"]:not(#z){--bg:#f5f0e6;--surface:#fffdf8;--fg:#1d2621;--muted:#5d675f;--line:#e5dccb;--accent:#1f5a43;--accent-soft:#e2ece4;--done:#a97a1f;--done-soft:#f5ecd4;--warn:#9b2c35;--c-ipt:#1f5a43;--c-gtv:#9b2c35;--gold:#c9a24a}
+@media (prefers-color-scheme: dark){:root[data-xmas="1"]:not([data-theme="light"]):not(#z){--bg:#0e1512;--surface:#16201b;--fg:#eef1ea;--muted:#a3b0a7;--line:#27352e;--accent:#8fd1ad;--accent-soft:#1c3128;--done:#e3b860;--done-soft:#33291a;--warn:#e88a90;--c-ipt:#8fd1ad;--c-gtv:#e88a90;--gold:#e3c27a}}
+:root[data-xmas="1"][data-theme="dark"]:not(#z){--bg:#0e1512;--surface:#16201b;--fg:#eef1ea;--muted:#a3b0a7;--line:#27352e;--accent:#8fd1ad;--accent-soft:#1c3128;--done:#e3b860;--done-soft:#33291a;--warn:#e88a90;--c-ipt:#8fd1ad;--c-gtv:#e88a90;--gold:#e3c27a}
+:root[data-xmas="1"]{background:var(--bg)}
+:root[data-xmas="1"] body{background:transparent;position:relative}
+:root[data-xmas="1"] body::before{content:'';position:fixed;inset:-40px;z-index:-1;pointer-events:none;background:url(img/xmas/bokeh.jpg) center/cover;filter:blur(28px) saturate(1.25);opacity:.32;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.35) 30%,#000 75%);mask-image:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.35) 30%,#000 75%)}
+@media (prefers-color-scheme: dark){:root[data-xmas="1"]:not([data-theme="light"]) body::before{opacity:.42}}
+:root[data-xmas="1"][data-theme="dark"] body::before{opacity:.42}
+/* 상단 배너 */
+:root[data-xmas="1"] .wrap>.brand{position:relative;overflow:hidden;isolation:isolate;align-items:flex-end;min-height:200px;padding:16px;margin:4px 0 14px;border:0;border-radius:20px;
+  background:linear-gradient(to top,rgba(8,16,12,.92) 0%,rgba(8,16,12,.72) 30%,rgba(8,16,12,.12) 62%,rgba(8,16,12,.08) 78%,rgba(8,16,12,.45) 100%),var(--xbg,none) center/cover,#1d2a24;
+  box-shadow:0 10px 28px -12px rgba(20,30,25,.55)}
+:root[data-xmas="1"] .wrap>.brand::before{content:'Happy Holidays';position:absolute;top:13px;left:16px;font-family:var(--display);font-style:italic;font-weight:500;font-size:.86rem;letter-spacing:.06em;color:var(--gold,#c9a24a);text-shadow:0 1px 6px rgba(0,0,0,.5)}
+:root[data-xmas="1"] .wrap>.brand .brand-t{font-size:clamp(1.6rem,6.4vw,2.1rem);color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+:root[data-xmas="1"] .wrap>.brand>div:not(.progsw){flex:1;min-width:0}
+:root[data-xmas="1"] .wrap>.brand .brand-s{word-break:keep-all;text-shadow:0 1px 6px rgba(0,0,0,.5);color:rgba(255,255,255,.82)}
+:root[data-xmas="1"] .wrap>.brand .progsw .brand-mark[aria-pressed="true"]{background:rgba(255,255,255,.94);color:#1f5a43;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+:root[data-xmas="1"] .wrap>.brand .progsw .brand-mark[aria-pressed="false"]{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.7)}
+:root[data-xmas="1"] .wrap>.brand .xmas-btn{position:absolute;top:12px;right:52px;margin:0}
+:root[data-xmas="1"] .wrap>.brand .pal-btn{position:absolute;top:12px;right:12px;margin:0!important}
+:root[data-xmas="1"] .wrap>.brand .pal-btn,:root[data-xmas="1"] .wrap>.brand .xmas-btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.brand .snow{position:absolute;inset:0;z-index:-1;pointer-events:none;width:100%;height:100%}
+.brand>*:not(.snow){position:relative}
+.xmas-btn{flex:none;align-self:flex-start;margin-left:auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:1.05rem;cursor:pointer;display:grid;place-items:center;padding:0;opacity:.9}
+.xmas-btn+.pal-btn{margin-left:6px!important}
+:root:not([data-xmas="1"]) .xmas-btn{filter:grayscale(1);opacity:.55}
 </style>
 </head>
 <body>
@@ -676,8 +706,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v208</button>
-  <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v209</button>
+  <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="xmas-btn" id="xmasBtn" title="크리스마스 테마 켜기/끄기 (베타 · 나만 보임)" aria-label="크리스마스 테마" hidden>🎄</button><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
   <div class="who" id="who" hidden>👤 <b id="whoName"></b><button id="addBtn" class="who-add" type="button" hidden>+ 새 주차</button><button id="nickChange" type="button">닉네임 변경</button></div>
@@ -705,7 +735,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v208</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v209</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -902,6 +932,26 @@ function applyPal(){const r=document.documentElement,k=palOf(curProg);r.dataset.
   const dark=r.dataset.theme==='dark'||(r.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches),ix=dark?2:1;
   r.style.setProperty('--c-ipt',PALS[palOf('ipt')][ix]);r.style.setProperty('--c-gtv',PALS[palOf('gtv')][ix]);
   const m=document.querySelector('meta[name=theme-color]');if(m)m.content=PALS[k][1];palPopRender()}
+
+/* 🎄 크리스마스 테마(베타): 관리자에게만 보이고, 🎄 버튼으로 켜고 끔. 배너 사진은 열 때마다 바뀜 */
+const XMAS_PH=['holiday','records','fifth','cafe','chelsea','bluetree','subway'];let xSnow=null;
+function xmasApply(){const r=document.documentElement,on=!!isOwner&&ls.get('xmas',true)!==false,b=document.querySelector('.wrap>.brand'),btn=$('xmasBtn');
+  if(btn){btn.hidden=!isOwner;btn.setAttribute('aria-pressed',on)}
+  const mt=document.querySelector('meta[name="theme-color"]');
+  if(on){r.dataset.xmas='1';if(b&&!b.dataset.ph){const i=(ls.get('xmasI',-1)+1)%XMAS_PH.length;ls.set('xmasI',i);b.dataset.ph=XMAS_PH[i];b.style.setProperty('--xbg',`url(img/xmas/${XMAS_PH[i]}.webp)`)}
+    if(mt){mt.dataset.o=mt.dataset.o||mt.content;mt.content='#1d2a24'}snowStart(b)}
+  else{delete r.dataset.xmas;snowStop();if(mt&&mt.dataset.o)mt.content=mt.dataset.o}}
+function snowStart(b){if(xSnow||!b||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const c=document.createElement('canvas');c.className='snow';c.setAttribute('aria-hidden','true');b.prepend(c);const g=c.getContext('2d');let W=0,H=0,vis=true,raf=0;
+  const fit=()=>{const d=Math.min(2,devicePixelRatio||1);W=b.clientWidth;H=b.clientHeight;c.width=W*d;c.height=H*d;g.setTransform(d,0,0,d,0,0)};fit();
+  const F=Array.from({length:46},()=>({x:Math.random()*W,y:Math.random()*H,r:.6+Math.random()*1.8,v:.18+Math.random()*.45,a:.35+Math.random()*.55,p:Math.random()*6.28}));
+  const step=()=>{raf=0;if(!vis||document.hidden)return;g.clearRect(0,0,W,H);for(const f of F){f.y+=f.v;f.p+=.012;f.x+=Math.sin(f.p)*.25;if(f.y>H+3){f.y=-3;f.x=Math.random()*W}
+      g.globalAlpha=f.a;g.beginPath();g.arc(f.x,f.y,f.r,0,6.283);g.fillStyle='#fff';g.fill()}raf=requestAnimationFrame(step)};
+  const io=new IntersectionObserver(es=>{vis=es[0].isIntersecting;if(vis&&!raf)raf=requestAnimationFrame(step)});io.observe(b);
+  const ro=new ResizeObserver(fit);ro.observe(b);const vc=()=>{if(!document.hidden&&!raf)raf=requestAnimationFrame(step)};document.addEventListener('visibilitychange',vc);
+  xSnow={stop(){cancelAnimationFrame(raf);io.disconnect();ro.disconnect();document.removeEventListener('visibilitychange',vc);c.remove()}};raf=requestAnimationFrame(step)}
+function snowStop(){if(xSnow){xSnow.stop();xSnow=null}}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#xmasBtn');if(!t)return;e.preventDefault();ls.set('xmas',ls.get('xmas',true)===false);xmasApply();toast(ls.get('xmas',true)!==false?'🎄 크리스마스 테마를 켰어요':'크리스마스 테마를 껐어요')});
 function palPopRender(){const pp=$('palPop');if(!pp||pp.hidden)return;const rnd=palRaw(curProg)==='random',k=palOf(curProg);
   pp.innerHTML=`<div class="pal-mode"><button type="button" data-pal="random" aria-pressed="${rnd}">🎲 매일 바뀜</button><button type="button" data-pal="${rnd?k:(PALS[palRaw(curProg)]?palRaw(curProg):k)}" class="pm-pick" aria-pressed="${!rnd}">🎨 직접 고르기</button></div>`+
   Object.entries(PALS).map(([id,[n,c]])=>`<button type="button" data-pal="${id}" aria-pressed="${!rnd&&id===k}"${rnd&&id===k?' class="today"':''}><i style="background:${c}"></i>${n}</button>`).join('')+
@@ -3363,8 +3413,8 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
   if(userApi){
     try{me=await userApi.id()}catch(e){}
     /* 관리자 확인은 서버에 물어봐야 해서 느림 → 기다리지 않고 지난번 결과로 바로 시작, 확인되면 조용히 반영 */
-    isOwner=ls.get('isOwner',false)===true;
-    userApi.isOwner().then(v=>{v=!!v;ls.set('isOwner',v);if(v!==isOwner){isOwner=v;if(loaded)keepScroll(full)}}).catch(()=>{});
+    isOwner=ls.get('isOwner',false)===true;xmasApply();
+    userApi.isOwner().then(v=>{v=!!v;ls.set('isOwner',v);if(v!==isOwner){isOwner=v;xmasApply();if(loaded)keepScroll(full)}}).catch(()=>{});
   }
   attachProgRef();
   db.collection('weeks').orderBy('monday','desc').onSnapshot(snap=>{
