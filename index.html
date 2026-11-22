@@ -808,7 +808,7 @@ body.typing .stop-fab{display:none}
   </form>
 </div>
 <div class="wrap">
-  <div class="ver-row"><button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v227</button><button type="button" class="ver-top ver-sw" id="speedBtn" title="이번에 열린 속도 보기">⏱ 열기 속도</button></div><div class="speed-pop" id="speedPop" hidden></div>
+  <div class="ver-row"><button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v228</button><button type="button" class="ver-top ver-sw" id="speedBtn" title="이번에 열린 속도 보기">⏱ 열기 속도</button></div><div class="speed-pop" id="speedPop" hidden></div>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="xmas-btn" id="xmasBtn" title="크리스마스 테마 켜기/끄기 (베타 · 나만 보임)" aria-label="크리스마스 테마" hidden>🎄</button><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -837,7 +837,7 @@ body.typing .stop-fab{display:none}
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v227</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v228</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -854,7 +854,7 @@ body.typing .stop-fab{display:none}
     <label for="gap">쉼 <select id="gap"><option value="1" selected>1초</option><option value="3">3초</option><option value="5">5초</option></select></label>
   </div>
 </div>
-<button type="button" class="stop-fab" id="stopFab" hidden>■ 정지</button>
+
 
 <script>
 /* ===== 서버 연결층: GitHub Pages 화면 ↔ Apps Script API(저장·AI) / 음성은 이 저장소의 audio 폴더 ===== */
@@ -1057,9 +1057,11 @@ function snowStart(b){if(xSnow||!b||matchMedia('(prefers-reduced-motion: reduce)
 
 
 /* 카드 버튼 글자를 한 곳에서 정리 — 아이콘 없이 짧은 글자만, 늘 한 줄 (상태가 바뀌어 글자가 다시 써져도 자동으로 맞춤) */
+let playKind=null;   /* 지금 소리 내는 버튼 {i,k} — 같은 버튼을 다시 누르면 정지 */
 function actsDeco(){const mn=$('main');if(!mn)return;mn.querySelectorAll('.card .acts button').forEach(b=>{const c=b.classList,t=b.textContent,p=b.getAttribute('aria-pressed')==='true';let lb;
-  if(c.contains('play')){lb=c.contains('looping')?'반복 중':'듣기'}
-  else if(c.contains('slow')){lb='천천히'}
+  const pl=b.closest('.card.playing'),i=pl?+pl.id.slice(1):-1,on=k=>pl&&playKind&&playKind.i===i&&playKind.k===k;
+  if(c.contains('play')){lb=c.contains('looping')?'반복 중':on('play')?'■ 정지':'듣기'}
+  else if(c.contains('slow')){lb=on('slow')?'■ 정지':'천천히'}
   else if(c.contains('hideen')){{const nb=b.clientWidth&&b.clientWidth<44?'':' ';lb=/보기/.test(t)?'영어'+nb+'보기':'영어'+nb+'숨김'}}
   else if(c.contains('write')){const op=p||/접기|닫기/.test(t);lb=op?'닫기':(/받아쓰기/.test(t)?'받아쓰기':'써보기')}
   else if(c.contains('wr-check')){lb='채점'}
@@ -2713,7 +2715,9 @@ document.addEventListener('click',async e=>{
       return}
     stay(i,render,showRes);return}
   if(t.classList.contains('hideen')){hiddenEn.has(i)?hiddenEn.delete(i):hiddenEn.add(i);if(!patchCardState(w,i))stay(i,render);return}
-  stop();const my=token;
+  /* 듣기·천천히: 소리가 나오는 중에 같은 버튼을 다시 누르면 정지 */
+  {const k=t.classList.contains('slow')?'slow':'play',c=$('c'+i);if(c&&c.classList.contains('playing')&&playKind&&playKind.i===i&&playKind.k===k){stop();return}playKind={i,k}}
+  stop();playKind={i,k:t.classList.contains('slow')?'slow':'play'};const my=token;
   /* 카드 안의 듣기·천천히: 지금 보고 있는 카드라 화면을 옮기지 않음 (전체 듣기만 읽는 카드를 따라감) */
   await playOne(s,i,t.classList.contains('slow')?0.7:+$('rate').value,my,true);
   if(my===token)hl(null);
@@ -2742,8 +2746,8 @@ $('stop').onclick=()=>{stop();const la=$('longAudio');if(la)la.pause()};
   const place=()=>{const bx=$('psBox');if(!bx){if(ctl.parentNode!==$('ctlHold'))$('ctlHold').appendChild(ctl);return}const hd=bx.querySelector('.ps-head');if(hd&&ctl.parentNode!==bx)hd.after(ctl)};
   new MutationObserver(place).observe(mn,{childList:true,subtree:true});place();
   $('rate').addEventListener('change',e=>{ls.set('rateSel',e.target.value);const a=$('longAudio');if(a){a.playbackRate=+e.target.value;a.defaultPlaybackRate=+e.target.value}});
-  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#psAll,#stopFab');if(!b)return;e.preventDefault();e.stopPropagation();if(b.id==='psAll')$('all').click();else $('stop').click()},true);
-  const fab=$('stopFab');setInterval(()=>{let on=!!document.querySelector('.card.playing');try{on=on||longPlaying()||loopIdx!=null}catch(_){}if(fab.hidden===on)fab.hidden=!on},400)})();
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#psAll,#stopFab');if(!b)return;e.preventDefault();e.stopPropagation();if(b.id==='psAll'){if(playKind&&playKind.k==='all'&&document.querySelector('.card.playing')){$('stop').click();playKind=null}else{$('all').click();playKind={i:-1,k:'all'}}}else $('stop').click()},true);
+  setInterval(()=>{const b=$('psAll');if(!b)return;const on=!!(playKind&&playKind.k==='all'&&document.querySelector('.card.playing'));const l=on?'■ 멈춤':'▶ 연속 듣기';if(b.textContent!==l)b.textContent=l},400)})();
 
 try{const sv=localStorage.getItem('voice');if(sv)$('voiceSel').value=sv}catch(e){}
 $('voiceSel').onchange=e=>{try{localStorage.setItem('voice',e.target.value)}catch(_){}};
