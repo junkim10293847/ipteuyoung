@@ -515,7 +515,7 @@ mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-sha
 .hint.press{margin:10px 0 10px;display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap}.hint.press .alllink{margin-left:auto;white-space:nowrap}
 .vbw{white-space:nowrap}.vbq{display:grid;gap:10px}.vbq-h{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--accent)}.vbq-h .bar{flex:1;height:6px;border-radius:9px;background:var(--line);overflow:hidden}.vbq-h .bar i{display:block;height:100%;background:var(--accent)}
 .vbq-ko{background:var(--accent-soft);border-radius:12px;padding:16px 14px;font-size:1.1rem;line-height:1.5}
-.vbq-en{font-size:1.3rem;line-height:1.9;padding:6px 2px}.vb-tabs{grid-template-columns:1fr 1fr 1fr;margin-bottom:10px}.vb-w{width:100%;box-sizing:border-box;font:inherit;font-size:1.05rem;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);color:var(--fg);resize:vertical}
+.vbq-en{font-size:1.3rem;line-height:1.9;padding:6px 2px}.vb-tabs{grid-template-columns:1fr 1fr;margin-bottom:10px}.vb-w{width:100%;box-sizing:border-box;font:inherit;font-size:1.05rem;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);color:var(--fg);resize:vertical}
 .vbq-en.all{font-size:1.2rem;line-height:2.1}
 /* 빈칸: 상자 대신 글줄 위의 얇은 밑줄 — 쓰는 중인 칸만 은은하게 강조 */
 .vbq .vb-in{font:inherit;font-size:1rem;font-weight:600;line-height:1.3;height:auto;min-height:0;border:0;border-radius:0;box-shadow:none;-webkit-appearance:none;appearance:none;
@@ -676,7 +676,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v206</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v207</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -705,7 +705,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v206</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v207</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1996,7 +1996,7 @@ function dqaHtml(w){const L=dqaItems(w);if(!L.length)return `<p class="hint" sty
     <div class="seq-act"><button class="ghost" id="dqaPrev"${p===0?' disabled':''}>◀ 이전</button><button class="primary" id="dqaNext">${p===L.length-1?'처음부터':'다음 ▶'}</button>${tried<L.length?`<button class="ghost" id="dqaSkip">안 푼 문제로</button>`:''}</div></div>`}
 /* 7. 빈칸 암기: 한글 문장을 보고 영어 빈칸을 직접 써서 채우기 (핵심 어휘만 / 문장 전체), 길이 보기·말하기 */
 let vbPos=0,vbKnow={},vbMode='v',vbLen=false,vbVal={},vbDone=null,vbSeed=0,vbOrd={};
-try{vbMode=localStorage.getItem('vbMode')||'v'}catch(_){}if(!/^[vaw]$/.test(vbMode))vbMode='v';
+try{vbMode=localStorage.getItem('vbMode')||'v'}catch(_){}if(vbMode==='a')vbMode='w';if(!/^[vw]$/.test(vbMode))vbMode='v';   /* '단어 전부'는 '문장 전체 쓰기'로 합침 */
 const vbNorm=x=>String(x||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9' ]/g,' ').replace(/\s+/g,' ').trim();
 function vbList(w){const L=[];w.sentences.forEach((x,i)=>{if(x.isTitle||!x.en)return;const sp=vocabSpans(x.en,x);if(vbMode!=='v'||sp.length)L.push({i,sp})});
   /* 순서대로가 아니라 섞어서 — 같은 회차·모드에서는 순서 유지, 모드를 바꾸거나 다시 하면 새로 섞음 */
@@ -2008,7 +2008,7 @@ function vbSlots(x,it){const ws=x.en.split(' '),S=[];
   it.sp.forEach(g=>{const txt=ws.slice(g.a,g.b+1).join(' '),m=txt.match(/^(["“‘(]*)(.*?)([.,!?;:"”’)]*)$/);S.push({a:g.a,b:g.b,pre:m[1],ans:m[2],tail:m[3]})});return S.sort((p,q)=>p.a-q.a)}
 const vbHint=a=>a.split(' ').map(t=>t.replace(/[a-zA-Z0-9]/g,'_')).join('  ');
 function vbHtml(w){const L=vbList(w);
-  const tabs=`<div class="dlg-steps vb-tabs"><button class="${vbMode==='v'?'on':''}" data-vbm="v">핵심 어휘</button><button class="${vbMode==='a'?'on':''}" data-vbm="a">단어 전부</button><button class="${vbMode==='w'?'on':''}" data-vbm="w">✍ 통째로 쓰기</button></div>`;
+  const tabs=`<div class="dlg-steps vb-tabs"><button class="${vbMode==='v'?'on':''}" data-vbm="v">핵심 어휘</button><button class="${vbMode==='w'?'on':''}" data-vbm="w">✍ 문장 전체 쓰기</button></div>`;
   if(!L.length)return tabs+'<p class="hint">이번 주 문장에서 가릴 단어·숙어를 찾지 못했어요.</p>';
   if(vbPos>=L.length){const n=Object.values(vbKnow).filter(Boolean).length;return tabs+`<div class="vbq"><b>🎉 ${L.length}문장 끝!</b><p>한 번에 맞힌 문장 ${n}/${L.length}</p><div class="seq-act"><button class="primary" id="vbAgain">새로 섞어서 다시</button></div></div>`}
   const it=L[vbPos],x=w.sentences[it.i],ws=x.en.split(' '),S=vbSlots(x,it),out=[];let n=0;
