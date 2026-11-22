@@ -667,7 +667,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v201</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v202</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -696,7 +696,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v201</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v202</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1284,7 +1284,7 @@ function patchWriteRes(w,i){
 function writeHtml(w,i){
   const key=curId+'|'+i, r=writeRes[key];
   return `<div class="wr">
-    ${isG()&&!r?`<div class="wr-ko dict"><span>🎧</span>▶ 듣기·천천히로 몇 번이든 듣고, <b>들리는 대로</b> 받아쓰세요. 모르는 곳은 비워도 돼요.</div>`:`<div class="wr-ko"><span>한글</span>${esc(w.sentences[i].ko||'(해석 없음)')}</div>`}
+    ${isG()&&!r?`<div class="wr-ko dict"><span>🎧</span>▶ 듣기·천천히로 몇 번이든 듣고, <b>들리는 대로</b> 받아쓰세요. 모르는 곳은 비워도 돼요.</div>`:`<div class="wr-ko"><span>한글</span>${(T=>T&&T.ko?`<b class="ttl-k">${esc(T.ko)}</b> · `:'')(ttlOf(w,i))}${esc(w.sentences[i].ko||'(해석 없음)')}</div>`}
     <textarea id="wr-${i}" data-i="${i}" rows="2" placeholder="${isG()?'들리는 대로 영어로 받아쓰기':'뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)'}" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
     ${r?`<div class="wr-res${r.perfect?' perfect':r.almost?' almost':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':r.almost?'거의 완벽! 단어는 모두 맞았어요 👍':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':r.almost?`<span class="al-note">쉼표 ${r.cmiss?r.cmiss+'곳 빠짐':''}${r.cmiss&&r.cbad?', ':''}${r.cbad?r.cbad+'곳 더 씀':''} — 표시된 자리만 고치면 완벽이에요</span>`:[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       ${diffHtml(r)}
