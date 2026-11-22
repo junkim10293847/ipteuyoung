@@ -585,8 +585,8 @@ li.card:has(.wr) > .ko,li.card:has(.wr) .body > .ko{display:none}   /* 쓰는 �
 @media (prefers-reduced-motion:reduce){.wr-res.perfect,.card.celebrate,.wr-confetti span{animation:none}.wr-confetti{display:none}}
 .wr-score{font-size:.84rem;color:var(--muted)}
 .wr-score b{color:var(--fg)}
-.wr-res.almost{background:#fff7e6;border:2px solid #e8a33d}
-.wr-res.almost .wr-score b{display:block;font-size:1.15rem;color:#b26a00;margin-bottom:2px}
+.wr-res.almost{background:#fffaf0;border:1px solid #efd6a6}
+.wr-res.almost .wr-score b{display:block;font-size:1.02rem;color:#a76300;margin-bottom:2px}
 .wr-res.almost .al-note{color:#8a5a00}
 @media (prefers-color-scheme:dark){.wr-res.almost{background:rgba(232,163,61,.12)}.wr-res.almost .wr-score b,.wr-res.almost .al-note{color:#f0b85a}}
 .wr-diff{line-height:1.8}
@@ -598,7 +598,7 @@ li.card:has(.wr) > .ko,li.card:has(.wr) .body > .ko{display:none}   /* 쓰는 �
 .wr-diff .sub s,.wr-legend .sub s{color:var(--warn)}
 .wr-diff .pun{display:inline-block;min-width:.9em;text-align:center;border-radius:4px;font-weight:800;text-decoration:none;margin-left:1px}
 .wr-diff .miss.pun{background:var(--done-soft);outline:1.5px dashed var(--done)}
-.cm-tip{margin-top:8px;font-size:.86rem;background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 10px;color:var(--fg)}.cm-tip ul{margin:4px 0 0;padding-left:18px}.cm-tip li{margin:2px 0;line-height:1.5}.cm-tip u{text-decoration:none;background:#fff3b0;border-radius:3px;padding:0 2px}
+.cm-tip{margin-top:6px;font-size:.86rem;background:color-mix(in srgb,var(--surface) 85%,transparent);border:0;border-left:3px solid var(--accent);border-radius:4px 10px 10px 4px;padding:8px 12px;color:var(--fg)}.cm-tip .cm-h{font-size:.82rem;color:var(--accent);font-weight:700;letter-spacing:.01em}.cm-tip ul{margin:4px 0 0;padding-left:16px}.cm-tip li::marker{color:var(--muted)}.cm-tip li{margin:2px 0;line-height:1.5}.cm-tip u{text-decoration:none;background:#fff3b0;border-radius:3px;padding:0 2px}
 .wr-diff .bad.pun{background:none;min-width:0;margin-left:0;color:#d33;text-decoration:line-through;text-decoration-thickness:2px}   /* 더 쓴 쉼표: 앞 단어에 바로 붙여 빨간 줄로 (지울 쉼표) */
 .wr-diff .sub b,.wr-legend .sub b{color:var(--done)}
 .allrow{margin:-4px 0 10px}
@@ -676,7 +676,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v207</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v208</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -705,7 +705,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v207</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v208</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1210,10 +1210,50 @@ function commaTips(r){if(!r||!r.d)return '';const D=r.d,W=e=>String(e[0]==='bad'
       else if(/^(which|who|where)$/.test(nx))out.add(`앞말에 설명을 덧붙이는 <b>, ${nx}</b> 앞에는 쉼표를 찍어요.`);
       else if(/^(too|either)$/.test(nx))out.add(`문장 끝의 <b>${nx}</b> 앞에는 쉼표를 넣기도 해요(생략해도 됨).`);
       else out.add('이름을 부를 때(Lulu, …), 나열할 때(A, B, and C), 말을 덧붙일 때 쉼표를 찍어요.')}});
-  return out.size?`<div class="cm-tip">💡 쉼표 규칙<ul>${[...out].map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
+  return [...out]}
+/* 문법 첨삭: 자주 틀리는 유형(관사·시제·단복수·3인칭 -s·전치사·숙어 어순)을 규칙으로 찾아 짧게 안내 */
+const ARTW=/^(a|an|the)$/,PREPW=/^(in|on|at|to|for|with|by|of|from|about|into|onto|during|since|until|after|before|over|under)$/;
+const DAYW=/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekends?|weekdays?|christmas|birthday)s?$/,MONW=/^(january|february|march|april|may|june|july|august|september|october|november|december|spring|summer|fall|autumn|winter|morning|afternoon|evening|\d{4}s?)$/;
+const PASTW=/^(ago|yesterday|last|once|then|earlier)$/,PRON3=/^(he|she|it|this|that|everyone|everybody|someone|somebody|nobody|everything|something|nothing|who)$/;
+const PLUR=/^(two|three|four|five|six|seven|eight|nine|ten|\d+|many|some|these|those|several|few|both|all|various|other|lots|plenty|numerous)$/,PARTW=/^(up|out|off|on|down|back|in|away|over|around)$/,OBJP=/^(him|her|it|them|me|us|you)$/;
+const IRR={went:'go',came:'come',saw:'see',took:'take',got:'get',had:'have',made:'make',was:'is',were:'are',brought:'bring',thought:'think',said:'say',told:'tell',found:'find',gave:'give',knew:'know',left:'leave',felt:'feel',kept:'keep',began:'begin',ate:'eat',bought:'buy',ran:'run',sat:'sit',wrote:'write',met:'meet',spent:'spend',taught:'teach',caught:'catch',heard:'hear',paid:'pay',sent:'send',slept:'sleep',lost:'lose',became:'become',fell:'fall',held:'hold',drove:'drive',chose:'choose',spoke:'speak',woke:'wake',did:'do',could:'can',would:'will'};
+function grammarTips(r){if(!r||!r.d)return [];const L=x=>String(x||'').toLowerCase().replace(/[^a-z0-9']/g,'');
+  const A=[],U=[],out=new Map();   /* A: 정답 쪽 단어열, U: 내가 쓴 단어열 */
+  r.d.forEach((e,n)=>{if(e[4]===',')return;const t=e[0];if(t!=='bad')A.push({w:L(t==='sub'?e[2]:e[1]),t,u:t==='sub'?L(e[1]):'',n});if(t!=='miss')U.push(L(e[1]))});
+  const all=A.map(o=>o.w),past=all.some(w=>PASTW.test(w)),add=(k,h)=>{if(!out.has(k))out.set(k,h)};
+  A.forEach((o,i)=>{const pv=i?A[i-1].w:'',nx=A[i+1]?A[i+1].w:'',w=o.w,u=o.u;
+    /* 관사 */
+    if(o.t==='miss'&&ARTW.test(w))add('art-'+w,w==='the'?`<b>the</b>가 빠졌어요 — 앞에서 말했거나 서로 아는 <u>그</u> 대상 앞에는 the를 붙여요. (<u>the</u> ${esc(nx)})`:`<b>${w}</b>가 빠졌어요 — 셀 수 있는 명사 하나를 처음 말할 땐 a/an을 붙여요. (<u>${w}</u> ${esc(nx)})`);
+    else if(o.t==='sub'&&ARTW.test(w)&&ARTW.test(u))add('art-s',(w==='an'||u==='an')&&w!=='the'&&u!=='the'?'모음 소리로 시작하는 말 앞에는 <b>an</b>, 나머지는 <b>a</b>예요. (<u>an</u> hour, <u>a</u> university)':`처음 말하는 하나는 <b>a</b>, 이미 아는 <u>그</u> 대상은 <b>the</b>예요. (${esc(u)} → <b>${w}</b>)`);
+    else if(o.t==='sub'&&u&&w!==u&&!ARTW.test(w)){
+      const base=IRR[w];
+      /* 시제 */
+      if((base&&(u===base||u===base+'s'||u===base+'es'))||(/ed$/.test(w)&&(u===w.slice(0,-2)||u===w.slice(0,-1)||u===w.slice(0,-2)+'s'||u===w.slice(0,-1)+'s'||(w.endsWith('ied')&&u===w.slice(0,-3)+'y')))){
+        add('tense',past?`<b>ago·yesterday·last</b>처럼 과거를 나타내는 말이 있으면 동사도 과거형으로 써요. (${esc(u)} → <b>${w}</b>)`:`이야기가 지난 일이라면 동사도 과거형으로 맞춰요. (${esc(u)} → <b>${w}</b>)`)}
+      else if((IRR[u]&&(w===IRR[u]||w===IRR[u]+'s'))||(/ed$/.test(u)&&(w===u.slice(0,-2)||w===u.slice(0,-1)||w+'ed'===u)))
+        add('tense2',`지금도 그런 일·늘 하는 일은 현재형으로 써요. (${esc(u)} → <b>${w}</b>)`);
+      /* 단수·복수 / 3인칭 -s */
+      else if(w===u+'s'||w===u+'es'||(w.endsWith('ies')&&u===w.slice(0,-3)+'y')||(u==='have'&&w==='has')||(u==='do'&&w==='does')){
+        if(PRON3.test(pv)||u==='have'||u==='do'||(pv&&!PLUR.test(pv)&&/^[A-Z]/.test(r.d[A[i-1].n][1]||'')&&i>1))add('s3',`주어가 he·she·it(또는 한 사람·한 개)이면 현재형 동사에 <b>-s</b>를 붙여요. (${esc(u)} → <b>${w}</b>)`);
+        else if(PLUR.test(pv)||!PREPW.test(nx))add('pl',`둘 이상이면 명사 끝에 <b>-s</b>를 붙여요. (${esc(u)} → <b>${w}</b>)`)}
+      else if(u===w+'s'||u===w+'es'||(u==='has'&&w==='have')||(u==='does'&&w==='do'))
+        add('pl2',PLUR.test(pv)?`여기는 -s를 붙이지 않아요. (${esc(u)} → <b>${w}</b>)`:`I·you·we·they 뒤나 조동사(can·will·to) 뒤 동사, 하나뿐인 명사에는 <b>-s</b>를 붙이지 않아요. (${esc(u)} → <b>${w}</b>)`);
+      /* 전치사 */
+      else if(PREPW.test(w)&&PREPW.test(u)){
+        if(w==='on'&&DAYW.test(nx))add('p-on','요일·날짜·특별한 날 앞에는 <b>on</b>을 써요. (<u>on</u> Monday, <u>on</u> my birthday)');
+        else if(w==='in'&&(MONW.test(nx)||(nx==='the'&&A[i+2]&&MONW.test(A[i+2].w))))add('p-in','달·계절·연도·하루 중 시간대 앞에는 <b>in</b>을 써요. (<u>in</u> May, <u>in</u> the morning)');
+        else if(w==='at'&&/^(night|noon|midnight|\d)/.test(nx))add('p-at','정확한 시각·밤·정오 앞에는 <b>at</b>을 써요. (<u>at</u> 7, <u>at</u> night)');
+        else add('p-'+i,`<b>${esc(pv)} ${w}</b> ${esc(nx)} — 전치사는 앞뒤 말과 한 덩어리로 외워 두세요. (${esc(u)} → <b>${w}</b>)`)}}
+    else if(o.t==='miss'&&PREPW.test(w)&&pv)add('pm-'+i,`<b>${w}</b>가 빠졌어요 — <u>${esc(pv)} ${w}</u>를 한 덩어리로 기억하세요.`);
+    /* 숙어 어순: sign him up */
+    if(OBJP.test(w)&&PARTW.test(nx)&&pv){const k=U.findIndex((x,j)=>x===pv&&U[j+1]===nx&&U[j+2]===w);
+      if(k>=0)add('pv',`대명사(${w})는 <b>${esc(pv)} … ${nx}</b> 사이에 넣어요. (<u>${esc(pv)} ${w} ${nx}</u> ○ / ${esc(pv)} ${nx} ${w} ✕)`)}});
+  return [...out.values()]}
+function fixTips(r){const g=grammarTips(r),c=commaTips(r),all=[...g,...c].slice(0,4);
+  return all.length?`<div class="cm-tip"><b class="cm-h">💡 고쳐 쓰기 팁</b><ul>${all.map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
 const diffHtml=r=>`<div class="wr-diff">${r.d.map(([t,x,y,s,k],n)=>{const sp=n&&k!==','?' ':'';
   if(k===','&&t!=='ok')return t==='bad'?`<s class="bad pun" title="쉼표 더 씀 — 지우세요">,</s>`:`<span class="${t} pun" title="쉼표 빠짐">,</span>`;
-  return sp+(t==='sub'?(hyDiff(x,y)||`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`):`<span class="${t}">${esc(x)}</span>`)}).join('')}</div>${commaTips(r)}`;
+  return sp+(t==='sub'?(hyDiff(x,y)||`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`):`<span class="${t}">${esc(x)}</span>`)}).join('')}</div>${fixTips(r)}`;
 const errCount=r=>[r.spell?`철자 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠짐 ${r.miss}`:'',r.bad?`더 씀 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).join(' · ');
 /* 4. 약점 기록: 써보기·모의 테스트 결과를 닉네임별로 누적 */
 function recordWeak(wid,i,r,save=true){
