@@ -754,6 +754,27 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .redo-pop b{font-weight:700}.redo-pop small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
 .redo-pop .rp-a{display:flex;gap:6px}.redo-pop button{font:inherit;font-size:.88rem;font-weight:700;border-radius:999px;padding:7px 14px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
 .redo-pop button.go{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+
+/* 카드 버튼 줄: 휴대폰에서는 칸을 맞춘 격자(닫힘 2×2, 써보기 열림 3×2)로 — 버튼이 들쭉날쭉 내려가지 않게 */
+@media (max-width:699px){
+ .card .acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .card .acts:has(.wr-check){grid-template-columns:repeat(3,minmax(0,1fr))}
+ .card .acts button{padding:9px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+ .card .acts .play.looping{white-space:normal;font-size:.8rem;line-height:1.2}
+}
+/* 🎄 카드 버튼: 초록·빨강 번갈아 + 크리스마스 아이콘(🔔 듣기 · ❄️ 천천히 · 🎁 영어 보기 · ✉️ 써보기 · ⭐ 채점) */
+:root[data-xmas="1"] .card .acts button{--xb:#1f5a43;background:var(--xb);border-color:var(--xb);color:#fffaf1;font-weight:700;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 6px -3px rgba(0,0,0,.35)}
+:root[data-xmas="1"] .card .acts button:nth-child(even){--xb:#9b2c35}
+@media (max-width:699px){:root[data-xmas="1"] .card .acts:not(:has(.wr-check)) button:nth-child(4n+3){--xb:#9b2c35}:root[data-xmas="1"] .card .acts:not(:has(.wr-check)) button:nth-child(4n){--xb:#1f5a43}}
+:root[data-xmas="1"] .card .acts button[aria-pressed="true"]{background:color-mix(in srgb,var(--xb) 14%,var(--surface));color:var(--xb);border:1.5px solid var(--xb)}
+:root[data-xmas="1"] .card .acts .play.looping{--xb:#a97a1f}
+:root[data-xmas="1"] .card .acts .play.waiting{opacity:.75}
+@media (prefers-color-scheme:dark){:root[data-xmas="1"]:not([data-theme="light"]) .card .acts button{--xb:#2f7d58}:root[data-xmas="1"]:not([data-theme="light"]) .card .acts button:nth-child(even){--xb:#b8424c}:root[data-xmas="1"]:not([data-theme="light"]) .card .acts button[aria-pressed="true"]{color:#fffaf1;background:color-mix(in srgb,var(--xb) 30%,var(--surface))}}
+:root[data-xmas="1"][data-theme="dark"] .card .acts button{--xb:#2f7d58}
+:root[data-xmas="1"][data-theme="dark"] .card .acts button:nth-child(even){--xb:#b8424c}
+@media (max-width:699px){:root[data-xmas="1"][data-theme="dark"] .card .acts:not(:has(.wr-check)) button:nth-child(4n+3){--xb:#b8424c}:root[data-xmas="1"][data-theme="dark"] .card .acts:not(:has(.wr-check)) button:nth-child(4n){--xb:#2f7d58}}
+@media (max-width:699px) and (prefers-color-scheme:dark){:root[data-xmas="1"]:not([data-theme="light"]) .card .acts:not(:has(.wr-check)) button:nth-child(4n+3){--xb:#b8424c}:root[data-xmas="1"]:not([data-theme="light"]) .card .acts:not(:has(.wr-check)) button:nth-child(4n){--xb:#2f7d58}}
+:root[data-xmas="1"][data-theme="dark"] .card .acts button[aria-pressed="true"]{color:#fffaf1;background:color-mix(in srgb,var(--xb) 30%,var(--surface))}
 </style>
 </head>
 <body>
@@ -771,7 +792,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v216</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v217</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="xmas-btn" id="xmasBtn" title="크리스마스 테마 켜기/끄기 (베타 · 나만 보임)" aria-label="크리스마스 테마" hidden>🎄</button><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -800,7 +821,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v216</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v217</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1004,8 +1025,8 @@ function xmasApply(){const r=document.documentElement,on=!!isOwner&&ls.get('xmas
   if(btn){btn.hidden=!isOwner;btn.setAttribute('aria-pressed',on)}
   const mt=document.querySelector('meta[name="theme-color"]');
   if(on){r.dataset.xmas='1';if(b&&!b.dataset.ph){const i=(ls.get('xmasI',-1)+1)%XMAS_PH.length;ls.set('xmasI',i);b.dataset.ph=XMAS_PH[i];b.style.setProperty('--xbg',`url(img/xmas/${XMAS_PH[i]}.webp)`)}
-    if(mt){mt.dataset.o=mt.dataset.o||mt.content;mt.content='#1d2a24'}snowStart(b)}
-  else{delete r.dataset.xmas;snowStop();if(mt&&mt.dataset.o)mt.content=mt.dataset.o}}
+    if(mt){mt.dataset.o=mt.dataset.o||mt.content;mt.content='#1d2a24'}snowStart(b);try{xmasDecoWatch(true)}catch(_){}}
+  else{const was=r.dataset.xmas==='1';delete r.dataset.xmas;snowStop();try{xmasDecoWatch(false);if(was&&typeof loaded!=='undefined'&&loaded)keepScroll(full)}catch(_){}if(mt&&mt.dataset.o)mt.content=mt.dataset.o}}
 function snowStart(b){if(xSnow||!b||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const c=document.createElement('canvas');c.className='snow';c.setAttribute('aria-hidden','true');b.prepend(c);const g=c.getContext('2d');let W=0,H=0,vis=true,raf=0;
   const fit=()=>{const d=Math.min(2,devicePixelRatio||1);W=b.clientWidth;H=b.clientHeight;c.width=W*d;c.height=H*d;g.setTransform(d,0,0,d,0,0)};fit();
@@ -1015,6 +1036,17 @@ function snowStart(b){if(xSnow||!b||matchMedia('(prefers-reduced-motion: reduce)
   const io=new IntersectionObserver(es=>{vis=es[0].isIntersecting;if(vis&&!raf)raf=requestAnimationFrame(step)});io.observe(b);
   const ro=new ResizeObserver(fit);ro.observe(b);const vc=()=>{if(!document.hidden&&!raf)raf=requestAnimationFrame(step)};document.addEventListener('visibilitychange',vc);
   xSnow={stop(){cancelAnimationFrame(raf);io.disconnect();ro.disconnect();document.removeEventListener('visibilitychange',vc);c.remove()}};raf=requestAnimationFrame(step)}
+
+/* 🎄 카드 버튼 글자 앞 아이콘을 크리스마스 아이콘으로 (글자가 바뀌어도 자동으로 다시 맞춤) */
+function xmasDeco(root){if(!XM())return;(root||document).querySelectorAll('.card .acts button').forEach(b=>{const t=b.textContent,c=b.classList;let m=null;
+  if(c.contains('play')&&/^▶/.test(t))m='🔔'+t.slice(1);
+  else if(c.contains('slow')&&/^▶/.test(t))m='❄️'+t.slice(1);
+  else if(c.contains('hideen')&&!/^[🎁🎀]/u.test(t))m=(/보기/.test(t)?'🎁 ':'🎀 ')+t;
+  else if(c.contains('write')&&/^✍/.test(t))m='✉️'+t.slice(1);
+  else if(c.contains('wr-check')&&t==='채점')m='⭐ 채점';
+  if(m&&m!==t)b.textContent=m})}
+let xDecoMO=null;
+function xmasDecoWatch(on){const mn=$('main');if(!mn)return;if(on){xmasDeco(mn);if(!xDecoMO){xDecoMO=new MutationObserver(()=>xmasDeco(mn));xDecoMO.observe(mn,{subtree:true,childList:true,characterData:true})}}else if(xDecoMO){xDecoMO.disconnect();xDecoMO=null}}
 function snowStop(){if(xSnow){xSnow.stop();xSnow=null}}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#xmasBtn');if(!t)return;e.preventDefault();ls.set('xmas',ls.get('xmas',true)===false);xmasApply();toast(ls.get('xmas',true)!==false?'🎄 크리스마스 테마를 켰어요':'크리스마스 테마를 껐어요')});
 function palPopRender(){const pp=$('palPop');if(!pp||pp.hidden)return;const rnd=palRaw(curProg)==='random',k=palOf(curProg);
