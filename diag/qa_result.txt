@@ -1,0 +1,18 @@
+== visit 1: html 577ms, first card 2081ms, long tasks(ms start,dur): [[2729, 112], [405, 84], [490, 63], [1592, 60], [663, 55]]
+  2732ms https://script.googleusercontent.com/macros/echo
+  2074ms V2rGckfAGTIMXqlBLrbjHdntdS2OcH2KwFvo_U1jXtRCbcBuBgTEJcw/exec
+  2004ms PbykFmXiEBPT4ITbgNA5Cgm20xz64px_1hVWr0wuPNGmlQNMEfD4.5.woff2
+  2003ms ykFmXiEBPT4ITbgNA5Cgm20xz64px_1hVWr0wuPNGmlQNMEfD4.107.woff2
+  1939ms ykFmXiEBPT4ITbgNA5Cgm20xz64px_1hVWr0wuPNGmlQNMEfD4.112.woff2
+  1864ms ykFmXiEBPT4ITbgNA5Cgm20xz64px_1hVWr0wuPNGmlQNMEfD4.110.woff2
+  1844ms https://script.googleusercontent.com/macros/echo
+  1595ms https://junkim10293847.github.io/ipteuyoung/data/weeks.json
+== visit 2: html 778ms, first card 891ms, long tasks(ms start,dur): [[102, 274], [697, 76], [603, 66]]
+  2787ms https://script.googleusercontent.com/macros/echo
+  2167ms V2rGckfAGTIMXqlBLrbjHdntdS2OcH2KwFvo_U1jXtRCbcBuBgTEJcw/exec
+  1617ms https://script.googleusercontent.com/macros/echo
+  1462ms V2rGckfAGTIMXqlBLrbjHdntdS2OcH2KwFvo_U1jXtRCbcBuBgTEJcw/exec
+  1434ms https://script.googleusercontent.com/macros/echo
+  1279ms V2rGckfAGTIMXqlBLrbjHdntdS2OcH2KwFvo_U1jXtRCbcBuBgTEJcw/exec
+  888ms tps://junkim10293847.github.io/ipteuyoung/audio/longmap.json
+  864ms https://junkim10293847.github.io/ipteuyoung/version.txt
