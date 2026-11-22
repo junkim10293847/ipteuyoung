@@ -590,6 +590,7 @@ li.card:has(.wr) > .ko,li.card:has(.wr) .body > .ko{display:none}   /* 쓰는 �
 .wr-diff .sub s,.wr-legend .sub s{color:var(--warn)}
 .wr-diff .pun{display:inline-block;min-width:.9em;text-align:center;border-radius:4px;font-weight:800;text-decoration:none;margin-left:1px}
 .wr-diff .miss.pun{background:var(--done-soft);outline:1.5px dashed var(--done)}
+.cm-tip{margin-top:8px;font-size:.86rem;background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 10px;color:var(--fg)}.cm-tip ul{margin:4px 0 0;padding-left:18px}.cm-tip li{margin:2px 0;line-height:1.5}.cm-tip u{text-decoration:none;background:#fff3b0;border-radius:3px;padding:0 2px}
 .wr-diff .bad.pun{background:none;min-width:0;margin-left:0;color:#d33;text-decoration:line-through;text-decoration-thickness:2px}   /* 더 쓴 쉼표: 앞 단어에 바로 붙여 빨간 줄로 (지울 쉼표) */
 .wr-diff .sub b,.wr-legend .sub b{color:var(--done)}
 .allrow{margin:-4px 0 10px}
@@ -667,7 +668,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v203</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v204</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -696,7 +697,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v203</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v204</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1180,9 +1181,31 @@ function hyDiff(x,y){if(!/-/.test(x)||!/-/.test(y))return '';
   if(!xs.some((p,i)=>key(p)===key(ys[i])))return '';
   return xs.map((p,i)=>key(p)===key(ys[i])?`<span class="ok">${esc(p)}</span>`:`<span class="sub"><s>${esc(p)}</s>→<b>${esc(ys[i])}</b></span>`).join('<span class="ok">-</span>')+(tail?`<span class="ok">${esc(tail)}</span>`:'')}
 /* 쉼표는 앞 단어에 붙여서 표시, 빠진 쉼표는 눈에 띄게 */
+/* 쉼표를 틀렸을 때, 그 자리에 맞는 쉼표 규칙을 짧게 알려 줌 */
+const SUBW=/^(when|because|if|before|after|until|while|since|although|though|unless|as|once|whenever|where)$/;
+const LINKW=/^(however|so|then|also|still|anyway|besides|meanwhile|finally|first|second|luckily|fortunately|unfortunately|actually|honestly|plus|now|well|yes|no|oh|instead|later|today|yesterday|recently)$/;
+function commaTips(r){if(!r||!r.d)return '';const D=r.d,W=e=>String(e[0]==='bad'?e[1]:(e[1]||e[2])||'').toLowerCase().replace(/[^a-z']/g,'');
+  const words=D.filter(e=>e[4]!==','&&e[0]!=='bad').map(W),first=words[0]||'',out=new Set();
+  D.forEach((e,n)=>{if(e[4]!==','||e[0]==='ok')return;
+    let nx='',pv='',before=0;for(let j=n+1;j<D.length;j++)if(D[j][4]!==','){nx=W(D[j]);break}
+    for(let j=n-1;j>=0;j--)if(D[j][4]!==','){if(!pv)pv=W(D[j]);if(D[j][0]!=='bad')before++}
+    if(e[0]==='bad'){
+      if((SUBW.test(first)&&before>1&&!SUBW.test(nx))||(before<=2&&LINKW.test(pv)))out.add('이 쉼표는 써도 틀린 것은 아니에요. 문장 앞의 When/If… 절이나 연결어 뒤 쉼표는 원문처럼 짧은 문장에서는 생략하기도 해요.');
+      else if(nx==='that')out.add('<b>that</b> 앞에는 쉼표를 찍지 않아요. (I think <u>that</u> …)');
+      else if(SUBW.test(nx))out.add(`문장 뒤에 이어지는 <b>${nx}</b> 절 앞에는 보통 쉼표를 찍지 않아요. (I was happy <u>${nx}</u> …) — ${nx} 절이 문장 맨 앞에 올 때만 그 절 끝에 쉼표를 찍어요.`);
+      else if(nx==='to'||nx==='and'&&before<4)out.add('짧은 말을 이어 줄 때(A and B, to + 동사)는 쉼표를 넣지 않아요.');
+      else out.add('주어와 동사, 동사와 목적어 사이처럼 한 덩어리로 이어지는 말은 쉼표로 끊지 않아요.')}
+    else{
+      if(SUBW.test(first)&&before>1)out.add(`<b>${first[0].toUpperCase()+first.slice(1)}</b> …로 시작하는 절이 문장 앞에 오면, 그 절이 끝나는 곳에 쉼표를 찍어요. (<u>When I got home,</u> I …)`);
+      else if(before<=2&&(LINKW.test(pv)||LINKW.test(first)))out.add('문장 맨 앞의 연결어·부사(However, So, Luckily, After that 등) 뒤에는 쉼표를 찍어요.');
+      else if(/^(and|but|so|or|yet)$/.test(nx))out.add(`두 문장(주어+동사)을 <b>${nx}</b>로 이을 때는 ${nx} 앞에 쉼표를 찍어요. (I was tired<u>, ${nx}</u> I …)`);
+      else if(/^(which|who|where)$/.test(nx))out.add(`앞말에 설명을 덧붙이는 <b>, ${nx}</b> 앞에는 쉼표를 찍어요.`);
+      else if(/^(too|either)$/.test(nx))out.add(`문장 끝의 <b>${nx}</b> 앞에는 쉼표를 넣기도 해요(생략해도 됨).`);
+      else out.add('이름을 부를 때(Lulu, …), 나열할 때(A, B, and C), 말을 덧붙일 때 쉼표를 찍어요.')}});
+  return out.size?`<div class="cm-tip">💡 쉼표 규칙<ul>${[...out].map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
 const diffHtml=r=>`<div class="wr-diff">${r.d.map(([t,x,y,s,k],n)=>{const sp=n&&k!==','?' ':'';
   if(k===','&&t!=='ok')return t==='bad'?`<s class="bad pun" title="쉼표 더 씀 — 지우세요">,</s>`:`<span class="${t} pun" title="쉼표 빠짐">,</span>`;
-  return sp+(t==='sub'?(hyDiff(x,y)||`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`):`<span class="${t}">${esc(x)}</span>`)}).join('')}</div>`;
+  return sp+(t==='sub'?(hyDiff(x,y)||`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`):`<span class="${t}">${esc(x)}</span>`)}).join('')}</div>${commaTips(r)}`;
 const errCount=r=>[r.spell?`철자 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠짐 ${r.miss}`:'',r.bad?`더 씀 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).join(' · ');
 /* 4. 약점 기록: 써보기·모의 테스트 결과를 닉네임별로 누적 */
 function recordWeak(wid,i,r,save=true){
