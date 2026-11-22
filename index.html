@@ -101,7 +101,7 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:.9375rem;line-height:1.55}
 html{font-size:16px}
-.wrap{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:18px 160px}
+.wrap{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:18px 90px}
 .install-slot:empty{display:none}
 .inst{position:relative;display:grid;justify-items:center;text-align:center;gap:6px;background:var(--accent);color:#fff;border-radius:16px;padding:16px 14px 14px;margin:0 0 14px;box-shadow:0 6px 18px rgba(0,0,0,.15)}
 .inst .ic{width:46px;height:46px;border-radius:50%;background:#fff;color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:1.4rem}
@@ -276,7 +276,7 @@ details.passage{margin-top:12px;padding:10px 14px}
 .howto{margin-top:12px;font-size:.82rem;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;display:grid;gap:3px}
 .howto>b{color:var(--fg);font-size:.88rem}
 .ps .mk-y{background:#ffe066;color:#1f2620;border-radius:3px;box-shadow:0 0 0 2px #ffe066}
-.toast{position:fixed;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:.82rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:.82rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40;white-space:nowrap}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .howto+*{}
 .ps-ko{display:block;font-size:.84rem;color:var(--muted);line-height:1.5;margin:0 0 8px}
@@ -313,7 +313,7 @@ ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .mkl{font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--muted)}
 .mkl span{padding:1px 8px;border-radius:999px;color:#1f2620;font-weight:600}
 .mkl .mk-y{background:#ffe066}.mkl .mk-r{background:#ff9e8f}
-.mkbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(120px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:8px;background:var(--fg);color:var(--bg);padding:8px 10px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:.82rem;white-space:nowrap}
+.mkbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:8px;background:var(--fg);color:var(--bg);padding:8px 10px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:.82rem;white-space:nowrap}
 .mkbar[hidden]{display:none}
 .mkb{font:inherit;font-weight:700;border:0;border-radius:999px;padding:6px 12px;cursor:pointer;color:#1f2620}
 .mkb.y{background:#ffe066}.mkb.r{background:#ff9e8f}.mkb.x{background:var(--bg);color:var(--fg)}
@@ -777,6 +777,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 /* 외운 문장: 별 대신 번호 색으로 구분 (외움 = 골드/주황, 아직 = 기본색) · 번호를 누르면 다시 외우기 */
 .card.done .num{color:var(--done);cursor:pointer;-webkit-tap-highlight-color:transparent}
 :root[data-xmas="1"] .card.done .num{color:var(--gold)}
+
+/* 재생 설정: 전체 지문 보기 안 / 정지는 재생 중에만 떠 있는 작은 버튼 */
+.ps-ctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:2px 0 10px;padding:8px 10px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.ps-ctl label{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ps-ctl select{font:inherit;font-size:.85rem;padding:4px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.stop-fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:40;font:inherit;font-weight:700;font-size:.92rem;padding:10px 22px;border-radius:999px;border:0;background:var(--fg);color:var(--bg);box-shadow:0 8px 22px -8px rgba(0,0,0,.45);cursor:pointer}
+body.typing .stop-fab{display:none}
 </style>
 </head>
 <body>
@@ -794,7 +801,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v225</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v226</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="xmas-btn" id="xmasBtn" title="크리스마스 테마 켜기/끄기 (베타 · 나만 보임)" aria-label="크리스마스 테마" hidden>🎄</button><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -823,7 +830,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v225</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v226</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -831,14 +838,16 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <button type="button" data-mk="y" class="mkb y">형광펜</button>
   <button type="button" data-mk="x" class="mkb x">형광펜 지우기</button>
 </div>
-<div class="dock"><div class="in">
-  <button class="big" id="all">▶ 전체 듣기</button>
-  <button class="stop" id="stop">■ 정지</button>
-  <label for="rate">속도 <select id="rate"><option value="0.85">0.85×</option><option value="1" selected>1.0×</option><option value="1.25">1.25×</option></select></label>
-  <label for="rep">반복 <select id="rep"><option selected>1</option><option>2</option><option>3</option><option>5</option></select></label>
-  <label for="voiceSel">목소리 <select id="voiceSel"><option value="af">미국 여성</option><option value="am">미국 남성</option><option value="bf">영국 여성</option></select></label>
-  <label for="gap">쉼 <select id="gap"><option value="1" selected>1초</option><option value="3">3초</option><option value="5">5초</option></select></label>
-</div></div>
+<div id="ctlHold" hidden>
+  <button class="big" id="all">▶ 전체 듣기</button><button class="stop" id="stop">■ 정지</button>
+  <div class="ps-ctl" id="psCtl">
+    <label for="rate">속도 <select id="rate"><option value="0.75">0.75×</option><option value="0.85">0.85×</option><option value="1" selected>1.0×</option><option value="1.1">1.1×</option><option value="1.25">1.25×</option></select></label>
+    <label for="rep">반복 <select id="rep"><option selected>1</option><option>2</option><option>3</option><option>5</option></select></label>
+    <label for="voiceSel">목소리 <select id="voiceSel"><option value="af">미국 여성</option><option value="am">미국 남성</option><option value="bf">영국 여성</option></select></label>
+    <label for="gap">쉼 <select id="gap"><option value="1" selected>1초</option><option value="3">3초</option><option value="5">5초</option></select></label>
+  </div>
+</div>
+<button type="button" class="stop-fab" id="stopFab" hidden>■ 정지</button>
 
 <script>
 /* ===== 서버 연결층: GitHub Pages 화면 ↔ Apps Script API(저장·AI) / 음성은 이 저장소의 audio 폴더 ===== */
@@ -1662,7 +1671,7 @@ function render(){
   const rng=d=>{const n=d.map(j=>numLabel(w,j)).filter(x=>x!=='T');return !n.length?'복습':n.length===1?n[0]:`${n[0]}–${n[n.length-1]}`};
   const missing=w.sentences.some(s=>!s.ko);
   const psHtml=`   <details class="passage" id="psBox"${psOpen?' open':''}>
-     <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장</span>${w.longAudio?`<span class="ps-act"><button type="button" class="ghost ps-rate" id="longRate" aria-label="연속 듣기 속도">${longRate()}×</button><button type="button" class="ghost" id="longRestart" aria-label="처음부터 듣기" title="처음부터"${longMid()?'':' hidden'}>↺ 처음</button><button type="button" class="ghost ps-long" id="longBtn">${longLabel()}</button></span>`:''}</summary>
+     <summary><span class="ps-title">전체 지문 보기</span><span class="ps-sub">${w.sentences.filter(x=>!x.isTitle).length}문장</span>${w.longAudio?`<span class="ps-act"><button type="button" class="ghost" id="longRestart" aria-label="처음부터 듣기" title="처음부터"${longMid()?'':' hidden'}>↺ 처음</button><button type="button" class="ghost ps-long" id="longBtn">${longLabel()}</button></span>`:`<span class="ps-act"><button type="button" class="ghost ps-long" id="psAll">▶ 연속 듣기</button></span>`}</summary>
      ${w.longAudio?`<div class="ps-prog" id="longProg"${longPlaying()?'':' hidden'}><i></i></div>`:''}
      <div class="ps-head"><span></span><button class="alllink" id="psKo">${psKo?'해석 숨기기':'해석 보기'}</button></div>
      ${w.sentences.filter(x=>x.isTitle).map(x=>`<h3>${esc(x.en)}</h3>`).join('')}
@@ -2500,7 +2509,7 @@ const preFail={};
 setInterval(()=>{document.querySelectorAll('.det-t').forEach(el=>{const t0=+el.dataset.t0;if(t0>1e12)el.textContent=Math.round((Date.now()-t0)/1000)+'초'})},1000);
 /* 한 주 연속 듣기: 전체 지문 줄의 버튼 하나로 재생/멈춤, 재생하면 지문을 펼쳐 지금 읽는 문장을 표시 */
 const LONG_RATES=[0.75,0.85,1,1.1,1.25];
-function longRate(){const r=+ls.get('longRate',1);const v=LONG_RATES.includes(r)?r:1;return v===1?'1.0':String(v)}
+function longRate(){const e=$('rate'),r=e?+e.value:1;return r===1?'1.0':String(r)}
 function longMid(){const a=$('longAudio');return !!(a&&a.src&&a.paused&&!a.ended&&a.currentTime>0.5)}
 function longLabel(){return longPlaying()?'⏸ 멈춤':longMid()?'▶ 이어서':'▶ 연속 듣기'}
 function longPlaying(){const a=$('longAudio');return !!(a&&!a.paused&&!a.ended)}
@@ -2703,6 +2712,15 @@ document.addEventListener('click',async e=>{
   if(my===token)hl(null);
 });
 $('stop').onclick=()=>{stop();const la=$('longAudio');if(la)la.pause()};
+/* 아래 고정 바 대신: 속도·반복·목소리·쉼은 '전체 지문 보기' 안에, 재생 중에만 작은 ■ 정지 버튼 */
+(()=>{const mn=$('main'),ctl=$('psCtl');if(!mn||!ctl)return;
+  try{const r=ls.get('rateSel',null);if(r&&[...$('rate').options].some(o=>o.value===String(r)))$('rate').value=String(r)}catch(_){}
+  const place=()=>{const bx=$('psBox');if(!bx){if(ctl.parentNode!==$('ctlHold'))$('ctlHold').appendChild(ctl);return}const hd=bx.querySelector('.ps-head');if(hd&&ctl.parentNode!==bx)hd.after(ctl)};
+  new MutationObserver(place).observe(mn,{childList:true,subtree:true});place();
+  $('rate').addEventListener('change',e=>{ls.set('rateSel',e.target.value);const a=$('longAudio');if(a){a.playbackRate=+e.target.value;a.defaultPlaybackRate=+e.target.value}});
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#psAll,#stopFab');if(!b)return;e.preventDefault();e.stopPropagation();if(b.id==='psAll')$('all').click();else $('stop').click()},true);
+  const fab=$('stopFab');setInterval(()=>{let on=!!document.querySelector('.card.playing');try{on=on||longPlaying()||loopIdx!=null}catch(_){}if(fab.hidden===on)fab.hidden=!on},400)})();
+
 try{const sv=localStorage.getItem('voice');if(sv)$('voiceSel').value=sv}catch(e){}
 $('voiceSel').onchange=e=>{try{localStorage.setItem('voice',e.target.value)}catch(_){}};
 document.addEventListener('play',e=>{if(e.target.id==='longAudio')stop()},true);
