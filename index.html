@@ -590,7 +590,7 @@ li.card:has(.wr) > .ko,li.card:has(.wr) .body > .ko{display:none}   /* 쓰는 �
 .wr-diff .sub s,.wr-legend .sub s{color:var(--warn)}
 .wr-diff .pun{display:inline-block;min-width:.9em;text-align:center;border-radius:4px;font-weight:800;text-decoration:none;margin-left:1px}
 .wr-diff .miss.pun{background:var(--done-soft);outline:1.5px dashed var(--done)}
-.wr-diff .bad.pun{background:rgba(220,60,60,.12)}
+.wr-diff .bad.pun{background:none;min-width:0;margin-left:0;color:#d33;text-decoration:line-through;text-decoration-thickness:2px}   /* 더 쓴 쉼표: 앞 단어에 바로 붙여 빨간 줄로 (지울 쉼표) */
 .wr-diff .sub b,.wr-legend .sub b{color:var(--done)}
 .allrow{margin:-4px 0 10px}
 .alllink{font:inherit;font-size:.82rem;font-weight:700;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
@@ -667,7 +667,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v202</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v203</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -696,7 +696,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v202</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v203</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -1181,7 +1181,7 @@ function hyDiff(x,y){if(!/-/.test(x)||!/-/.test(y))return '';
   return xs.map((p,i)=>key(p)===key(ys[i])?`<span class="ok">${esc(p)}</span>`:`<span class="sub"><s>${esc(p)}</s>→<b>${esc(ys[i])}</b></span>`).join('<span class="ok">-</span>')+(tail?`<span class="ok">${esc(tail)}</span>`:'')}
 /* 쉼표는 앞 단어에 붙여서 표시, 빠진 쉼표는 눈에 띄게 */
 const diffHtml=r=>`<div class="wr-diff">${r.d.map(([t,x,y,s,k],n)=>{const sp=n&&k!==','?' ':'';
-  if(k===','&&t!=='ok')return `<span class="${t} pun" title="${t==='miss'?'쉼표 빠짐':'쉼표 더 씀'}">,</span>`;
+  if(k===','&&t!=='ok')return t==='bad'?`<s class="bad pun" title="쉼표 더 씀 — 지우세요">,</s>`:`<span class="${t} pun" title="쉼표 빠짐">,</span>`;
   return sp+(t==='sub'?(hyDiff(x,y)||`<span class="sub"><s>${esc(x)}</s>→<b>${esc(y)}</b></span>`):`<span class="${t}">${esc(x)}</span>`)}).join('')}</div>`;
 const errCount=r=>[r.spell?`철자 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠짐 ${r.miss}`:'',r.bad?`더 씀 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).join(' · ');
 /* 4. 약점 기록: 써보기·모의 테스트 결과를 닉네임별로 누적 */
@@ -1286,7 +1286,7 @@ function writeHtml(w,i){
   return `<div class="wr">
     ${isG()&&!r?`<div class="wr-ko dict"><span>🎧</span>▶ 듣기·천천히로 몇 번이든 듣고, <b>들리는 대로</b> 받아쓰세요. 모르는 곳은 비워도 돼요.</div>`:`<div class="wr-ko"><span>한글</span>${(T=>T&&T.ko?`<b class="ttl-k">${esc(T.ko)}</b> · `:'')(ttlOf(w,i))}${esc(w.sentences[i].ko||'(해석 없음)')}</div>`}
     <textarea id="wr-${i}" data-i="${i}" rows="2" placeholder="${isG()?'들리는 대로 영어로 받아쓰기':'뜻을 떠올리며 영어 문장을 써 보세요 (키보드 마이크로 말해도 됩니다)'}" autocapitalize="sentences" spellcheck="false">${esc(writeDraft[key]||'')}</textarea>
-    ${r?`<div class="wr-res${r.perfect?' perfect':r.almost?' almost':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':r.almost?'거의 완벽! 단어는 모두 맞았어요 👍':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':r.almost?`<span class="al-note">쉼표 ${r.cmiss?r.cmiss+'곳 빠짐':''}${r.cmiss&&r.cbad?', ':''}${r.cbad?r.cbad+'곳 더 씀':''} — 표시된 자리만 고치면 완벽이에요</span>`:[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
+    ${r?`<div class="wr-res${r.perfect?' perfect':r.almost?' almost':''}"><div class="wr-score"><b>${r.perfect?'완벽해요! 🎉':r.almost?'거의 완벽! 단어는 모두 맞았어요 👍':`정확도 ${r.score}%`}</b>${r.perfect?'✓ 외움으로 표시했어요':r.almost?`<span class="al-note">쉼표 ${r.cmiss?r.cmiss+'곳 빠짐':''}${r.cmiss&&r.cbad?', ':''}${r.cbad?r.cbad+'곳 더 씀(빨간 줄 쉼표는 빼야 해요)':''} — 표시된 자리만 고치면 완벽이에요</span>`:[r.spell?`철자 틀림 ${r.spell}`:'',r.sub?`다른 단어 ${r.sub}`:'',r.miss?`빠진 단어 ${r.miss}`:'',r.bad?`더 쓴 단어 ${r.bad}`:'',r.cmiss?`쉼표 빠짐 ${r.cmiss}`:'',r.cbad?`쉼표 더 씀 ${r.cbad}`:''].filter(Boolean).map(x=>' · '+x).join('')}</div>
       ${diffHtml(r)}
 </div>`:''}
   </div>`;
