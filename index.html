@@ -516,10 +516,18 @@ mark.hl{background:#fff27a;color:inherit;border-radius:3px;padding:0 1px;box-sha
 .vbw{white-space:nowrap}.vbq{display:grid;gap:10px}.vbq-h{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--accent)}.vbq-h .bar{flex:1;height:6px;border-radius:9px;background:var(--line);overflow:hidden}.vbq-h .bar i{display:block;height:100%;background:var(--accent)}
 .vbq-ko{background:var(--accent-soft);border-radius:12px;padding:16px 14px;font-size:1.1rem;line-height:1.5}
 .vbq-en{font-size:1.3rem;line-height:1.9;padding:6px 2px}.vb-tabs{grid-template-columns:1fr 1fr 1fr;margin-bottom:10px}.vb-w{width:100%;box-sizing:border-box;font:inherit;font-size:1.05rem;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);color:var(--fg);resize:vertical}
-.vbq-en.all{line-height:2.3}.vb-in{font:inherit;font-size:1rem;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:2px 6px;margin:0 2px;color:var(--fg);min-width:3ch;max-width:100%;letter-spacing:.02em}
-.vb-in:focus{outline:2px solid var(--accent);background:#fff}.vb-in::placeholder{color:var(--muted);opacity:.7;letter-spacing:.08em}
-.vb-a{border-radius:8px;padding:1px 6px;font-weight:700}.vb-a.ok{background:#dcf5e3;color:#18794e}.vb-a.no{background:#fde2e2;color:#c0392b;text-decoration:line-through}.vb-c{background:#fff3b0;border-radius:8px;padding:1px 6px;margin-left:3px;font-weight:700}
-.vb-r{margin:0;font-weight:700;color:#c0392b}.vb-r.ok{color:#18794e}
+.vbq-en.all{font-size:1.2rem;line-height:2.1}
+/* 빈칸: 상자 대신 글줄 위의 얇은 밑줄 — 쓰는 중인 칸만 은은하게 강조 */
+.vbq .vb-in{font:inherit;font-size:1rem;font-weight:600;line-height:1.3;height:auto;min-height:0;border:0;border-radius:0;box-shadow:none;-webkit-appearance:none;appearance:none;
+  background:transparent;border-bottom:1.5px solid color-mix(in srgb,var(--accent) 35%,transparent);padding:0 2px 1px;margin:0 1px;color:var(--accent);text-align:center;
+  min-width:3ch;max-width:100%;letter-spacing:.01em;vertical-align:baseline;transition:border-color .15s,background .15s}
+.vbq .vb-in:focus,.vbq .vb-in:focus-visible{outline:0;border-bottom:2px solid var(--accent);background:color-mix(in srgb,var(--accent-soft) 70%,transparent);border-radius:6px 6px 0 0}
+.vbq .vb-in::placeholder{color:var(--muted);opacity:.7;letter-spacing:.08em}
+/* 채점 결과: 맞은 말은 초록 글자+밑줄, 틀린 말은 작게 지운 줄, 정답은 형광 밑줄 */
+.vb-a{font-weight:600}.vb-a.ok{color:#18794e;border-bottom:1.5px solid #8fd3a8}
+.vb-a.no{color:#c0392b;opacity:.75;font-size:.72em;font-weight:500;text-decoration:line-through;margin-right:3px;vertical-align:.15em}
+.vb-c{font-weight:600;color:var(--fg);background:linear-gradient(transparent 62%,#ffe58a 62%);padding:0 1px}
+.vb-r{margin:0;font-size:.92rem;font-weight:600;color:var(--muted)}.vb-r.ok{color:#18794e}
 .vbq-tool{display:flex;flex-wrap:wrap;gap:8px}.vbq-tool button{padding:9px 12px;border-radius:12px;font-size:.92rem}
 .vbq-act{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}.vbq-act button{padding:12px 6px;font-size:.95rem;border-radius:14px}.vb{font:inherit;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:0 8px;margin:0 1px;cursor:pointer;font-size:.82em;font-weight:700;line-height:1.5}.vb.op{font-size:1em;color:var(--fg);background:#fff3b0;border-bottom-color:#e0b400}
 .acts .wr-check{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
@@ -668,7 +676,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </form>
 </div>
 <div class="wrap">
-  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v205</button>
+  <button type="button" class="ver-top" id="verTop" title="지금 버전 · 눌러서 최신 버전 받기">v206</button>
   <header class="brand"><span class="progsw" id="progSw"><button type="button" class="brand-mark" data-prog="ipt" aria-pressed="true" title="입트영">입</button><button type="button" class="brand-mark" data-prog="gtv" aria-pressed="false" title="귀트영">귀</button></span><div><div class="brand-t" id="brandT">입트영 스터디</div><div class="brand-s" id="brandS">EBS 입이 트이는 영어 · 듣고 쓰고 외우기</div></div><button type="button" class="pal-btn" id="palBtn" aria-label="색 고르기" title="색 고르기">🎨</button></header>
   <div class="pal-pop" id="palPop" hidden></div>
   <div class="install-slot"></div>
@@ -697,7 +705,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     try{history.scrollRestoration='manual'}catch(_){}window.scrollTo(0,x.y||0);window.__snap=true}catch(_){}})();</script>
   <p class="adminfoot"><button type="button" id="adminBtn">🔐 관리자</button> <button type="button" id="membersBtn" hidden>👥 회원 현황</button></p>
   <section class="panel members" id="membersPanel" hidden></section>
-  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v205</button></p>
+  <p class="copyright-note">본 지문·해석·음성의 저작권은 EBS 「입이 트이는 영어」에 있습니다.<br>스터디 구성원의 내부 학습용으로만 사용하며, 링크와 내용의 외부 공유를 삼가 주세요.<br><button type="button" class="ver" id="verBtn" title="눌러서 최신 버전 받기">v206</button></p>
 </div>
 
 <div class="mkbar" id="mkbar" hidden role="toolbar" aria-label="표시하기">
@@ -2014,13 +2022,13 @@ function vbHtml(w){const L=vbList(w);
   for(let k=0;k<ws.length;k++){const g=S.find(o=>o.a===k);
     if(!g){out.push(esc(ws[k]));continue}
     const id=n++,v=vbVal[id]||'',st=vbDone&&vbDone[id],ch=vbMode==='a'?5:8;   /* 길이 힌트가 되지 않게 칸 크기는 같게 */
-    out.push(`<span class="vbw">${esc(g.pre)}${st?`<span class="vb-a ${st.ok?'ok':'no'}">${esc(st.ok?g.ans:(v||'—'))}</span>${st.ok?'':`<span class="vb-c">${esc(g.ans)}</span>`}`:
+    out.push(`<span class="vbw">${esc(g.pre)}${st?(st.ok?`<span class="vb-a ok">${esc(g.ans)}</span>`:`${v.trim()?`<span class="vb-a no">${esc(v)}</span>`:''}<span class="vb-c">${esc(g.ans)}</span>`):
       `<input class="vb-in" data-vbi="${id}" value="${esc(v)}" style="width:${ch}ch" autocomplete="off" autocapitalize="off" spellcheck="false" >`}${esc(g.tail)}</span>`);k=g.b}
   const fin=!!vbDone,allOk=fin&&Object.values(vbDone).every(z=>z.ok);
   return tabs+`<div class="vbq"><div class="vbq-h"><b>${vbPos+1}/${L.length}</b><span class="bar"><i style="width:${vbPos/L.length*100}%"></i></span></div>
     <div class="vbq-ko">${esc(x.ko||'')}</div>
     <div class="vbq-en${vbMode==='a'?' all':''}">${out.join(' ')}</div>
-    ${fin?`<p class="vb-r ${allOk?'ok':''}">${allOk?'🎉 정답!':'✏️ 빨간 칸의 정답을 확인하고 소리 내어 읽어 보세요'}</p>`:''}
+    ${fin?`<p class="vb-r ${allOk?'ok':''}">${allOk?'🎉 정답!':'✏️ 노란 밑줄이 정답이에요 — 소리 내어 읽어 보세요'}</p>`:''}
     <textarea id="vbSay" hidden></textarea>
     <div class="vbq-tool">${fin?'':micBtn('vbSay')}<button class="ghost" id="vbHear">🔊 듣기</button></div>
     <div class="vbq-act">${fin?`<button class="ghost" id="vbRetry">다시 쓰기</button><button class="primary" id="vbNext">다음 문제 ▶</button>`:`<button class="ghost" id="vbShow">정답 보기</button><button class="primary" id="vbChk">✓ 확인</button>`}</div></div>`}
