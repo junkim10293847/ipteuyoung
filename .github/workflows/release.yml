@@ -34,6 +34,7 @@ jobs:
             const js=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join('\n');
             require('fs').writeFileSync('/tmp/app.js',js)"
           node --check /tmp/app.js
+          node --check app.js
           node --check sw.js
           python3 -m py_compile scripts/gen_details.py scripts/gen_audio.py scripts/tts.py
       - name: 2. 주요 기능 눌러 보기

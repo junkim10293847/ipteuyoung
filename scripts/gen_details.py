@@ -2,7 +2,7 @@
 
 앱에서 '자세히'를 누를 때 AI가 그제야 설명을 만들면 15~25초를 기다려야 함.
 그래서 이번 주·다음 주 지문의 단어·숙어 중 아직 설명이 없는 것을 미리 만들어 주차 자료에 넣어 둠
-→ 누르면 바로 보임. 앱과 똑같은 지시문(index.html의 DETAIL_EXAMPLE 포함)을 씀.
+→ 누르면 바로 보임. 앱과 똑같은 지시문(app.js의 DETAIL_EXAMPLE 포함)을 씀.
 
   python scripts/gen_details.py          # 실제 생성
   python scripts/gen_details.py --plan   # 만들 개수만 확인
@@ -42,7 +42,7 @@ def call(url, fn, *args, timeout=150):
 
 
 def example():
-    s = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+    s = open(os.path.join(ROOT, 'app.js'), encoding='utf-8').read()
     m = re.search(r'const DETAIL_EXAMPLE=("(?:[^"\\]|\\.)*");', s)
     return json.loads(m.group(1)) if m else ''
 
