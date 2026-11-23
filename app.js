@@ -181,8 +181,8 @@ function applyPal(){const r=document.documentElement,k=palOf(curProg);r.dataset.
 
 /* 🎄 크리스마스 테마(베타): 관리자에게만 보이고, 🎄 버튼으로 켜고 끔. 배너 사진은 열 때마다 바뀜 */
 const XMAS_PH=['holiday','records','fifth','cafe','chelsea','bluetree','subway'];let xSnow=null;
-const XMAS_USERS=['배라'];   /* 크리스마스 테마를 미리 보는 멤버 (닉네임) */
-const xmasOk=()=>!!isOwner||XMAS_USERS.includes(typeof nick==='string'?nick:'');
+const XMAS_END=new Date(2027,0,16).getTime();   /* 크리스마스 시즌: 지금 ~ 2027년 1월 15일, 모든 멤버 */
+const xmasOk=()=>Date.now()<XMAS_END;
 function xmasApply(){const r=document.documentElement,on=xmasOk()&&ls.get('xmas',true)!==false,b=document.querySelector('.wrap>.brand'),btn=$('xmasBtn');
   if(btn){btn.hidden=!xmasOk();btn.setAttribute('aria-pressed',on)}
   const mt=document.querySelector('meta[name="theme-color"]');
