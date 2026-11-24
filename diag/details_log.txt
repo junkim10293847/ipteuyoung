@@ -1,12 +1,7 @@
-설명이 없는 단어·숙어 8개 (이번에 최대 40개), 퀴즈가 없는 설명 0개
+설명이 없는 단어·숙어 3개 (이번에 최대 40개), 퀴즈가 없는 설명 0개
 품사·어원이 없는 설명 0개
-  2026-11-22 take a leaf from one's playbook: 실패 The read operation timed out
-  2026-11-22 #7 uptake: 완료 (38초)
+  2026-11-22 #7 take a leaf from one's playbook: 완료 (89초)
   2026-11-22 drop-off bin: 실패 The read operation timed out
-  2026-11-22 lure in: 실패 The read operation timed out
-  2026-11-22 #8 a sliver of: 완료 (103초)
-  2026-11-22 #9 Sustainability expert: 완료 (7초)
-  2026-11-22 #9 incentive: 완료 (113초)
-  2026-11-22 #9 close the gap: 완료 (8초)
-  → 5개 저장
-설명 5개 저장
+  2026-11-22 #8 lure in: 완료 (50초)
+  → 2개 저장
+설명 2개 저장
