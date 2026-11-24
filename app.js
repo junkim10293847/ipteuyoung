@@ -910,17 +910,26 @@ document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classL
 const qaLive={}, qaDraft={}, qaJust={}, qaOpen=new Set(), qaItem={};
 /* 답 끝의 '확인 퀴즈'에 바로 써서 첨삭 받기 */
 const qzBusy={};
+/* 답 끝의 '퀴즈 정답:' 줄은 화면에서 빼고 따로 저장 → 첨삭을 누르면 정답과 바로 비교 */
+function qzSplit(t){t=String(t||'');const m=t.match(/\n?\s*퀴즈\s*정답\s*[:：]\s*([^\n]+)\s*$/);return m?{a:t.slice(0,m.index).trimEnd(),ans:m[1].trim().replace(/^["'“]|["'”]$/g,'')}:{a:t,ans:''}}
+/* 정답이 없는 예전 퀴즈: 화면에 보이면 뒤에서 조용히 정답을 받아 둠 */
+const qzAnsBusy=new Set();
+function qzEnsure(x,key,i){if(!x||x.qzA||!sample||qzAnsBusy.has(key+'#'+i))return;qzAnsBusy.add(key+'#'+i);
+  sample.json(`영어 학습 퀴즈의 모범 답을 만든다.\n앞의 설명 주제: ${x.q}\n퀴즈: ${qzText(x.a)}\n퀴즈가 요구하는 뜻을 가장 자연스럽고 흔한 영어 한 문장으로. JSON만: {"answer":"..."}`,{bg:true,limit:40000})
+   .then(j=>{const s=String(j&&j.answer||'').trim();if(s){x.qzA=s;try{saveProg()}catch(_){}}}).catch(()=>{}).finally(()=>qzAnsBusy.delete(key+'#'+i))}
 function qzText(a){const m=String(a||'').match(/확인\s*퀴즈\s*[:：]\s*([^\n]+)/);return m?m[1].trim():''}
 /* 첨삭 버튼: 기다리는 중에는 '첨삭 중… N초', 12초가 지나면 다시 누를 수 있게 풀어 둠 (휴대폰 연결이 멈춰도 갇히지 않게) */
 const BUSY_RETRY=12000;
 const busyBtn=(b,label)=>{if(!b)return {dis:'',txt:label};const sec=Math.round((Date.now()-b)/1000);return Date.now()-b<BUSY_RETRY?{dis:' disabled',txt:`첨삭 중… ${sec}초`}:{dis:'',txt:`첨삭 중… ${sec}초 · 다시 누르기`}};
 setInterval(()=>{document.querySelectorAll('[data-busy0]').forEach(el=>{const b=+el.dataset.busy0,r=busyBtn(b,'');el.textContent=r.txt;el.disabled=!!r.dis})},1000);
-function qzHtml(x,key,i){const q=qzText(x.a);if(!q)return '';const z=x.qz,b=qzBusy[key+'#'+i],bb=busyBtn(b,'첨삭 받기');
+function qzHtml(x,key,i){const q=qzText(x.a);if(!q)return '';if(!x.qzA)setTimeout(()=>qzEnsure(x,key,i),0);const z=x.qz,b=(z&&z.ans)?0:qzBusy[key+'#'+i],bb=busyBtn(b,'첨삭 받기');
   return `<div class="qz"><div class="qz-h">✏️ 확인 퀴즈 풀기</div>
     <input class="qz-in" id="qz-${i}" data-qk="${esc(key)}" data-i="${i}" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" placeholder="여기에 영어로 써 보세요" value="${esc(z&&z.u||'')}">
     <div class="seq-act">${micBtn('qz-'+i)}<button type="button" class="primary qz-go" data-qk="${esc(key)}" data-i="${i}"${bb.dis}${b?` data-busy0="${b}"`:''}>${bb.txt}</button>${z?`<button type="button" class="ghost qz-re" data-qk="${esc(key)}" data-i="${i}">↺ 다시 하기</button>`:''}</div>
     ${z&&z.err?`<p class="load">${esc(z.err)}</p>`:''}
-    ${z&&z.fixed?`<div class="seq-r ${z.ok?'ok':''}"><b>${z.ok?'✅ 맞았어요':'✏️ 이렇게 고쳐 보세요'}</b>${z.ok?`<div class="wr-diff">${esc(z.fixed)}</div>`:diffHtml(gradeText(z.fixed,z.u))}${z.better&&z.better!==z.fixed?`<em>더 자연스럽게: ${esc(z.better)}</em>`:''}${z.tip?`<em>${esc(z.tip)}</em>`:''}</div>`:''}
+    ${z&&z.ans?(()=>{const r=gradeText(z.ans,z.u),ok=r.perfect||z.ok;
+      return `<div class="seq-r ${ok?'ok':''}"><b>${r.perfect?'✅ 완벽해요':z.ok?'✅ 뜻은 맞아요 — 정답 예와 비교해 보세요':'✏️ 정답과 비교해 보세요'}</b>${diffHtml(r)}${z.better&&z.better!==z.ans?`<em>더 자연스럽게: ${esc(z.better)}</em>`:''}${z.tip?`<em>${esc(z.tip)}</em>`:''}${!r.perfect&&!z.tip&&qzBusy[key+'#'+i]?'<em class="qz-wait">AI 조언 받는 중…</em>':''}</div>`})():''}
+    ${z&&!z.ans&&z.fixed?`<div class="seq-r ${z.ok?'ok':''}"><b>${z.ok?'✅ 맞았어요':'✏️ 이렇게 고쳐 보세요'}</b>${z.ok?`<div class="wr-diff">${esc(z.fixed)}</div>`:diffHtml(gradeText(z.fixed,z.u))}${z.better&&z.better!==z.fixed?`<em>더 자연스럽게: ${esc(z.better)}</em>`:''}${z.tip?`<em>${esc(z.tip)}</em>`:''}</div>`:''}
   </div>`}
 const qaRe=el=>{const q=el.closest('.qa');if(q)q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)};
 document.addEventListener('click',async e=>{
@@ -929,7 +938,17 @@ document.addEventListener('click',async e=>{
     if(zq.classList.contains('qz-re')){delete x.qz;saveProg();qaRe(zq);return}
     const inp=zq.closest('.qz').querySelector('.qz-in'),u=(inp?inp.value:'').trim();if(!u){toast('먼저 써 보거나 🎤로 말해 보세요');return}
     if(!sample){x.qz={u,err:'AI 기능이 켜져 있어야 첨삭할 수 있어요.'};qaRe(zq);return}
-    micStop();const myT=Date.now();qzBusy[k+'#'+i]=myT;x.qz={u};qaRe(zq);
+    micStop();const myT=Date.now();
+    if(x.qzA){const r=gradeText(x.qzA,u);x.qz={u,ans:x.qzA,ok:r.perfect};saveProg();
+      if(r.perfect){delete qzBusy[k+'#'+i];qaRe(zq);const rb=document.querySelector(`.qz-in[data-qk="${CSS.escape(k)}"][data-i="${i}"]`);const box=rb&&rb.closest('.qz').querySelector('.seq-r');if(box)celebrateBox(box);return}
+      qzBusy[k+'#'+i]=myT;qaRe(zq);
+      /* 정답과 다르면 AI 조언을 뒤에서 이어 받음 (뜻이 맞는 다른 표현인지도 판단) */
+      sample.json(`너는 한국인 초보 영어 학습자를 다정하게 가르치는 영어 강사다.\n퀴즈: ${qzText(x.a)}\n모범 답: ${x.qzA}\n학습자의 답: ${u}\n(음성 인식이라 철자가 이상할 수 있다.)\n- "ok": 모범 답과 단어는 달라도 퀴즈의 뜻을 문법적으로 맞게 표현했으면 true.\n- "better": 학습자 답을 살린 자연스러운 문장(모범 답과 같으면 빈 문자열).\n- "tip": 무엇이 다르고 왜 그런지 한국어 한 문장.\nJSON만: {"ok":false,"better":"...","tip":"..."}`,{modelTier:'default',limit:50000})
+        .then(j=>{if(qzBusy[k+'#'+i]!==myT||!x.qz||x.qz.u!==u)return;x.qz={...x.qz,ok:!!(j&&j.ok),better:String(j&&j.better||'').trim(),tip:String(j&&j.tip||'').trim()}})
+        .catch(()=>{})
+        .finally(()=>{if(qzBusy[k+'#'+i]!==myT)return;delete qzBusy[k+'#'+i];try{saveProg()}catch(_){}const h=document.querySelector(`.qz-go[data-qk="${CSS.escape(k)}"][data-i="${i}"]`);const q=h&&h.closest('.qa');if(q)q.outerHTML=qaHtml(q.dataset.k,q.dataset.t||undefined,q.dataset.p||undefined)});
+      return}
+    qzBusy[k+'#'+i]=myT;x.qz={u};qaRe(zq);
     const prompt=`너는 한국인 초보 영어 학습자를 다정하게 가르치는 영어 강사다.
 앞서 학습자가 한 질문: ${x.q}
 그에 대한 설명 끝에 낸 확인 퀴즈: ${qzText(x.a)}
@@ -940,10 +959,11 @@ document.addEventListener('click',async e=>{
 - "fixed": 학습자 답을 최대한 살려 가장 적게 고친 올바른 영어 문장. ok면 다듬은 학습자 문장.
 - "better": 원어민이 더 자연스럽게 말하는 문장 (fixed와 같으면 빈 문자열).
 - "tip": 무엇을 왜 고쳤는지 한국어 한 문장 (ok면 칭찬 한 마디).
-JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"..."}`;
+- "answer": 이 퀴즈의 모범 답 영어 한 문장.
+JSON만 답한다: {"ok":true,"fixed":"...","better":"...","tip":"...","answer":"..."}`;
     let fresh=null;
     try{const j=await sample.json(prompt,{modelTier:'default',limit:50000});const fixed=String(j?.fixed||'').trim();if(!fixed)throw{code:'invalid_json'};
-      x.qz={u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};fresh=x.qz.ok}
+      x.qz={u,ok:!!j.ok,fixed,better:String(j.better||'').trim(),tip:String(j.tip||'').trim()};if(j.answer&&!x.qzA)x.qzA=String(j.answer).trim();fresh=x.qz.ok}
     catch(err){x.qz={u,err:err&&err.code==='rate_limited'?'요청이 많습니다. 잠시 후 다시 눌러 주세요.':err&&err.code==='network'?'답이 늦어 멈췄어요. [첨삭 받기]를 다시 눌러 주세요.':'첨삭을 받지 못했습니다. 다시 눌러 주세요.'}}
     if(qzBusy[k+'#'+i]!==myT)return;   /* 그사이 다시 눌렀으면 이 늦은 답은 버림 */
     delete qzBusy[k+'#'+i];try{saveProg()}catch(_){}
@@ -1018,11 +1038,13 @@ Measure the table before you buy a tablecloth. (식탁보를 사기 전에 테�
 Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.)
 지문의 'first measure out 240 grams of rice'도 쌀을 정량만큼 덜어 놓는 장면이라 out이 붙었습니다.
 확인 퀴즈: '설탕 한 스푼을 계량해 덜어 두세요'를 영어로 말해 보세요.
+퀴즈 정답: Measure out a spoonful of sugar.
 
-위 예시처럼 질문에 정확히 답하되, 예시의 내용을 그대로 베끼지 않는다.`;
+위 예시처럼 질문에 정확히 답하되, 예시의 내용을 그대로 베끼지 않는다.
+확인 퀴즈를 냈다면 맨 마지막 줄에 '퀴즈 정답: '과 모범 답 영어 한 문장을 쓴다(화면에는 숨겨 채점에만 씀).`;
   delete detErr['qa'+key];const t0=Date.now();qaLive[key]={q,a:'',t0};qaDraft[key]='';rc();
   try{
-    const onText=({text})=>{qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
+    const onText=({text})=>{text=qzSplit(text).a;qaLive[key].a=text;const el=$('qaLive-'+k);if(el)el.textContent=text};
     /* 60초 넘게 답이 없으면 끊고 다시 질문하게 안내 (예전엔 최대 4분까지 '생각하는 중…'에 머묾) */
     let text;
     try{({text}=await sample(prompt,{cache:false,onText,limit:45000}))}
@@ -1030,7 +1052,7 @@ Measure out two cups of flour. (밀가루 두 컵을 계량해 덜어 두세요.
       qaLive[key].a='';qaLive[key].t0=Date.now();{const el=$('qaLive-'+k);if(el)el.innerHTML=`한 번 더 물어보는 중… <span class="det-t" data-t0="${Date.now()}">0초</span>`}
       ({text}=await sample(prompt,{cache:false,onText,limit:45000}))}
     if((!/[A-Za-z]{3,}/.test(text)||text.length<60)&&Date.now()-t0<25000){const r2=await sample(prompt+'\n\n[주의] 직전 답에 영어 예문이 없거나 너무 짧았다. 규칙대로 다시 답한다.',{cache:false,onText,limit:30000}).catch(()=>null);if(r2&&r2.text)text=r2.text}
-    prog.qa=prog.qa||{};const arr=(prog.qa[key]||[]).concat([{q,a:text}]).slice(-8);prog.qa[key]=arr;qaJust[key]=1;saveProg();
+    const sp=qzSplit(text);prog.qa=prog.qa||{};const arr=(prog.qa[key]||[]).concat([sp.ans?{q,a:sp.a,qzA:sp.ans}:{q,a:sp.a}]).slice(-8);prog.qa[key]=arr;qaJust[key]=1;saveProg();
   }catch(err){
     const msg=err&&err.code==='not_granted'?'AI 키가 설정되지 않아 답할 수 없습니다. 관리자에게 알려 주세요.':err&&err.code==='rate_limited'?'요청이 많습니다. 1분 뒤 다시 질문해 주세요.':err&&err.code==='network'?'답이 늦어 멈췄어요. [질문]을 다시 눌러 주세요. (질문은 그대로 남겨 뒀어요)':'답을 만들지 못했습니다. 다시 질문해 주세요. ('+String(err&&err.message||'').slice(0,60)+')';
     qaDraft[key]=q;detErr['qa'+key]=msg;
