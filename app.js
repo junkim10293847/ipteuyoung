@@ -2792,6 +2792,7 @@ async function loadPublic(final){if(final&&!liveDb){loaded=true;dbFailed=true;fu
   /* 처음 온 날은 안내 없이 바로 쓰게 하고, 두 번째 방문부터 작게 한 번 안내 */
   let visits=0;try{const d=new Date().toDateString(),last=localStorage.getItem('visitDay');visits=+(localStorage.getItem('visits')||0);if(last!==d){visits++;localStorage.setItem('visits',visits);localStorage.setItem('visitDay',d)}}catch(_){}
   if(visits<2)return;
+  return;   /* 앱 설치 안내는 잠시 끔 (나중에 다시 검토) */
   let off=false;try{off=localStorage.getItem('instOff')==='1'}catch(_){}
   if(off)return;
   let deferred=null;
