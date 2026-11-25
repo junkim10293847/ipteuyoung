@@ -749,7 +749,7 @@ function vocabSpans(t,s){const toks=t.split(' ').map(vTok),out=[];
 
 let revSeed='', hideSeed={}, seqPos=0, seqShow=false, seqHint=false, mock=null, seqAns={};
 const toolOpen={};
-document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='sumBox'||id==='qqBox'||id==='mkBox'||id==='gsBox'||id==='dqaBox'||id==='dlgBox'||id==='vbBox')toolOpen[id]=e.target.open;if(id==='vbBox'&&e.target.open)vbPatch();if(id==='dlgBox'){if(e.target.open)dlgPatch();else dlgPlay=null}if(id==='dqaBox'&&e.target.open)dqaPatch();if((id==='gsBox'||id==='mkBox')&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w){makeKey10(w);if(id==='gsBox'&&(!w.clues||mkItems(w).some(x=>!w.clues[x.i+'-'+x.j])))makeClues(w)}}if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
+document.addEventListener('toggle',e=>{const id=e.target.id;if(id==='seqBox'||id==='mockBox'||id==='weakBox'||id==='wbBox'||id==='sumBox'||id==='qqBox'||id==='mkBox'||id==='gsBox'||id==='dqaBox'||id==='dlgBox'||id==='vbBox'||id==='chatBox')toolOpen[id]=e.target.open;if(id==='chatBox'&&e.target.open)chatPatch();if(id==='vbBox'&&e.target.open)vbPatch();if(id==='dlgBox'){if(e.target.open)dlgPatch();else dlgPlay=null}if(id==='dqaBox'&&e.target.open)dqaPatch();if((id==='gsBox'||id==='mkBox')&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w){makeKey10(w);if(id==='gsBox'&&(!w.clues||mkItems(w).some(x=>!w.clues[x.i+'-'+x.j])))makeClues(w)}}if(id==='qqBox'&&e.target.open){const w=weeks.find(x=>x.id===curId);if(w&&!(w.qs&&w.qs.length))makeQs(w)}},true);
 let psKo=false, psOpen=false;
 document.addEventListener('toggle',e=>{if(e.target.id==='psBox')psOpen=e.target.open},true);
 /* 내 표시(노랑·빨강): 문장에서 드래그해 고른 단어를 닉네임별로 저장 */
@@ -884,6 +884,7 @@ ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은
    <details class="tool" id="sumBox"${toolOpen.sumBox?' open':''}><summary><span class="t-title"><i class="tn">5</i>🗣 듣고 요약해 말하기</span><span class="t-sub">지문을 듣고 영어 3문장으로 요약 · 놓친 내용과 표현 첨삭</span></summary><div id="sumBody">${sumHtml(w)}</div></details>
    <details class="tool" id="dlgBox"${toolOpen.dlgBox?' open':''}><summary><span class="t-title"><i class="tn">6</i>🎭 그림 속 대화</span><span class="t-sub">명화 인물의 대화 듣고 역할 맡아 말하기</span></summary><div id="dlgBody">${toolOpen.dlgBox?dlgHtml(w):''}</div></details>
    <details class="tool" id="vbBox"${toolOpen.vbBox?' open':''}><summary><span class="t-title"><i class="tn">7</i>🔎 빈칸 채워 쓰기</span><span class="t-sub">한글 보고 가린 영어를 직접 써서 채우기</span></summary><div id="vbBody">${toolOpen.vbBox?vbHtml(w):''}</div></details>
+   <details class="tool" id="chatBox"${toolOpen.chatBox?' open':''}><summary><span class="t-title"><i class="tn">8</i>💬 그림 속 인물과 대화</span><span class="t-sub">6번 인물과 이번 주 주제로 자유 대화 · 내 수준에 맞춰 · 말할 때마다 첨삭</span></summary><div id="chatBody">${toolOpen.chatBox?chatHtml(w):''}</div></details>
    <div class="howto"><b>✏️ 형광펜 사용법</b><span>문장 카드나 전체 지문에서 외울 단어·숙어를 <b>길게 눌러 선택</b>하면 아래에 <b>[형광펜]</b> 버튼이 나옵니다. 표시한 표현은 <b>전체 지문</b>에서 노랑으로 보이고, 지우려면 다시 선택해 [지우기]를 누르세요. 표시는 나만 볼 수 있습니다.</span></div>
    <p class="note">외움 표시와 써보기 기록은 <b>${esc(nick||'나')} 님만 보는 개인 기록</b>입니다. 지문·해석·단어 설명은 모임 전체가 함께 봅니다.</p>
    <p class="note">${(()=>{const vm=w.sentences.reduce((n,x)=>n+(x.vocab||[]).filter(v=>!v.audio).length,0),sOk=!!w.longAudio&&w.sentences.every(x=>x.audio&&x.alt);return sOk&&vm?`문장 음성은 준비돼 있습니다. 새로 정리된 단어·숙어 ${vm}개의 원어민 음성은 15~20분 안에 자동으로 만들어지고, 그동안은 기기 음성으로 재생됩니다.`:''})()||(hasAudio(w)?'원어민 스타일 음성 파일로 재생됩니다. 소리가 작으면 미디어 볼륨을 올려 주세요.':w.audioRequested?'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다.':'원어민 음성을 자동으로 만드는 중입니다(저장 후 15~20분). 그동안은 기기 음성으로 재생됩니다. 다 만들어지면 새로고침 시 자동으로 바뀝니다.')}</p>
@@ -1429,6 +1430,67 @@ function vbHtml(w){const L=vbList(w);
     <textarea id="vbSay" hidden></textarea>
     <div class="vbq-tool">${fin?'':micBtn('vbSay')}<button class="ghost" id="vbHear">🔊 듣기</button></div>
     <div class="vbq-act">${fin?`<button class="ghost" id="vbRetry">다시 쓰기</button><button class="primary" id="vbNext">다음 문제 ▶</button>`:`<button class="ghost" id="vbShow">정답 보기</button><button class="primary" id="vbChk">✓ 확인</button>`}</div></div>`}
+
+/* ===== 8. 그림 속 인물과 대화: 6번 명화 인물이 대화 상대 · 내 수준(입문~상급)에 맞춰 이번 주 주제로 자유 대화 · 내가 말할 때마다 첨삭 ===== */
+const CHAT_LV=[['입문','A1: very short simple sentences (5-8 words), basic everyday words, one simple question'],['초급','A2: short sentences (8-12 words), common words, simple past/present, one clear question'],['중급','B1: natural sentences (12-18 words), some idioms, ask for reasons or experiences'],['상급','B2+: rich natural English, idioms and phrasal verbs, ask for opinions and comparisons']];
+const CHAT_TURNS=6;let chatBusy=0,chatErr='',chatKo={};
+const chatLv=()=>{const v=+ls.get('chatLvl',1);return v>=0&&v<4?v:1};
+function chatOf(w){prog.chat=prog.chat||{};const c=prog.chat[w.id];return c&&c.k?c:null}
+function chatNew(w,k){const ks=Object.keys(CAST);k=k||(w.dlg&&w.dlg.a)||ls.get('chatWho','')||'roulin';if(!CAST[k])k=ks[0];ls.set('chatWho',k);prog.chat=prog.chat||{};prog.chat[w.id]={k,lv:chatLv(),m:[],done:0};chatKo={};saveProg();return prog.chat[w.id]}
+const chatKeys=w=>{const s=new Set(),o=[];w.sentences.forEach(x=>(x.vocab||[]).forEach(v=>{const t=cleanTerm(v.t);if(t&&!s.has(t.toLowerCase())){s.add(t.toLowerCase());o.push(t)}}));return o.slice(0,14)};
+function chatHtml(w){const c=chatOf(w),lv=chatLv(),me=(c?c.m.filter(x=>x.r==='me').length:0);
+  const pick=`<select id="chatWho" aria-label="대화 상대">${Object.keys(CAST).map(k=>`<option value="${k}"${c&&c.k===k?' selected':''}>${esc(CAST[k].name)} · ${esc(CAST[k].art.replace(/^.*「|」.*$/g,''))}</option>`).join('')}</select>`;
+  const lvb=`<div class="chat-lv">${CHAT_LV.map((l,i)=>`<button type="button" data-clv="${i}" aria-pressed="${i===lv}">${l[0]}</button>`).join('')}</div>`;
+  if(!c)return `<div class="chat-start"><p class="chat-g">명화 속 인물이 이번 주 지문 이야기로 말을 걸어요. 영어로 대답하면 한 번씩 고쳐 주고, ${CHAT_TURNS}번 주고받으면 정리해 줘요.</p>
+    <label class="chat-row">대화 상대 ${pick.replace('id="chatWho"','id="chatWho0"')}</label><div class="chat-row">내 수준 ${lvb}</div>
+    <button type="button" class="primary" id="chatGo"${sample?'':' disabled'}>대화 시작</button>${sample?'':'<p class="load">AI 기능이 켜져 있어야 대화할 수 있어요.</p>'}</div>`;
+  const P=CAST[c.k]||{name:c.k,art:''};
+  const msgs=c.m.map((x,i)=>x.r==='ai'?`<div class="chat-l ai"><img class="dlg-av" src="img/paint/${c.k}-face.jpg" alt=""><div class="chat-b"><span class="chat-en">${esc(x.en)}</span>${chatKo[i]&&x.ko?`<span class="chat-ko">${esc(x.ko)}</span>`:''}<span class="chat-a"><button type="button" class="linkish" data-csay="${i}">듣기</button>${x.ko?`<button type="button" class="linkish" data-cko="${i}">${chatKo[i]?'해석 닫기':'해석'}</button>`:''}</span></div></div>`
+    :`<div class="chat-l me"><div class="chat-b"><span class="chat-en">${esc(x.en)}</span>${x.fb?chatFb(x):''}</div></div>`).join('');
+  const sum=c.sum?`<div class="chat-sum"><b>대화 정리</b>${c.sum.good?`<p>👍 ${esc(c.sum.good)}</p>`:''}${c.sum.fix?`<p>✏️ ${esc(c.sum.fix)}</p>`:''}${(c.sum.try||[]).length?`<p>💡 다음에 써 볼 표현: ${c.sum.try.map(t=>`<b>${esc(t)}</b>`).join(' · ')}</p>`:''}</div>`:'';
+  const wait=chatBusy?`<div class="chat-l ai"><img class="dlg-av" src="img/paint/${c.k}-face.jpg" alt=""><div class="chat-b chat-typing"><i></i><i></i><i></i> <span class="det-t" data-t0="${chatBusy}">0초</span></div></div>`:'';
+  return `<div class="chat-hd"><img class="dlg-av" src="img/paint/${c.k}-face.jpg" alt=""><span><b>${esc(P.name)}</b><small>${esc(P.art)} · ${CHAT_LV[c.lv][0]} · ${me}/${CHAT_TURNS}</small></span><button type="button" class="ghost" id="chatReset">새 대화</button></div>
+    <div class="chat-list">${msgs}${wait}</div>${chatErr?`<p class="load">${esc(chatErr)}</p>`:''}${sum}
+    ${c.done?'':`<textarea id="chatIn" rows="2" placeholder="영어로 대답해 보세요 (🎤로 말해도 돼요)" autocapitalize="sentences" spellcheck="false"${chatBusy?' disabled':''}></textarea>
+    <div class="seq-act">${micBtn('chatIn')}<button type="button" class="primary" id="chatSend"${chatBusy?' disabled':''}>보내기</button></div>`}`}
+function chatFb(x){const f=x.fb;let h='';
+  if(f.fix&&dlgNorm(f.fix)!==dlgNorm(x.en)){h+=diffHtml(gradeText(f.fix,x.en))}else h+='<em class="chat-ok">✅ 문법이 자연스러워요</em>';
+  if(f.better&&dlgNorm(f.better)!==dlgNorm(f.fix||x.en))h+=`<em>더 자연스럽게: ${esc(f.better)}</em>`;
+  if(f.tip)h+=`<em>${esc(f.tip)}</em>`;if((f.used||[]).length)h+=`<em class="chat-star">⭐ 이번 주 표현을 썼어요: ${f.used.map(esc).join(', ')}</em>`;
+  return `<div class="chat-fb">${h}</div>`}
+function chatPatch(){const b=$('chatBody'),w=weeks.find(x=>x.id===curId);if(!b||!w)return;b.innerHTML=chatHtml(w);const L=b.querySelector('.chat-list');if(L)L.scrollTop=L.scrollHeight}
+function chatCtx(w,c){const P=CAST[c.k];const body=w.sentences.filter(x=>!x.isTitle).map(x=>x.en).join(' ').slice(0,1400);const ttl=(w.sentences.find(x=>x.isTitle)||{}).en||w.title||'';
+  return `너는 명화 ${P.art}의 인물 "${P.name}"이다. 성격: ${P.p}. 한국인 영어 학습자와 영어로 수다를 떠는 대화 상대다.
+학습자가 이번 주 외우는 지문: [${ttl}] ${body}
+이번 주 핵심 표현: ${chatKeys(w).join(', ')}
+학습자 수준: ${CHAT_LV[c.lv][1]}
+규칙: 대화는 지문의 주제와 이어지되 학습자 자신의 경험·생각을 묻는다. 한 번에 1~2문장, 끝은 질문 하나. 가끔 핵심 표현을 자연스럽게 섞는다. 그림 속 인물답게 말투에 개성을 살린다. 이모지·마크다운 금지.`}
+async function chatAsk(w,first){const c=chatOf(w);if(!c||!sample)return;chatErr='';chatBusy=Date.now();chatPatch();const my=chatBusy;
+  const hist=c.m.map(x=>(x.r==='ai'?c.k:'Learner')+': '+x.en).join('\n'),last=c.m[c.m.length-1],meN=c.m.filter(x=>x.r==='me').length,end=!first&&meN>=CHAT_TURNS;
+  const prompt=chatCtx(w,c)+(first?`\n\n대화를 시작한다. 반갑게 인사하고 지문 주제와 이어지는 쉬운 첫 질문을 한다.\nJSON만: {"reply":"영어","ko":"자연스러운 한국어 해석"}`
+   :`\n\n지금까지 대화:\n${hist}\n\n학습자의 마지막 말(음성 인식이라 철자가 이상할 수 있음): ${last.en}
+1) 학습자의 마지막 말을 첨삭한다: "fix"=뜻을 살려 가장 적게 고친 올바른 문장(맞으면 그대로), "better"=원어민이 더 자연스럽게 말하는 문장(같으면 빈 문자열), "tip"=무엇을 왜 고쳤는지 한국어 한 문장(맞으면 짧은 칭찬), "used"=학습자가 쓴 이번 주 핵심 표현 목록.
+2) ${end?'대화를 따뜻하게 마무리하는 한마디(질문 없이)를 "reply"에 쓰고, "sum"에 정리: {"good":"잘한 점 한국어 한 문장","fix":"가장 고칠 점 한국어 한 문장","try":["다음에 써 볼 영어 표현 2개"]}':'학습자 말에 공감하며 반응하고 이어지는 질문 하나를 "reply"에 쓴다.'}
+JSON만: {"fix":"...","better":"...","tip":"...","used":[],"reply":"...","ko":"reply의 한국어 해석"${end?',"sum":{"good":"...","fix":"...","try":["...","..."]}':''}}`);
+  try{const j=await sample.json(prompt,{modelTier:'default',limit:60000});if(chatBusy!==my||chatOf(w)!==c)return;
+    const reply=String(j&&j.reply||'').trim();if(!reply)throw{code:'invalid_json'};
+    if(!first&&last&&last.r==='me')last.fb={fix:String(j.fix||'').trim(),better:String(j.better||'').trim(),tip:String(j.tip||'').trim(),used:Array.isArray(j.used)?j.used.slice(0,4).map(String):[]};
+    c.m.push({r:'ai',en:reply,ko:String(j.ko||'').trim()});if(end){c.done=1;c.sum=j.sum&&typeof j.sum==='object'?{good:String(j.sum.good||''),fix:String(j.sum.fix||''),try:(j.sum.try||[]).slice(0,3).map(String)}:null}
+    saveProg();chatBusy=0;chatPatch();chatSpeak(w,c.m.length-1);if(end){const s=document.querySelector('#chatBody .chat-sum');if(s)celebrateBox(s)}}
+  catch(err){if(chatBusy!==my)return;chatBusy=0;chatErr=err&&err.code==='rate_limited'?'요청이 많아요. 잠시 뒤 [보내기]를 다시 눌러 주세요.':'답이 늦어 멈췄어요. [보내기]를 다시 눌러 주세요.';
+    if(!first&&last&&last.r==='me'){c.m.pop();chatDraft=last.en}chatPatch()}}
+let chatDraft='';
+function chatSpeak(w,i){const c=chatOf(w);if(!c||!c.m[i])return;try{stop()}catch(_){}dlgSay0(w,{en:c.m[i].en,who:'a'},c.k,1,'')}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#chatBody button');if(!t)return;const w=weeks.find(x=>x.id===curId);if(!w)return;e.preventDefault();
+  if(t.dataset.clv!=null){ls.set('chatLvl',+t.dataset.clv);const c=chatOf(w);if(c&&!c.m.some(x=>x.r==='me'))c.lv=+t.dataset.clv;chatPatch();return}
+  if(t.id==='chatGo'){const s=$('chatWho0');chatNew(w,s&&s.value);chatAsk(w,true);return}
+  if(t.id==='chatReset'){if(chatOf(w)&&chatOf(w).m.length>1&&!confirm('지금 대화를 지우고 새로 시작할까요?'))return;delete prog.chat[w.id];chatBusy=0;chatErr='';saveProg();chatPatch();return}
+  if(t.dataset.csay!=null){chatSpeak(w,+t.dataset.csay);return}
+  if(t.dataset.cko!=null){const i=+t.dataset.cko;chatKo[i]=!chatKo[i];chatPatch();return}
+  if(t.id==='chatSend'){const ta=$('chatIn'),u=(ta?ta.value:'').trim();if(!u){toast('먼저 영어로 써 보거나 🎤로 말해 보세요');return}
+    micStop();const c=chatOf(w);if(!c||chatBusy)return;c.m.push({r:'me',en:u});chatDraft='';saveProg();chatAsk(w,false)}});
+document.addEventListener('change',e=>{if(e.target.id!=='chatWho')return;const w=weeks.find(x=>x.id===curId);if(!w)return;const c=chatOf(w);
+  if(c&&c.m.some(x=>x.r==='me')&&!confirm('대화 상대를 바꾸면 새 대화로 시작해요. 바꿀까요?')){e.target.value=c.k;return}chatNew(w,e.target.value);chatAsk(w,true)});
 function vbPatch(focus){const b=$('vbBody'),w=weeks.find(x=>x.id===curId);if(!b||!w)return;b.innerHTML=vbHtml(w);
   if(focus){const f=[...b.querySelectorAll('.vb-in')].find(e=>!e.value);if(f)try{f.focus({preventScroll:true})}catch(_){}}}
 function vbCheck(show){const w=weeks.find(x=>x.id===curId);if(!w)return;const L=vbList(w),it=L[vbPos];if(!it)return;const S=vbSlots(w.sentences[it.i],it);
