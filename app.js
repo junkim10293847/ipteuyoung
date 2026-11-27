@@ -711,8 +711,10 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('t
     const bt=(el.closest('.wr')&&el.closest('.wr').querySelector('.wr-btns'))||el,rt=el.getBoundingClientRect(),r=bt.getBoundingClientRect(),gap=vv.offsetTop+vv.height-12-r.bottom;
     if(gap>8)window.scrollBy(0,-gap);else if(gap<-4){const d=Math.min(-gap,rt.top-(vv.offsetTop+8));if(d>4)window.scrollBy(0,d)}}
   const kick=()=>{if(Date.now()>until)return;clearTimeout(tmr);tmr=setTimeout(fit,140)};
-  vv.addEventListener('resize',kick);vv.addEventListener('scroll',kick);
-  document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;el=t;until=Date.now()+1800;kick();setTimeout(fit,500);setTimeout(fit,1000)});
+  /* 키보드 높이는 늦게(추천 단어 줄·도구 줄이 붙으며) 한 번 더 바뀜 → 쓰는 동안 화면 '크기'가 바뀔 때마다 다시 맞춤 (손가락으로 스크롤한 건 건드리지 않음) */
+  let lastH=0;const onResize=()=>{if(document.activeElement!==el){kick();return}if(Math.abs(vv.height-lastH)<4)return;lastH=vv.height;clearTimeout(tmr);tmr=setTimeout(fit,160)};
+  vv.addEventListener('resize',onResize);window.addEventListener('resize',onResize);vv.addEventListener('scroll',kick);
+  document.addEventListener('focusin',e=>{const t=e.target;if(!(t&&t.matches&&t.matches('textarea')))return;el=t;lastH=vv.height;until=Date.now()+3000;kick();[400,800,1300,2000,2800].forEach(ms=>setTimeout(fit,ms))});
   /* 처음 누를 때 한 번에: 키보드가 올라오기 전에, 이 화면에서 실제로 잰 키보드 높이를 기준으로 쓰기 칸 아래 끝이 키보드 바로 위에 오게 미리 맞춰 둠.
      아직 잰 적이 없으면 미리 움직이지 않고(엉뚱하게 올라가는 것 방지) 키보드가 올라온 뒤 한 번만 맞춤 */
   let pd=null,pu=0;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY}},true);
