@@ -859,7 +859,7 @@ function render(){
      ${askAllHtml()}
    </header>
 ${readOnly?`<p class="ro">로그인 없이 보는 중입니다. 암기 기록은 이 기기에 저장되고, 새 주차 추가는 Claude에 로그인한 멤버가 할 수 있습니다.</p>`:''}
-   <p class="hint press"><span>💡 ▶ 듣기를 <b>1초 누르면</b> 그 문장을 계속 반복합니다</span><button class="alllink" id="hideAll">${idx.every(j=>hiddenEn.has(j))?"영어 모두 보기":"영어 모두 가리기"}</button></p>
+   <p class="hint press"><span>💡 ▶ 듣기·연속 듣기를 <b>1초 누르면</b> 계속 반복합니다</span><button class="alllink" id="hideAll">${idx.every(j=>hiddenEn.has(j))?"영어 모두 보기":"영어 모두 가리기"}</button></p>
    <ol id="list">
     ${listIdx.map(i=>{if(i==='__H')return `<li class="revhead"><b>📖 오늘 ${idx.length}문장${nRev?` · 🔁 어제 복습 ${nRev}`:''}${nSkip?` · ✓ 이미 외움 ${nSkip}`:''}</b><span>번호 순서대로 이어서 보여 줘요.${nRev?' 어제 복습 문장은 영어를 가려 두었어요.':''}${behind?` 앞에서 아직 못 외운 ${behind}문장도 오늘 분량에 넣었어요.`:''}</span></li>`;if(i==='__R')return `<li class="revhead"><b>🔁 어제 복습 · ${rev.length}문장</b><span>영어를 가려 두었어요. 한글만 보고 말해 본 뒤 '영어 보기'로 확인하세요.</span></li>`;if(i==='__S')return skipHtml;if(i==='__T'){const behind=idx.filter(j=>j<prevMax).length;return `<li class="revhead today"><b>📖 오늘 문장 · ${idx.length}문장</b>${behind?`<span>앞에서 아직 못 외운 ${behind}문장을 먼저 넣었어요.</span>`:''}</li>`+skipHtml};const s=w.sentences[i];const v=s.vocab||[];return `
      <li class="card${done[i]?' done':''}" id="c${i}">
@@ -1750,7 +1750,7 @@ setInterval(()=>{document.querySelectorAll('.det-t').forEach(el=>{const t0=+el.d
 const LONG_RATES=[0.75,0.85,1,1.1,1.25];
 function longRate(){const e=$('rate'),r=e?+e.value:1;return r===1?'1.0':String(r)}
 function longMid(){const a=$('longAudio');return !!(a&&a.src&&a.paused&&!a.ended&&a.currentTime>0.5)}
-function longLabel(){return longPlaying()?'⏸ 멈춤':longMid()?'▶ 이어서':'▶ 연속 듣기'}
+function longLabel(){const a=$('longAudio');if(a&&a.loop&&longPlaying())return '🔁 반복 중';return longPlaying()?'⏸ 멈춤':longMid()?'▶ 이어서':'▶ 연속 듣기'}
 function longPlaying(){const a=$('longAudio');return !!(a&&!a.paused&&!a.ended)}
 function longSync(){const a=$('longAudio'),b=$('longBtn'),pg=$('longProg');const on=longPlaying();
   if(b)b.textContent=longLabel();const rs=$('longRestart');if(rs)rs.hidden=!longMid();const bx=$('psBox');if(bx)bx.classList.toggle('lmid',longMid());
@@ -1759,7 +1759,7 @@ function longSync(){const a=$('longAudio'),b=$('longBtn'),pg=$('longProg');const
 document.addEventListener('click',e=>{
   const b=e.target.closest&&e.target.closest('#longBtn');
   if(b){e.preventDefault();e.stopPropagation();const w=weeks.find(x=>x.id===curId),a=$('longAudio');if(!w||!a)return;
-    if(longPlaying()){a.pause();return}
+    if(longPlaying()){a.pause();a.loop=false;return}
     const lm=longSig(w);let h=0;for(const c of (lm?lm.sig:w.sentences.map(s=>s.en).join('|')))h=(h*31+c.charCodeAt(0))>>>0;
     const src=new URL(w.longAudio+'?v='+h.toString(36),location.href).href;if(a.src!==src){a.src=src}
     a.playbackRate=+longRate();a.defaultPlaybackRate=+longRate();
@@ -1976,8 +1976,8 @@ $('stop').onclick=()=>{stop();const la=$('longAudio');if(la)la.pause()};
   const place=()=>{const bx=$('psBox');if(!bx){if(ctl.parentNode!==$('ctlHold'))$('ctlHold').appendChild(ctl);return}const hd=bx.querySelector('.ps-head');if(hd&&ctl.parentNode!==bx)hd.after(ctl)};
   new MutationObserver(place).observe(mn,{childList:true,subtree:true});place();
   $('rate').addEventListener('change',e=>{ls.set('rateSel',e.target.value);const a=$('longAudio');if(a){a.playbackRate=+e.target.value;a.defaultPlaybackRate=+e.target.value}});
-  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#psAll,#stopFab');if(!b)return;e.preventDefault();e.stopPropagation();if(b.id==='psAll'){if(playKind&&playKind.k==='all'&&document.querySelector('.card.playing')){$('stop').click();playKind=null}else{$('all').click();playKind={i:-1,k:'all'}}}else $('stop').click()},true);
-  setInterval(()=>{const b=$('psAll');if(!b)return;const on=!!(playKind&&playKind.k==='all'&&document.querySelector('.card.playing'));const l=on?'■ 멈춤':'▶ 연속 듣기';if(b.textContent!==l)b.textContent=l},400)})();
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#psAll,#stopFab');if(!b)return;e.preventDefault();e.stopPropagation();if(b.id==='psAll'){if(playKind&&playKind.k==='all'&&(allLoop||document.querySelector('.card.playing'))){allLoop=false;$('stop').click();playKind=null}else{$('all').click();playKind={i:-1,k:'all'}}}else $('stop').click()},true);
+  setInterval(()=>{const b=$('psAll');if(!b)return;const on=!!(playKind&&playKind.k==='all'&&document.querySelector('.card.playing'));const l=on?(allLoop?'🔁 반복 중':'■ 멈춤'):'▶ 연속 듣기';if(b.textContent!==l)b.textContent=l},400)})();
 
 try{const sv=localStorage.getItem('voice');if(sv)$('voiceSel').value=sv}catch(e){}
 $('voiceSel').onchange=e=>{try{localStorage.setItem('voice',e.target.value)}catch(_){}};
@@ -2002,12 +2002,23 @@ document.addEventListener('timeupdate',async e=>{
 },true);
 document.addEventListener('play',e=>{if(e.target.id==='longAudio'){const w=weeks.find(x=>x.id===curId);if(w)buildLongMap(w)}},true);
 document.addEventListener('ended',e=>{if(e.target.id==='longAudio'){const c=document.querySelector('.ps.on');if(c)c.classList.remove('on')}},true);
+
+/* ▶ 연속 듣기를 1초 누르면 지문 전체를 계속 반복 (원어민 이어 붙인 음성이면 그대로 반복, 없으면 문장을 차례로 반복) · 다시 탭하면 멈춤 */
+let allLoop=false,lpT=null,lpSup=false;
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('#longBtn,#psAll');if(!b)return;clearTimeout(lpT);lpSup=false;
+  if((b.id==='longBtn'&&longPlaying())||(b.id==='psAll'&&allLoop))return;b.classList.add('pressing');
+  lpT=setTimeout(()=>{b.classList.remove('pressing');if(navigator.vibrate)try{navigator.vibrate(40)}catch(_){}
+    if(b.id==='longBtn'){const a=$('longAudio');lpSup=false;b.click();lpSup=true;if(a){a.loop=true;longSync()}toast('🔁 지문 전체를 계속 반복해요 · 다시 누르면 멈춤')}
+    else{lpSup=true;allLoop=true;playKind={i:-1,k:'all'};$('all').click();toast('🔁 지문 전체를 계속 반복해요 · 다시 누르면 멈춤')}},1000)},true);
+['pointerup','pointercancel','pointerleave'].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(lpT);document.querySelectorAll('#longBtn.pressing,#psAll.pressing').forEach(x=>x.classList.remove('pressing'))},true));
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#longBtn,#psAll');if(!b||!lpSup)return;lpSup=false;e.preventDefault();e.stopImmediatePropagation()},true);
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('#longBtn,#psAll'))e.preventDefault()});
 $('all').onclick=async()=>{
   const w=weeks.find(x=>x.id===curId); if(!w)return;
   stop();const my=token;const rate=+$('rate').value;
   const ids=[...document.querySelectorAll('#list .card')].map(c=>+c.id.slice(1));
-  for(const i of ids){if(my!==token)return;await playOne(w.sentences[i],i,rate,my)}
-  if(my===token)hl(null);
+  do{for(const i of ids){if(my!==token)return;await playOne(w.sentences[i],i,rate,my)}if(allLoop&&my===token)await wait(+$('gap').value+1)}while(allLoop&&my===token);
+  if(my===token)hl(null);allLoop=false;
 };
 
 /* ---------- add week ---------- */
